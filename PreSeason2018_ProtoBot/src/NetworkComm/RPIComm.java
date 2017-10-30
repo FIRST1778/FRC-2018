@@ -1,11 +1,16 @@
 package NetworkComm;
 
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.networktables.NetworkTable;
+//import edu.wpi.first.wpilibj.networktables.NetworkTable;  // deprecated in 2018
+import edu.wpi.first.networktables.NetworkTable;
 
 public class RPIComm {
         
-    // camera image parameters
+	// comm objects
+	private InputOutputComm ioComm;
+	private  NetworkTable table;
+
+	// camera image parameters
     private static int frameWidth = 160;
     private static int frameHeight = 120;
    	
@@ -14,53 +19,57 @@ public class RPIComm {
 	private static final int Y_THRESHOLD = 5;
 	private static final double AREA_THRESHOLD = 20;
 
-	private static NetworkTable table;
-	
-    private static boolean initialized = false;
+	// singleton class elements (ensures only one instance of this class)
+	private static final RPIComm instance = new RPIComm();
     
-    // movement modes
-    private static boolean lateralMovement = true;
-    private static boolean forwardMovement = false;
+	private RPIComm() {
+
+		ioComm = InputOutputComm.GetInstance();
+		
+		//table = NetworkTable.getTable("InputOutput1778/DataTable");
+        table = new NetworkTable(null, "InputOutput1778/DataTable");
         
-	public static boolean targetCentered = false;
+		table.getEntry("autoCam").setBoolean(false);
+		
+		threshX = X_THRESHOLD;
+		threshY = Y_THRESHOLD;
+		speedX = DRIVE_SPEED_X;
+		speedY = DRIVE_SPEED_Y;
+	}
+		
+	public static RPIComm GetInstance() {
+		return instance;
+	}
+
+    // instance data and methods
+    private boolean lateralMovement = true;
+    private boolean forwardMovement = false;
+        
+	public boolean targetCentered = false;
 	
-	public static double numTargets, targetX, targetY, targetArea, targetDistance;
-	private static double desiredX, desiredY;
-	private static double threshX, threshY;
-	private static double speedX, speedY;
+	public double numTargets, targetX, targetY, targetArea, targetDistance;
+	private double desiredX, desiredY;
+	private double threshX, threshY;
+	private double speedX, speedY;
 	
 	// Robot drive output
-	private static double driveLeft;
-	private static double driveRight;
+	private double driveLeft;
+	private double driveRight;
 	
 	// Robot targeting speed (% how fast it moves and turns)
-	private static final double DRIVE_SPEED_X = 0.4;
-	private static final double DRIVE_SPEED_Y = 0.4;
+	private final double DRIVE_SPEED_X = 0.4;
+	private final double DRIVE_SPEED_Y = 0.4;
 	
 	// Number of loops to perform to guarantee the robot is lined up with the target
-	private static final int IS_CENTERED_DELAY = 15;
-	private static int readyTimer = 0;
-	
-    public static void initialize() {
-    	if (!initialized) {
-    		
-	        table = NetworkTable.getTable("RPIComm/Data_Table");	        	        	        	        
-       		initialized = true;
-    		table.putBoolean("autoCam", false);
-    		
-    		threshX = X_THRESHOLD;
-    		threshY = Y_THRESHOLD;
-    		speedX = DRIVE_SPEED_X;
-    		speedY = DRIVE_SPEED_Y;
-    	}
-	}
-    
-    public static void setMovementModes(boolean forwardFlag, boolean lateralFlag) {
+	private final int IS_CENTERED_DELAY = 15;
+	private int readyTimer = 0;
+	    
+    public void setMovementModes(boolean forwardFlag, boolean lateralFlag) {
     	forwardMovement = forwardFlag;
     	lateralMovement = lateralFlag;
     }
     
-    public static void setDesired(double x, double y, double tX, double tY, double spX, double spY)
+    public void setDesired(double x, double y, double tX, double tY, double spX, double spY)
     {
     	desiredX = x;
     	desiredY = y;
@@ -70,7 +79,7 @@ public class RPIComm {
     	speedY = spY;
     }
     
-    public static void autoInit() {
+    public void autoInit() {
     	numTargets = 0;
     	desiredX = frameWidth/2;
     	desiredY = frameHeight/2;
@@ -82,10 +91,10 @@ public class RPIComm {
 		reset();
 		
 		//table.putBoolean("autoCam", true);
-		table.putBoolean("autoCam", false);  // keep camera auto exposure on with RPi
+		table.getEntry("autoCam").setBoolean(false);  // keep camera auto exposure on with RPi
     }
     
-    public static void teleopInit() {
+    public void teleopInit() {
     	numTargets = 0;
     	desiredX = frameWidth/2;
     	desiredY = frameHeight/2;
@@ -96,16 +105,16 @@ public class RPIComm {
     	
 		reset();
 		
-		table.putBoolean("autoCam", false);
+		table.getEntry("autoCam").setBoolean(false);
     }
     
-    public static void disabledInit() {
+    public void disabledInit() {
     	
-		table.putBoolean("autoCam", false);
+		table.getEntry("autoCam").setBoolean(false);
     }
   
         
-    public static void reset() {
+    public void reset() {
 		
 		driveLeft = 0;
 		driveRight = 0;
@@ -115,25 +124,22 @@ public class RPIComm {
 		targetCentered = false;
     }
     
-    public static void updateValues() {
-        
-    	if (!initialized)
-    		return;
-    	
+    public void updateValues() {
+            	
     	// Default data if network table data pull fails
 		double defaultDoubleVal = 0.0;
 		
 		// Pull data from grip
-		numTargets = table.getNumber("targets", defaultDoubleVal);
-		targetX = table.getNumber("targetX", defaultDoubleVal);
-		targetY = table.getNumber("targetY", defaultDoubleVal);
-		targetArea = table.getNumber("targetArea",defaultDoubleVal);
-		targetDistance = table.getNumber("targetDistance",defaultDoubleVal);
+		numTargets = table.getEntry("targets").getDouble(defaultDoubleVal);
+		targetX = table.getEntry("targetX").getDouble(defaultDoubleVal);
+		targetY = table.getEntry("targetY").getDouble(defaultDoubleVal);
+		targetArea = table.getEntry("targetArea").getDouble(defaultDoubleVal);
+		targetDistance = table.getEntry("targetDistance").getDouble(defaultDoubleVal);
 		
 		Timer.delay(0.02);
     }
     
-    public static void targetProcessing() {
+    public void targetProcessing() {
 		if (numTargets > 0) {
 			
 			// Debug only - print out values read from network table
@@ -168,7 +174,7 @@ public class RPIComm {
 						//		"driveRight = " + driveRight);
 						String outputStr = String.format("RPIComm: TARGET CENTERED!.... X: %.1f Y: %.1f driveLeft= %.1f driveRight= %.1f",
 											deltaX, deltaY,driveLeft,driveRight);
-						InputOutputComm.putString(InputOutputComm.LogTable.kRPICommLog,"RPIComm",outputStr);
+						ioComm.putString(InputOutputComm.LogTable.kRPICommLog,"RPIComm",outputStr);
 						targetCentered = true;
 					}
 					return;
@@ -182,7 +188,7 @@ public class RPIComm {
 
 					String outputStr = String.format("RPIComm: CENTERING Y.... X: %.1f Y: %.1f driveLeft= %.1f driveRight= %.1f",
 							deltaX, deltaY,driveLeft,driveRight);
-					InputOutputComm.putString(InputOutputComm.LogTable.kRPICommLog,"RPIComm",outputStr);
+					ioComm.putString(InputOutputComm.LogTable.kRPICommLog,"RPIComm",outputStr);
 					return;
 				}
 			}
@@ -195,13 +201,13 @@ public class RPIComm {
 				
 				String outputStr = String.format("RPIComm: CENTERING X.... X: %.1f Y: %.1f driveLeft= %.1f driveRight= %.1f",
 						deltaX, deltaY,driveLeft,driveRight);
-				InputOutputComm.putString(InputOutputComm.LogTable.kRPICommLog,"RPIComm",outputStr);
+				ioComm.putString(InputOutputComm.LogTable.kRPICommLog,"RPIComm",outputStr);
 				return;
 			}		
 		}
 		else {
 			// no target found!  Reset targeting params
-			InputOutputComm.putString(InputOutputComm.LogTable.kRPICommLog,"RPIComm","No target found");
+			ioComm.putString(InputOutputComm.LogTable.kRPICommLog,"RPIComm","No target found");
 			reset();
 		}
 			
@@ -209,30 +215,30 @@ public class RPIComm {
     }
     
 	// Returns the value for the left side drivetrain
-	public static double getLeftDriveValue() {
+	public double getLeftDriveValue() {
 		return driveLeft;
 	}
 	
 	// Returns the value for the right side drivetrain
-	public static double getRightDriveValue() {
+	public double getRightDriveValue() {
 		return driveRight;
 	}
 	
 	// Returns true if the target is visible, returns false otherwise
-	public static boolean hasTarget() {
+	public boolean hasTarget() {
 		return (numTargets > 0);
 	}
 	
-	public static double getFrameWidth() {
+	public double getFrameWidth() {
 		return frameWidth;
 	}
 	
-	public static double getFrameHeight() {
+	public double getFrameHeight() {
 		return frameHeight;
 	}
 	
 	// returns delta from current desired X position
-	public static double getDeltaX() {
+	public double getDeltaX() {
 		if (!hasTarget())
 			return 0;
 		
@@ -240,7 +246,7 @@ public class RPIComm {
 	}
 	
 	// returns delta from current desired Y position
-	public static double getDeltaY() {
+	public double getDeltaY() {
 		if (!hasTarget())
 			return 0;
 		
@@ -248,7 +254,7 @@ public class RPIComm {
 	}
 	
 	// Returns true if the catapult is ready to shoot, returns false otherwise
-	public static boolean targetCentered() {
+	public boolean targetCentered() {
 		return targetCentered;
 	}
     

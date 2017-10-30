@@ -5,23 +5,25 @@ import Systems.CameraControl;
 public class CameraAction extends Action {
 	
 	private double camPos = CameraControl.GEAR_CAM_POS;
+	private CameraControl camCtrl;
 	
 	public CameraAction() {
 		this.name = "<Camera Action>";
+		camCtrl = CameraControl.GetInstance();
 	}
 	
 	public CameraAction(String name, double camPos) {
 		this.name = name;
 		this.camPos = camPos;
+		camCtrl = CameraControl.GetInstance();
 	}
 	
 	// action entry
 	public void initialize() {
-		CameraControl.initialize();	
-		CameraControl.moveToPos(camPos);
+		camCtrl.moveToPos(camPos);
 		
 		// in auto, turn on extra LEDs!
-		CameraControl.setCameraLed(true);
+		camCtrl.setCameraLed(true);
 		
 		super.initialize();
 	}

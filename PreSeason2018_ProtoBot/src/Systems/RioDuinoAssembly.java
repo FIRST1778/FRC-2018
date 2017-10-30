@@ -1,37 +1,40 @@
 package Systems;
 
+import NetworkComm.InputOutputComm;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.I2C;
 
 public class RioDuinoAssembly {
 	
+    // singleton class elements (ensures only one instance of this class)
+	private static final RioDuinoAssembly instance = new RioDuinoAssembly();
+    
+	private RioDuinoAssembly() {
+		i2cBus = new I2C(I2C.Port.kMXP, 4);	
+		
+		setTeamColor();
+	}
+		
+	public static RioDuinoAssembly GetInstance() {
+		return instance;
+	}
+
 	public static enum Color { Black, Red, Blue, Yellow, Orange, Green, Purple, Grey};
 	
 	// particulars about the team number and color
-	private static DriverStation.Alliance dsTeamColor;
-	private static int dsTeamLocation;
+	private DriverStation.Alliance dsTeamColor;
+	private int dsTeamLocation;
 
-	private static boolean initialized = false;
-	private static Color teamColor;
+	private Color teamColor;
 
-	private static I2C i2cBus;
-	
-	public static void initialize() {
-		if (!initialized)
-		{
-			i2cBus = new I2C(I2C.Port.kMXP, 4);	
-			initialized = true;
-			
-			setTeamColor();
-		}
-	}
-	
-	public static void setTeamColor(Color col) {
+	private I2C i2cBus;
+		
+	public void setTeamColor(Color col) {
 		teamColor = col;
 		sendColor(teamColor);
 	}
 	
-	public static void setTeamColor() {
+	public void setTeamColor() {
 		dsTeamColor = DriverStation.getInstance().getAlliance();
 		dsTeamLocation = DriverStation.getInstance().getLocation();
 
@@ -43,35 +46,32 @@ public class RioDuinoAssembly {
 		 sendTeamColor(teamColor);
 	}
 		
-	public static void autonomousInit() {
+	public void autonomousInit() {
 	
 		setTeamColor();
 		//SendString("colorGreen");
 		SendString("autoInit");
 	}
 	
-	public static void teleopInit() {
+	public void teleopInit() {
 		
 		setTeamColor();
 		//SendString("colorGreen");
 		SendString("teleopInit");
 	}
 	
-	public static void testInit() {
+	public void testInit() {
 
 		setTeamColor();		
 		//SendString("colorOrange");		
 		SendString("testInit");
 	}
 	
-	public static void disabledInit() {
-		if (!initialized)
-			initialize();
-		
+	public void disabledInit() {		
 		SendString("disabledInit");
 	}
 		
-	public static void sendColor(Color col)
+	public void sendColor(Color col)
 	{
 		switch (col) {
 		case Red:
@@ -99,7 +99,7 @@ public class RioDuinoAssembly {
 		}
 	}
 	
-	private static void sendTeamColor(Color col)
+	private void sendTeamColor(Color col)
 	{
 		switch (col) {
 		case Red:
@@ -112,20 +112,14 @@ public class RioDuinoAssembly {
 		}
 	}
 	
-	public static void SendStateChange(char state)
-	{
-		if (!initialized)
-			return;
-		
+	public void SendStateChange(char state)
+	{		
 		i2cBus.write(0x02, state);
 	}
 	
-	public static void SendString(String writeStr)
+	public void SendString(String writeStr)
 	{
-		
-		if (!initialized)
-			return;
-		
+				
 		char[] CharArray = writeStr.toCharArray();
 		byte[] WriteData = new byte[CharArray.length];
 		for (int i = 0; i < CharArray.length; i++) {

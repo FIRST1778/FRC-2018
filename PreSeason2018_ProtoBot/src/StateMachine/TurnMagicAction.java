@@ -8,9 +8,10 @@ import Systems.NavXSensor;
 public class TurnMagicAction extends Action {
 	private double leftRevs = 0.0;
 	private double rightRevs = 0.0;
-	private int speedToTurn = 0; 
-	
+	private int speedToTurn = 0; 	
 	private final double REVS_PER_INCH = 1/(6 * 3.14159);   // assume 6 inch diameter wheels
+	
+	private AutoDriveAssembly autoDrive;
 		
 	public TurnMagicAction(double leftPosInches, double rightPosInches, int speed)
 	{
@@ -19,7 +20,7 @@ public class TurnMagicAction extends Action {
 		this.rightRevs = rightPosInches * REVS_PER_INCH;
 		this.speedToTurn = speed;
 				
-		AutoDriveAssembly.initialize();
+		autoDrive = AutoDriveAssembly.GetInstance();
 	}
 	
 	public TurnMagicAction(String name, double leftPosInches, double rightPosInches, int speed)
@@ -29,15 +30,15 @@ public class TurnMagicAction extends Action {
 		this.rightRevs = rightPosInches * REVS_PER_INCH;
 		this.speedToTurn = speed;
 		
-		AutoDriveAssembly.initialize();
+		autoDrive = AutoDriveAssembly.GetInstance();
 	}
 	
 	// action entry
 	public void initialize() {
 				
 		// initialize motor assembly for auto - use motion magic (closed loop control targets)
-		AutoDriveAssembly.autoInit(true, 0.0, true);
-		AutoDriveAssembly.autoMagicTurn(leftRevs, rightRevs, speedToTurn);
+		autoDrive.autoInit(true, 0.0, true);
+		autoDrive.autoMagicTurn(leftRevs, rightRevs, speedToTurn);
 		
 		super.initialize();
 	}
@@ -53,7 +54,7 @@ public class TurnMagicAction extends Action {
 	public void cleanup() {
 		// do some drivey cleanup
 					
-		AutoDriveAssembly.autoStop();
+		autoDrive.autoStop();
 		
 		// cleanup base class
 		super.cleanup();

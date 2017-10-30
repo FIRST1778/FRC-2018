@@ -1,5 +1,14 @@
 package org.usfirst.frc.team1778.robot;
 
+import FreezyDrive.FreezyDriveTrain;
+import NetworkComm.InputOutputComm;
+import NetworkComm.RPIComm;
+import StateMachine.AutoStateMachine;
+import Systems.AutoDriveAssembly;
+import Systems.BallManagement;
+import Systems.CameraControl;
+import Systems.ClimberAssembly;
+import Systems.NavXSensor;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -17,6 +26,16 @@ public class Robot extends IterativeRobot {
 	String autoSelected;
 	SendableChooser<String> chooser = new SendableChooser<>();
 
+	protected AutoStateMachine autoSM;
+	protected RPIComm rpiComm;
+	protected InputOutputComm ioComm;
+	protected AutoDriveAssembly autoDrive;
+	protected FreezyDriveTrain freezyDrive;
+	protected BallManagement ballCtrl;
+	protected CameraControl camCtrl;
+	protected ClimberAssembly climber;
+	protected NavXSensor navX;
+
 	/**
 	 * This function is run when the robot is first started up and should be
 	 * used for any initialization code.
@@ -26,6 +45,19 @@ public class Robot extends IterativeRobot {
 		chooser.addDefault("Default Auto", defaultAuto);
 		chooser.addObject("My Auto", customAuto);
 		SmartDashboard.putData("Auto choices", chooser);
+		
+		rpiComm = RPIComm.GetInstance();
+		ioComm = InputOutputComm.GetInstance();
+		autoDrive = AutoDriveAssembly.GetInstance();
+		freezyDrive = FreezyDriveTrain.GetInstance();
+		ballCtrl = BallManagement.GetInstance();
+		camCtrl = CameraControl.GetInstance();
+		climber = ClimberAssembly.GetInstance();
+		
+		autoSM = new AutoStateMachine();
+		
+    	ioComm.putString(InputOutputComm.LogTable.kMainLog,"MainLog","robot initialized...");        
+
 	}
 
 	/**
@@ -45,6 +77,15 @@ public class Robot extends IterativeRobot {
 		// autoSelected = SmartDashboard.getString("Auto Selector",
 		// defaultAuto);
 		System.out.println("Auto selected: " + autoSelected);
+
+    	ioComm.putString(InputOutputComm.LogTable.kMainLog,"MainLog","autonomous mode...");
+    	autoDrive.autoInit(true, 0.0, false);
+    	rpiComm.autoInit();
+    	camCtrl.autoInit();
+    	ballCtrl.autoInit();
+    	
+    	autoSM.start();
+
 	}
 
 	/**
@@ -52,23 +93,65 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void autonomousPeriodic() {
-		switch (autoSelected) {
-		case customAuto:
-			// Put custom auto code here
-			break;
-		case defaultAuto:
-		default:
-			// Put default auto code here
-			break;
-		}
+    	rpiComm.updateValues();
+    	
+    	autoSM.process();
+ 
+    	// debug only
+    	autoDrive.getDistanceInches();
+    	getGyroAngle();
+   	
 	}
 
+	public void teleopInit() {
+    	ioComm.putString(InputOutputComm.LogTable.kMainLog,"MainLog","teleop mode...");
+
+    	rpiComm.teleopInit();
+    	ballCtrl.teleopInit();  	
+    	freezyDrive.teleopInit();	
+    	camCtrl.teleopInit();
+    	climber.teleopInit();
+		
+	}
+	
 	/**
 	 * This function is called periodically during operator control
 	 */
 	@Override
 	public void teleopPeriodic() {
+    	rpiComm.updateValues();  
+        ballCtrl.teleopPeriodic();	
+        freezyDrive.teleopPeriodic();   
+        camCtrl.teleopPeriodic();
+        climber.teleopPeriodic();
 	}
+	
+    /**
+     * This function is called periodically during operator control
+     */
+    
+	private double getGyroAngle() {
+		//double gyroAngle = 0.0;
+		//double gyroAngle = navX.getYaw();  // -180 deg to +180 deg
+		double gyroAngle = navX.getAngle();  // continuous angle (can be larger than 360 deg)
+		
+		//System.out.println("getGyroAngle:  Gyro angle = " + gyroAngle);
+			
+		// send output data for test & debug
+	    ioComm.putBoolean(InputOutputComm.LogTable.kMainLog,"Auto/IMU_Connected",navX.isConnected());
+	    ioComm.putBoolean(InputOutputComm.LogTable.kMainLog,"Auto/IMU_Calibrating",navX.isCalibrating());
+
+		//System.out.println("gyroAngle = " + gyroAngle);
+	    ioComm.putDouble(InputOutputComm.LogTable.kMainLog,"Auto/GyroAngle", gyroAngle);		
+
+		return gyroAngle;
+	}
+	
+    public void disabledInit() {
+    	autoDrive.disabledInit();
+    	ballCtrl.resetMotors();
+    	rpiComm.disabledInit();
+    }
 
 	/**
 	 * This function is called periodically during test mode

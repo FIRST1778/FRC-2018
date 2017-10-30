@@ -7,37 +7,38 @@ import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.Timer;
 
 public class NavXSensor {
-	private static boolean initialized = false;
 	
-	private static AHRS ahrs;
+    // singleton class elements (ensures only one instance of this class)
+	private static final NavXSensor instance = new NavXSensor();
+    
+	private NavXSensor() {
+		System.out.println("NavXSensor constructor called...");
+		
+		try {
+			ahrs = new AHRS(SPI.Port.kMXP);     
+		} catch (RuntimeException ex ) {
+            DriverStation.reportError("Error instantiating navX MXP:  " + ex.getMessage(), true);
+        }
+
+		reset();
+	}
+		
+	public static NavXSensor GetInstance() {
+		return instance;
+	}
 	
-	private static double yawOffset = 0.0;
+	// instance data and methods
+	private AHRS ahrs;
 	
-	public static class Angles {
+	private double yawOffset = 0.0;
+	
+	public class Angles {
 		float roll = 0f;
 		float pitch = 0f;
 		float yaw = 0f;
 	}
-			
-	public static void initialize()
-	{
-		if (!initialized) {
 				
-			System.out.println("NavXSensor::initialize() called...");
-			
-			try {
-				ahrs = new AHRS(SPI.Port.kMXP);     
-			} catch (RuntimeException ex ) {
-	            DriverStation.reportError("Error instantiating navX MXP:  " + ex.getMessage(), true);
-	        }
-
-			reset();
-			
-			initialized = true;
-		}
-	}
-	
-	public static void reset()
+	public void reset()
 	{
 		System.out.println("NavXSensor::reset called!");
 		
@@ -56,14 +57,11 @@ public class NavXSensor {
 		}
 	}
 
-	public static AHRS getAHRS() {
-		if (!initialized)
-			initialize();
-		
+	public AHRS getAHRS() {		
 		return ahrs;
 	}
 	
-	public static boolean isConnected() {
+	public boolean isConnected() {
 		if (ahrs != null) {
 			return ahrs.isConnected();
 		}
@@ -71,7 +69,7 @@ public class NavXSensor {
 		return false;
 	}
 	
-	public static boolean isCalibrating() {
+	public boolean isCalibrating() {
 		if (ahrs != null) {
 			return ahrs.isCalibrating();
 		}
@@ -79,7 +77,7 @@ public class NavXSensor {
 		return false;
 	}
 	
-	public static Angles getAngles()
+	public Angles getAngles()
 	{
 		Angles angles = new Angles();
 		
@@ -93,7 +91,7 @@ public class NavXSensor {
 	}
 	
 	// returns yaw angle (-180 deg to +180 deg)
-	public static float getYaw() 
+	public float getYaw() 
 	{
 		float yaw = 0f;
 		
@@ -106,7 +104,7 @@ public class NavXSensor {
 	}
 	
 	// returns absolute yaw angle (can be larger than 360 deg)
-	public static double getAngle() 
+	public double getAngle() 
 	{
 		double yaw = 0f;
 		

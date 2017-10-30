@@ -9,7 +9,25 @@ import edu.wpi.first.wpilibj.Relay;
 import edu.wpi.first.wpilibj.Spark;
 
 public class ClimberAssembly {
-	private static boolean initialized = false;
+	
+    // singleton class elements (ensures only one instance of this class)
+	private static final ClimberAssembly instance = new ClimberAssembly();
+    
+	private ClimberAssembly() {
+		
+		ioComm = InputOutputComm.GetInstance();
+		
+		climberMotor = new TalonSRX(HardwareIDs.CLIMBER_TALON_ID);
+		
+		//************ DEBUG only - PROTOBOT ***************
+		//climberMotor = new Spark(HardwareIDs.PROTOBOT_PWM_ID);
+				
+		gamepad = new Joystick(HardwareIDs.GAMEPAD_ID);
+	}
+		
+	public static ClimberAssembly GetInstance() {
+		return instance;
+	}
 	
 	private static final double CLIMBER_MOTOR_DEAD_ZONE = 0.1;
 
@@ -18,33 +36,21 @@ public class ClimberAssembly {
 	private static final double CLIMB_MOTOR_FACTOR = 1.0;
 	
 	// COMPETITION BOT climber
-	private static TalonSRX climberMotor;
+	private InputOutputComm ioComm;
+	private TalonSRX climberMotor;
 	
 	//******* DEBUG climber only (PROTOBOT)******
 	//private static Spark climberMotor;
 	//*******************************************
 	
-	private static Joystick gamepad;
-	private static double currentClimbValue = 0.0;
-	
-	public static void initialize() {
-		if (initialized)
-			return;
-		
-		climberMotor = new TalonSRX(HardwareIDs.CLIMBER_TALON_ID);
-		
-		//************ DEBUG only - PROTOBOT ***************
-		//climberMotor = new Spark(HardwareIDs.PROTOBOT_PWM_ID);
+	private Joystick gamepad;
+	private double currentClimbValue = 0.0;
 				
-		gamepad = new Joystick(HardwareIDs.GAMEPAD_ID);
-		
-	}
-			
-	public static void teleopInit() {
+	public void teleopInit() {
 		currentClimbValue = 0.0;
 	}
 	
-	public static void teleopPeriodic() {
+	public void teleopPeriodic() {
 
 		double newClimbValue = gamepad.getRawAxis(HardwareIDs.CLIMBER_MOTOR_AXIS);
 		
@@ -63,6 +69,6 @@ public class ClimberAssembly {
 		climberMotor.set(newClimbValue);
 		
 		String climbValueStr = String.format("%.2f", newClimbValue);
-		InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"Climber/speed", climbValueStr);
+		ioComm.putString(InputOutputComm.LogTable.kMainLog,"Climber/speed", climbValueStr);
 	}
 }

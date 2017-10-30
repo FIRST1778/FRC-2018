@@ -2,12 +2,37 @@ package Systems;
 
 import com.kauailabs.navx.frc.AHRS;
 
+import NetworkComm.InputOutputComm;
+import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.wpilibj.PIDController;
 import edu.wpi.first.wpilibj.PIDOutput;
 
 public class TurnController {
 
-	private static PIDController pidCtrl;
+    // singleton class elements (ensures only one instance of this class)
+	private static final TurnController instance = new TurnController();
+    
+	private TurnController() {
+		navX = NavXSensor.GetInstance();	
+		ahrs = navX.getAHRS();
+		
+		pidOut = new TurnOutput();
+
+		pidCtrl = new PIDController(kP,kI,kD,kF,ahrs,pidOut);
+		
+		pidCtrl.setInputRange(-180.0, 180.0);
+		pidCtrl.setOutputRange(-maxSpeed, maxSpeed);
+		//pidCtrl.setAbsoluteTolerance(0.5);
+		pidCtrl.setContinuous(true);
+	}
+		
+	public static TurnController GetInstance() {
+		return instance;
+	}
+	
+	// instance data and methods
+	private NavXSensor navX;
+	private PIDController pidCtrl;
 	
 	// comp.bot - tuned 7/20/2017
 	private static final double kP = 0.075;
@@ -23,69 +48,47 @@ public class TurnController {
 	
 	private static final double maxSpeed = 0.5;
 	
-	private static double angleTargetDeg = 0.0;	
-	private static TurnOutput pidOut;
+	private double angleTargetDeg = 0.0;	
+	private TurnOutput pidOut;
+	private AHRS ahrs;
 	
-	private static AHRS ahrs;
-	
-	private static boolean initialized = false;
-	
-	public static void initialize() {
-		
-		if (initialized)
-			return;
-		
-		ahrs = NavXSensor.getAHRS();
-		
-		pidOut = new TurnOutput();
-
-		pidCtrl = new PIDController(kP,kI,kD,kF,ahrs,pidOut);
-		
-		pidCtrl.setInputRange(-180.0, 180.0);
-		pidCtrl.setOutputRange(-maxSpeed, maxSpeed);
-		//pidCtrl.setAbsoluteTolerance(0.5);
-		pidCtrl.setContinuous(true);
-		
-		initialized = true;
-	}
-
-	public static void setAngle(double angleDeg) {
+	public void setAngle(double angleDeg) {
 		
 		angleTargetDeg = angleDeg;
 		pidCtrl.setOutputRange(-maxSpeed, maxSpeed);
 		pidCtrl.setSetpoint(angleTargetDeg);
 	}
 
-	public static void setAngle(double angleDeg, double speed) {
+	public void setAngle(double angleDeg, double speed) {
 		
 		angleTargetDeg = angleDeg;
 		pidCtrl.setOutputRange(-speed, speed);
 		pidCtrl.setSetpoint(angleTargetDeg);
 	}
 	
-	public static void reset() {
+	public void reset() {
 		disable();
-		NavXSensor.reset();
+		navX.reset();
 		angleTargetDeg = 0.0;
 	}
 	
-	public static void enable() {
+	public void enable() {
 		pidCtrl.enable();
 	}
 	
-	public static void disable() {
+	public void disable() {
 		pidCtrl.disable();
 	}
 	
-	public static double getLeft() {
+	public double getLeft() {
 		return pidOut.getValue();
 	}
 	
-	public static double getRight() {
+	public double getRight() {
 		return -pidOut.getValue();
 	}
 	
-	public static class TurnOutput implements PIDOutput {
+	public class TurnOutput implements PIDOutput {
 		private double myOutput = 0.0;
 		
 		public double getValue() {

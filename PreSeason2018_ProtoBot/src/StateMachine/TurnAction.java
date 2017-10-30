@@ -11,8 +11,9 @@ public class TurnAction extends Action {
 	private double speedToTurn = 0.3;
 	private boolean resetGyro = true;
 	private double headingDeg = 0.0;   // heading to use if not resetting gyro
-	
 	private double initialAngle = 0.0;
+	private AutoDriveAssembly autoDrive;
+	private NavXSensor navX;
 		
 	public TurnAction(double angleToTurn, double speed, boolean resetGyro)
 	{
@@ -21,7 +22,8 @@ public class TurnAction extends Action {
 		this.speedToTurn = speed;
 		this.resetGyro = resetGyro;
 				
-		AutoDriveAssembly.initialize();
+		autoDrive = AutoDriveAssembly.GetInstance();
+		navX = NavXSensor.GetInstance();
 	}
 	
 	public TurnAction(String name, double angleToTurn, double speed, boolean resetGyro)
@@ -31,7 +33,8 @@ public class TurnAction extends Action {
 		this.speedToTurn = speed;
 		this.resetGyro = resetGyro;
 		
-		AutoDriveAssembly.initialize();
+		autoDrive = AutoDriveAssembly.GetInstance();
+		navX = NavXSensor.GetInstance();
 	}
 	
 	// action entry
@@ -39,14 +42,14 @@ public class TurnAction extends Action {
 		
 		// if we're not resetting the gyro, we'll want to see what angle it is to start
 		if (resetGyro) {
-			NavXSensor.reset();
+			navX.reset();
 			initialAngle = 0.0;
 		} 
 		else
-			initialAngle = NavXSensor.getAngle();
+			initialAngle = navX.getAngle();
 		
 		// initialize motor assembly for auto
-		AutoDriveAssembly.autoInit(resetGyro, initialAngle, false);
+		autoDrive.autoInit(resetGyro, initialAngle, false);
 		
 		super.initialize();
 	}
@@ -59,9 +62,9 @@ public class TurnAction extends Action {
 			
 		// rotate to close the gap
 		if (angleDiff > 0.0)
-			AutoDriveAssembly.rotateRight(speedToTurn);
+			autoDrive.rotateRight(speedToTurn);
 		else
-			AutoDriveAssembly.rotateLeft(speedToTurn);
+			autoDrive.rotateLeft(speedToTurn);
 		
 		super.process();
 	}
@@ -72,7 +75,7 @@ public class TurnAction extends Action {
 			
 		// PWMDriveAssembly not supported
 		
-		AutoDriveAssembly.autoStop();
+		autoDrive.autoStop();
 		
 		// cleanup base class
 		super.cleanup();

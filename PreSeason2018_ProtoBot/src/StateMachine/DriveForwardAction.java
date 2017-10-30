@@ -12,6 +12,9 @@ public class DriveForwardAction extends Action {
 	private double speed = 0.0;
 	private boolean resetGyro = true;
 	private double headingDeg = 0.0;
+	private AutoDriveAssembly autoDrive;
+	private InputOutputComm ioComm;
+	private NavXSensor navX;
 	
 	public DriveForwardAction(double speed, boolean resetGyro, double headingDeg)
 	{
@@ -20,7 +23,9 @@ public class DriveForwardAction extends Action {
 		this.resetGyro = resetGyro;
 		this.headingDeg = headingDeg;   // absolute heading to use if not resetting gyro
 
-		AutoDriveAssembly.initialize();
+		autoDrive = AutoDriveAssembly.GetInstance();
+		navX = NavXSensor.GetInstance();
+		ioComm = InputOutputComm.GetInstance();
 	}
 	
 	public DriveForwardAction(String name, double speed, boolean resetGyro, double headingDeg)
@@ -30,22 +35,24 @@ public class DriveForwardAction extends Action {
 		this.resetGyro = resetGyro;
 		this.headingDeg = headingDeg;   // absolute heading to use if not resetting gyro
 				
-		AutoDriveAssembly.initialize();
+		autoDrive = AutoDriveAssembly.GetInstance();
+		navX = NavXSensor.GetInstance();
+		ioComm = InputOutputComm.GetInstance();
 	}
 	
 	private double getGyroAngle() {
 		//double gyroAngle = 0.0;
-		//double gyroAngle = NavXSensor.getYaw();  // -180 deg to +180 deg
-		double gyroAngle = NavXSensor.getAngle();  // continuous angle (can be larger than 360 deg)
+		//double gyroAngle = navX.getYaw();  // -180 deg to +180 deg
+		double gyroAngle = navX.getAngle();  // continuous angle (can be larger than 360 deg)
 		
 		//System.out.println("autoPeriodicStraight:  Gyro angle = " + gyroAngle);
 			
 		// send output data for test & debug
-	    InputOutputComm.putBoolean(InputOutputComm.LogTable.kMainLog,"Auto/IMU_Connected",NavXSensor.isConnected());
-	    InputOutputComm.putBoolean(InputOutputComm.LogTable.kMainLog,"Auto/IMU_Calibrating",NavXSensor.isCalibrating());
+	    ioComm.putBoolean(InputOutputComm.LogTable.kMainLog,"Auto/IMU_Connected",navX.isConnected());
+	    ioComm.putBoolean(InputOutputComm.LogTable.kMainLog,"Auto/IMU_Calibrating",navX.isCalibrating());
 
 		//System.out.println("gyroAngle = " + gyroAngle);
-		InputOutputComm.putDouble(InputOutputComm.LogTable.kMainLog,"Auto/GyroAngle", gyroAngle);		
+	    ioComm.putDouble(InputOutputComm.LogTable.kMainLog,"Auto/GyroAngle", gyroAngle);		
 
 		return gyroAngle;
 	}
@@ -54,7 +61,7 @@ public class DriveForwardAction extends Action {
 	public void initialize() {
 		// do some drivey initialization
 		
-		AutoDriveAssembly.autoInit(resetGyro, headingDeg, false);
+		autoDrive.autoInit(resetGyro, headingDeg, false);
 		
 		super.initialize();
 	}
@@ -64,7 +71,7 @@ public class DriveForwardAction extends Action {
 		
 		// do some drivey stuff
 				
-		AutoDriveAssembly.autoGyroStraight(speed);
+		autoDrive.autoGyroStraight(speed);
 
 		// get gyro angle 
 		// (not used for anything else here except reporting to driver)
@@ -77,7 +84,7 @@ public class DriveForwardAction extends Action {
 	public void cleanup() {
 		// do some drivey cleanup
 					
-		AutoDriveAssembly.autoStop();
+		autoDrive.autoStop();
 		
 		// cleanup base class
 		super.cleanup();

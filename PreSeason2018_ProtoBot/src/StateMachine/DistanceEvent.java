@@ -6,24 +6,29 @@ import Systems.AutoDriveAssembly;
 public class DistanceEvent extends Event {
 	private String name;
 	private double desiredDistanceInches;
+	private AutoDriveAssembly autoDrive;
+	private InputOutputComm ioComm;
 	
 	public DistanceEvent()
 	{	
 		this.name = "<Distance Event>";
 		this.desiredDistanceInches = 0.0;
+		autoDrive = AutoDriveAssembly.GetInstance();
+		ioComm = InputOutputComm.GetInstance();
 	}
 	
 	public DistanceEvent(double distanceInches)
 	{
 		this.name = "<Distance Event>";
 		this.desiredDistanceInches = distanceInches;
+		autoDrive = AutoDriveAssembly.GetInstance();
+		ioComm = InputOutputComm.GetInstance();
 	}
 	
 	// overloaded initialize method
 	public void initialize()
 	{
 		//System.out.println("DistanceEvent initialized!");
-		AutoDriveAssembly.initialize();
 		
 		super.initialize();
 	}
@@ -35,12 +40,12 @@ public class DistanceEvent extends Event {
 	
 	public double getDistance() {
 		
-		double currentDistanceInches = AutoDriveAssembly.getDistanceInches();
+		double currentDistanceInches = autoDrive.getDistanceInches();
 		
 		String distStr = String.format("%.2f", currentDistanceInches);
 	    String myString = new String("currentDistanceInches = " + distStr);
 		//System.out.println(myString);
-		InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"Auto/CurrentDistance", myString);		
+		ioComm.putString(InputOutputComm.LogTable.kMainLog,"Auto/CurrentDistance", myString);		
 		
 		return currentDistanceInches;
 	}

@@ -8,9 +8,34 @@ import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.Utility;
 
 public class CameraControl {
-	private static boolean initialized = false;
+	
+    // singleton class elements (ensures only one instance of this class)
+	private static final CameraControl instance = new CameraControl();
+    
+	private CameraControl() {
 		
-	private static Joystick gamepad;
+		ioComm = InputOutputComm.GetInstance();
+		
+		// reset trigger init time
+		initTriggerTime = Utility.getFPGATime();		
+
+		cameraLedRelay = new Relay(HardwareIDs.CAMERA_LED_RELAY_CHANNEL,Relay.Direction.kForward);
+		cameraLedRelay.set(Relay.Value.kOff);
+		
+		positionServo = new Servo(HardwareIDs.CAMERA_SERVO_PWM_ID);
+		
+		gamepad = new Joystick(HardwareIDs.DRIVER_CONTROL_ID);
+		
+		ledState = false;
+	}
+		
+	public static CameraControl GetInstance() {
+		return instance;
+	}
+		
+	// instance data and methods
+	private InputOutputComm ioComm;
+	private Joystick gamepad;
 	
 	//********* DEBUG (PROTOBOT) ONLY *************
 	// assumes HS-475HB servo, which 1.0 = 90 degrees (PROTOBOT)
@@ -27,45 +52,26 @@ public class CameraControl {
 	private static final double SERVO_POS_TOLERANCE = 0.005;
 	
 	// Relay for extra LEDs
-	private static Relay cameraLedRelay;
-	private static boolean ledState = false;
+	private Relay cameraLedRelay;
+	private boolean ledState = false;
 	
 	// camera position servo
-	private static Servo positionServo;
+	private Servo positionServo;
 
 	// wait 0.25 s between button pushes on shooter
     private static final int TRIGGER_CYCLE_WAIT_US = 250000;
-    private static double initTriggerTime;
-
-	public static void initialize() {
-		if (initialized)
-			return;
-		
-		// reset trigger init time
-		initTriggerTime = Utility.getFPGATime();		
-
-		cameraLedRelay = new Relay(HardwareIDs.CAMERA_LED_RELAY_CHANNEL,Relay.Direction.kForward);
-		cameraLedRelay.set(Relay.Value.kOff);
-		
-		positionServo = new Servo(HardwareIDs.CAMERA_SERVO_PWM_ID);
-		
-		gamepad = new Joystick(HardwareIDs.DRIVER_CONTROL_ID);
-		
-		ledState = false;
-		
-		initialized = true;
-	}
+    private double initTriggerTime;
 	
-	public static void moveToPos(double position) {
+	public void moveToPos(double position) {
 		if ((position < GEAR_CAM_POS) || (position > BOILER_CAM_POS))
 			return;
 		
-		InputOutputComm.putDouble(InputOutputComm.LogTable.kMainLog,"CameraControl/Angle", position*180.0);
+		ioComm.putDouble(InputOutputComm.LogTable.kMainLog,"CameraControl/Angle", position*180.0);
 		
 		positionServo.set(position);
 	}
 	
-	public static void setCameraLed(boolean state) {
+	public void setCameraLed(boolean state) {
 		
 		if (state == true) {
 			cameraLedRelay.set(Relay.Value.kOn);
@@ -78,17 +84,17 @@ public class CameraControl {
 		
 	}
 	
-	public static void autoInit() {
+	public void autoInit() {
 		
 		setCameraLed(true);
 	}
 	
-	public static void teleopInit() {
+	public void teleopInit() {
 		
 		setCameraLed(false);
 	}
 	
-	public static void teleopPeriodic() {
+	public void teleopPeriodic() {
 
 		// fire controls - using a timer to debounce
 		double currentTime = Utility.getFPGATime();

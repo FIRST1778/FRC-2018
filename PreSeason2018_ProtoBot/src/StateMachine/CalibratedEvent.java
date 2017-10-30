@@ -7,9 +7,14 @@ public class CalibratedEvent extends Event {
 	private String name;
 	private double desiredX, desiredY;
 	private double marginX, marginY;
+	private InputOutputComm ioComm;
+	private RPIComm rpiComm;
 	
 	public CalibratedEvent()
 	{	
+		ioComm = InputOutputComm.GetInstance();
+		rpiComm = RPIComm.GetInstance();
+		
 		this.name = "<Calibrated Event>";
 		this.desiredX = 0.0;
 		this.desiredY = 0.0;
@@ -19,6 +24,8 @@ public class CalibratedEvent extends Event {
 	
 	public CalibratedEvent(double desiredX, double desiredY, double marginX, double marginY)
 	{
+		ioComm = InputOutputComm.GetInstance();
+
 		this.name = "<Calibrated Event>";
 		
 		// desired location
@@ -39,18 +46,18 @@ public class CalibratedEvent extends Event {
 	// overloaded trigger method
 	public boolean isTriggered()
 	{
-		if (!RPIComm.hasTarget())
+		if (!rpiComm.hasTarget())
 			return false;
 		
 		// read network table target data
 		
-		double deltaX = Math.abs(desiredX - RPIComm.targetX);
-		double deltaY = Math.abs(desiredY - RPIComm.targetY);
+		double deltaX = Math.abs(desiredX - rpiComm.targetX);
+		double deltaY = Math.abs(desiredY - rpiComm.targetY);
 		
-		InputOutputComm.putDouble(InputOutputComm.LogTable.kMainLog,"Auto/desiredX", desiredX);		
-		InputOutputComm.putDouble(InputOutputComm.LogTable.kMainLog,"Auto/desiredY", desiredY);		
-		InputOutputComm.putDouble(InputOutputComm.LogTable.kMainLog,"Auto/deltaX", deltaX);		
-		InputOutputComm.putDouble(InputOutputComm.LogTable.kMainLog,"Auto/deltaY", deltaY);		
+		ioComm.putDouble(InputOutputComm.LogTable.kMainLog,"Auto/desiredX", desiredX);		
+		ioComm.putDouble(InputOutputComm.LogTable.kMainLog,"Auto/desiredY", desiredY);		
+		ioComm.putDouble(InputOutputComm.LogTable.kMainLog,"Auto/deltaX", deltaX);		
+		ioComm.putDouble(InputOutputComm.LogTable.kMainLog,"Auto/deltaY", deltaY);		
 		
 		if ((deltaX < marginX) && (deltaY < marginY))
 		{

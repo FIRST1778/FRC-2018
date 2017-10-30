@@ -17,6 +17,9 @@ public class ClosedLoopAngleEvent extends Event {
 	
 	private long startTimeUs = 0;
 	
+	private InputOutputComm ioComm;
+	private NavXSensor navX;
+	
 	public ClosedLoopAngleEvent(double targetAngleDeg, double errorDeg, double durationSec)
 	{
 		this.name = "<Gyro Angle Event>";
@@ -25,7 +28,8 @@ public class ClosedLoopAngleEvent extends Event {
 		this.errorDeg = errorDeg;
 		this.durationSec = durationSec;
 		
-		NavXSensor.initialize();
+		navX = NavXSensor.GetInstance();
+		ioComm = InputOutputComm.GetInstance();
 	}
 	
 	// overloaded initialize method
@@ -40,14 +44,14 @@ public class ClosedLoopAngleEvent extends Event {
 	
 	private double getGyroAngle() {
 
-		double gyroAngle = NavXSensor.getAngle();  // continuous angle (can be larger than 360 deg)
+		double gyroAngle = navX.getAngle();  // continuous angle (can be larger than 360 deg)
 					
 		// send output data for test & debug
-	    InputOutputComm.putBoolean(InputOutputComm.LogTable.kMainLog,"Auto/IMU_Connected",NavXSensor.isConnected());
-	    InputOutputComm.putBoolean(InputOutputComm.LogTable.kMainLog,"Auto/IMU_Calibrating",NavXSensor.isCalibrating());
+	    ioComm.putBoolean(InputOutputComm.LogTable.kMainLog,"Auto/IMU_Connected",navX.isConnected());
+	    ioComm.putBoolean(InputOutputComm.LogTable.kMainLog,"Auto/IMU_Calibrating",navX.isCalibrating());
 
 		//System.out.println("gyroAngle = " + gyroAngle);
-		InputOutputComm.putDouble(InputOutputComm.LogTable.kMainLog,"Auto/GyroAngle", gyroAngle);		
+	    ioComm.putDouble(InputOutputComm.LogTable.kMainLog,"Auto/GyroAngle", gyroAngle);		
 
 		return gyroAngle;
 	}

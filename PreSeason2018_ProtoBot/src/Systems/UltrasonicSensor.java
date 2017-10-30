@@ -1,36 +1,35 @@
 package Systems;
 
-//import edu.wpi.first.wpilibj.AnalogInput;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.Ultrasonic;
+
+import com.kauailabs.navx.frc.AHRS;
+
 import Utility.HardwareIDs;
 
 public class UltrasonicSensor {
 		
-	private static Ultrasonic ultrasonicDevice;
-	private static boolean initialized = false;
-
-	public static void initialize()
-	{
-		if (!initialized) {
-			ultrasonicDevice = new Ultrasonic(HardwareIDs.TRIGGER_CHANNEL_ID,HardwareIDs.ECHO_CHANNEL_ID);
-			ultrasonicDevice.setAutomaticMode(true);
-			
-			initialized = true;
-		}
+    // singleton class elements (ensures only one instance of this class)
+	private static final UltrasonicSensor instance = new UltrasonicSensor();
+    
+	private UltrasonicSensor() {
+		ultrasonicDevice = new Ultrasonic(HardwareIDs.TRIGGER_CHANNEL_ID,HardwareIDs.ECHO_CHANNEL_ID);
+		ultrasonicDevice.setAutomaticMode(true);
+	}
+		
+	public static UltrasonicSensor GetInstance() {
+		return instance;
 	}
 	
-	public static void autoInit()
-	{
-		if (!initialized)
-			initialize();
-		
+	private Ultrasonic ultrasonicDevice;
+	
+	public void autoInit()
+	{		
 		ultrasonicDevice.setEnabled(true);
 	}
 	
-	public static double getRange() {
-		if (!initialized)
-			initialize();
-				
+	public double getRange() {				
 		return ultrasonicDevice.getRangeInches();
 	}
 }

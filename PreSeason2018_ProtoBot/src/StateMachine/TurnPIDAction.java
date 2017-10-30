@@ -10,6 +10,8 @@ public class TurnPIDAction extends Action {
 	private double angleToTurn = 0.0;
 	private double speedToTurn = 0.3;
 	private boolean resetGyro = true;
+	private AutoDriveAssembly autoDrive;
+	private NavXSensor navX;
 			
 	public TurnPIDAction(double angleToTurn, double speed, boolean resetGyro)
 	{
@@ -18,7 +20,8 @@ public class TurnPIDAction extends Action {
 		this.speedToTurn = speed;
 		this.resetGyro = resetGyro;
 				
-		AutoDriveAssembly.initialize();
+		autoDrive = AutoDriveAssembly.GetInstance();
+		navX = NavXSensor.GetInstance();
 	}
 	
 	public TurnPIDAction(String name, double angleToTurn, double speed, boolean resetGyro)
@@ -28,7 +31,8 @@ public class TurnPIDAction extends Action {
 		this.speedToTurn = speed;
 		this.resetGyro = resetGyro;
 		
-		AutoDriveAssembly.initialize();
+		autoDrive = AutoDriveAssembly.GetInstance();
+		navX = NavXSensor.GetInstance();
 	}
 	
 	// action entry
@@ -36,10 +40,10 @@ public class TurnPIDAction extends Action {
 		
 		// if we're not resetting the gyro, we'll want to see what angle it is to start
 		if (resetGyro)
-			NavXSensor.reset();
+			navX.reset();
 		
 		// initialize motor assembly for auto
-		AutoDriveAssembly.autoPidTurnStart(angleToTurn, speedToTurn);
+		autoDrive.autoPidTurnStart(angleToTurn, speedToTurn);
 		
 		super.initialize();
 	}
@@ -47,7 +51,7 @@ public class TurnPIDAction extends Action {
 	// called periodically
 	public void process()  {
 		
-		AutoDriveAssembly.autoPidTurnProcess();
+		autoDrive.autoPidTurnProcess();
 		
 		super.process();
 	}
@@ -56,7 +60,7 @@ public class TurnPIDAction extends Action {
 	public void cleanup() {
 		// do some drivey cleanup
 					
-		AutoDriveAssembly.autoPidTurnStop();
+		autoDrive.autoPidTurnStop();
 		
 		// cleanup base class
 		super.cleanup();

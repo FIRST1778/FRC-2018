@@ -9,9 +9,12 @@ public class DriveControl {
 	// "Deadband" is the dead zone of the joysticks, for throttle and steering
     private double throttleDeadband = 0.04;
     private double wheelDeadband = 0.02;
+    private InputOutputComm ioComm;
+    private FreezyDriveTrain freezyDrive;
 	
-	public DriveControl(){
-		
+	public DriveControl()  {
+		ioComm = InputOutputComm.GetInstance();
+		freezyDrive = FreezyDriveTrain.GetInstance();
 	}
 	
 	public void calculateDrive(double throttle, double wheel, boolean isQuickTurn){
@@ -26,8 +29,8 @@ public class DriveControl {
         if(throttle > 0)
         	wheel = -wheel;
         
-        InputOutputComm.putDouble(InputOutputComm.LogTable.kDriveLog,"Teleop/Throttle", throttle);		
-		InputOutputComm.putDouble(InputOutputComm.LogTable.kDriveLog,"Teleop/Wheel", wheel);
+        ioComm.putDouble(InputOutputComm.LogTable.kDriveLog,"Teleop/Throttle", throttle);		
+        ioComm.putDouble(InputOutputComm.LogTable.kDriveLog,"Teleop/Wheel", wheel);
 		
         
         
@@ -123,10 +126,10 @@ public class DriveControl {
         
 		
 		// sends final values to drive train
-		FreezyDrive.FreezyDriveTrain.ChangeSpeed(-leftPower,rightPower);
+		freezyDrive.ChangeSpeed(-leftPower,rightPower);
 		
-		InputOutputComm.putDouble(InputOutputComm.LogTable.kDriveLog,"Teleop/leftPower", -leftPower);		
-		InputOutputComm.putDouble(InputOutputComm.LogTable.kDriveLog,"Teleop/rightPower", rightPower);
+		ioComm.putDouble(InputOutputComm.LogTable.kDriveLog,"Teleop/leftPower", -leftPower);		
+		ioComm.putDouble(InputOutputComm.LogTable.kDriveLog,"Teleop/rightPower", rightPower);
 
 	}
 	
