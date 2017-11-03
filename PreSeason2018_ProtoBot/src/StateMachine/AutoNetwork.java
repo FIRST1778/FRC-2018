@@ -10,20 +10,17 @@ public class AutoNetwork {
 	protected ArrayList<AutoState> states;
 	
 	private AutoState currentState;
-	private InputOutputComm ioComm;
 	
 	public AutoNetwork() {
 		name = "<Generic Auto Network>";
 		states = new ArrayList<AutoState>();
 		currentState = null;
-		ioComm = InputOutputComm.GetInstance();
 	}
 	
 	public AutoNetwork(String name) {
 		this.name = name;
 		states = new ArrayList<AutoState>();
 		currentState = null;
-		ioComm = InputOutputComm.GetInstance();
 	}
 
 	
@@ -59,7 +56,7 @@ public class AutoNetwork {
 		{
 			String myString = new String("State = " + currentState.name);
 			//System.out.println(myString);
-			ioComm.putString(InputOutputComm.LogTable.kMainLog,"Auto/AutoSM_currentState", myString);
+			InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"Auto/AutoSM_currentState", myString);
 
 			AutoState nextState = currentState.process();
 

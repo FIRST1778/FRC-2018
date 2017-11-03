@@ -12,8 +12,6 @@ public class AutoStateMachine {
 
 	private AutoNetwork currentNetwork;
 	private AutoChooser autoChooser;
-	private InputOutputComm ioComm;
-	private NavXSensor navX;
 		
 	public AutoStateMachine()
 	{
@@ -25,9 +23,8 @@ public class AutoStateMachine {
 			e.printStackTrace();
 		}
 		
-		ioComm = InputOutputComm.GetInstance();
-		
-		navX = NavXSensor.GetInstance();
+		InputOutputComm.initialize();
+		NavXSensor.initialize();
 		
 		// create list of autonomous networks
 		autoNetworks = AutoNetworkBuilder.readInNetworks();
@@ -45,7 +42,7 @@ public class AutoStateMachine {
 		
 		String myString = new String("autoNetworkEnable = " + autoNetworkEnable + ", networkIndex = " + networkIndex);
 		System.out.println(myString);
-		ioComm.putString(InputOutputComm.LogTable.kMainLog,"Auto/AutoSM_network", myString);
+		InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"Auto/AutoSM_network", myString);
 		
 		if (autoNetworkEnable)
 		{
@@ -60,7 +57,7 @@ public class AutoStateMachine {
 		}
 		
 		// must initialize the gyro class and reset the angle to our initial position
-		navX.reset();
+		NavXSensor.reset();
 		
 	}
 	

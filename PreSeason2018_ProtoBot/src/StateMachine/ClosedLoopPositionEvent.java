@@ -13,7 +13,6 @@ public class ClosedLoopPositionEvent extends Event {
 	private double errorThresholdInches;
 	private double durationSec;
 	private long startTimeUs;
-	private AutoDriveAssembly autoDrive;
 	
 	public ClosedLoopPositionEvent()
 	{	
@@ -21,7 +20,7 @@ public class ClosedLoopPositionEvent extends Event {
 		this.durationSec = 0.0;
 		this.errorThresholdInches = 0.0;
 		this.targetPosInches = 0.0;
-		autoDrive = AutoDriveAssembly.GetInstance();
+		AutoDriveAssembly.initialize();
 	}
 	
 	public ClosedLoopPositionEvent(double targetPosInches, double errorThreshInches, double durationSec)
@@ -30,7 +29,7 @@ public class ClosedLoopPositionEvent extends Event {
 		this.durationSec = durationSec;
 		this.errorThresholdInches = errorThreshInches;
 		this.targetPosInches = targetPosInches;
-		autoDrive = AutoDriveAssembly.GetInstance();
+		AutoDriveAssembly.initialize();
 	}
 	
 	// overloaded initialize method
@@ -46,7 +45,7 @@ public class ClosedLoopPositionEvent extends Event {
 	public boolean isTriggered()
 	{		
 		// measure current position error
-		double actualPosInches = autoDrive.getDistanceInches();
+		double actualPosInches = AutoDriveAssembly.getDistanceInches();
 		double errorPosInches = Math.abs(targetPosInches - actualPosInches);
 		if (errorPosInches > errorThresholdInches)
 		{

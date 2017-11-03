@@ -12,7 +12,6 @@ public class DriveForwardMagicAction extends Action {
 	private int speedRpm = 0;
 	private boolean resetGyro = false;
 	private double headingDeg = 0.0;   // angle to use if gyro not reset
-	private AutoDriveAssembly autoDrive;
 		
 	public DriveForwardMagicAction(double targetPosInches, int speedRpm, boolean resetGyro, double headingDeg)
 	{
@@ -22,7 +21,7 @@ public class DriveForwardMagicAction extends Action {
 		this.resetGyro = resetGyro;
 		this.headingDeg = headingDeg;
 
-		autoDrive = AutoDriveAssembly.GetInstance();
+		AutoDriveAssembly.initialize();
 	}
 	
 	public DriveForwardMagicAction(String name, double targetPosInches, int speedRpm, boolean resetGyro, double headingDeg)
@@ -33,15 +32,15 @@ public class DriveForwardMagicAction extends Action {
 		this.resetGyro = resetGyro;
 		this.headingDeg = headingDeg;
 				
-		autoDrive = AutoDriveAssembly.GetInstance();
+		AutoDriveAssembly.initialize();
 	}
 		
 	// action entry
 	public void initialize() {
 		// do some drivey initialization
 		
-		autoDrive.autoInit(resetGyro, headingDeg, true);
-		autoDrive.autoMagicStraight(targetPosRevs, speedRpm);
+		AutoDriveAssembly.autoInit(resetGyro, headingDeg, true);
+		AutoDriveAssembly.autoMagicStraight(targetPosRevs, speedRpm);
 		
 		super.initialize();
 	}
@@ -58,7 +57,7 @@ public class DriveForwardMagicAction extends Action {
 	public void cleanup() {
 		// do some drivey cleanup
 					
-		autoDrive.autoStop();
+		AutoDriveAssembly.autoStop();
 		
 		// cleanup base class
 		super.cleanup();

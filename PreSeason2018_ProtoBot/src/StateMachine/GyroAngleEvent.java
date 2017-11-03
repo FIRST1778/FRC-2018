@@ -17,8 +17,6 @@ public class GyroAngleEvent extends Event {
 	private double accuracyDeg = 5.0;
 	private AnglePolarity polarity;
 	private boolean resetGyro = true;
-	private NavXSensor navX;
-	private InputOutputComm ioComm;
 	
 	public GyroAngleEvent(double angleToTurn, boolean resetGyro, AnglePolarity polarity)
 	{
@@ -28,8 +26,8 @@ public class GyroAngleEvent extends Event {
 		this.resetGyro = resetGyro;
 		this.polarity = polarity;
 		
-		navX = NavXSensor.GetInstance();
-		ioComm = InputOutputComm.GetInstance();
+		NavXSensor.initialize();
+		InputOutputComm.initialize();
 	}
 	
 	// overloaded initialize method
@@ -37,7 +35,7 @@ public class GyroAngleEvent extends Event {
 	{
 		//System.out.println("GyroAngleEvent initialized!");
 		if (resetGyro)
-			navX.reset();
+			NavXSensor.reset();
 		
 		super.initialize();
 	}
@@ -45,16 +43,16 @@ public class GyroAngleEvent extends Event {
 	private double getGyroAngle() {
 		//double gyroAngle = 0.0;
 		//double gyroAngle = navX.getYaw();  // -180 deg to +180 deg
-		double gyroAngle = navX.getAngle();  // continuous angle (can be larger than 360 deg)
+		double gyroAngle = NavXSensor.getAngle();  // continuous angle (can be larger than 360 deg)
 		
 		//System.out.println("autoPeriodicStraight:  Gyro angle = " + gyroAngle);
 			
 		// send output data for test & debug
-		ioComm.putBoolean(InputOutputComm.LogTable.kMainLog,"Auto/IMU_Connected",navX.isConnected());
-		ioComm.putBoolean(InputOutputComm.LogTable.kMainLog,"Auto/IMU_Calibrating",navX.isCalibrating());
+		InputOutputComm.putBoolean(InputOutputComm.LogTable.kMainLog,"Auto/IMU_Connected",NavXSensor.isConnected());
+		InputOutputComm.putBoolean(InputOutputComm.LogTable.kMainLog,"Auto/IMU_Calibrating",NavXSensor.isCalibrating());
 
 		//System.out.println("gyroAngle = " + gyroAngle);
-		ioComm.putDouble(InputOutputComm.LogTable.kMainLog,"Auto/GyroAngle", gyroAngle);		
+		InputOutputComm.putDouble(InputOutputComm.LogTable.kMainLog,"Auto/GyroAngle", gyroAngle);		
 
 		return gyroAngle;
 	}

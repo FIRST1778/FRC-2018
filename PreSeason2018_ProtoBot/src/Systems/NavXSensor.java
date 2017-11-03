@@ -8,11 +8,14 @@ import edu.wpi.first.wpilibj.Timer;
 
 public class NavXSensor {
 	
-    // singleton class elements (ensures only one instance of this class)
-	private static final NavXSensor instance = new NavXSensor();
+	private static boolean initialized = false;
     
-	private NavXSensor() {
-		System.out.println("NavXSensor constructor called...");
+	public static void initialize() {
+		
+		if (initialized)
+			return;
+		
+		System.out.println("NavXSensor initialize called...");
 		
 		try {
 			ahrs = new AHRS(SPI.Port.kMXP);     
@@ -21,24 +24,22 @@ public class NavXSensor {
         }
 
 		reset();
-	}
 		
-	public static NavXSensor GetInstance() {
-		return instance;
+		initialized = true;
 	}
-	
+			
 	// instance data and methods
-	private AHRS ahrs;
+	private static AHRS ahrs;
 	
-	private double yawOffset = 0.0;
+	private static double yawOffset = 0.0;
 	
-	public class Angles {
+	public static class Angles {
 		float roll = 0f;
 		float pitch = 0f;
 		float yaw = 0f;
 	}
 				
-	public void reset()
+	public static void reset()
 	{
 		System.out.println("NavXSensor::reset called!");
 		
@@ -57,11 +58,11 @@ public class NavXSensor {
 		}
 	}
 
-	public AHRS getAHRS() {		
+	public static AHRS getAHRS() {		
 		return ahrs;
 	}
 	
-	public boolean isConnected() {
+	public static boolean isConnected() {
 		if (ahrs != null) {
 			return ahrs.isConnected();
 		}
@@ -69,7 +70,7 @@ public class NavXSensor {
 		return false;
 	}
 	
-	public boolean isCalibrating() {
+	public static boolean isCalibrating() {
 		if (ahrs != null) {
 			return ahrs.isCalibrating();
 		}
@@ -77,7 +78,7 @@ public class NavXSensor {
 		return false;
 	}
 	
-	public Angles getAngles()
+	public static Angles getAngles()
 	{
 		Angles angles = new Angles();
 		
@@ -91,7 +92,7 @@ public class NavXSensor {
 	}
 	
 	// returns yaw angle (-180 deg to +180 deg)
-	public float getYaw() 
+	public static float getYaw() 
 	{
 		float yaw = 0f;
 		
@@ -104,7 +105,7 @@ public class NavXSensor {
 	}
 	
 	// returns absolute yaw angle (can be larger than 360 deg)
-	public double getAngle() 
+	public static double getAngle() 
 	{
 		double yaw = 0f;
 		

@@ -12,8 +12,6 @@ public class TurnAction extends Action {
 	private boolean resetGyro = true;
 	private double headingDeg = 0.0;   // heading to use if not resetting gyro
 	private double initialAngle = 0.0;
-	private AutoDriveAssembly autoDrive;
-	private NavXSensor navX;
 		
 	public TurnAction(double angleToTurn, double speed, boolean resetGyro)
 	{
@@ -22,8 +20,8 @@ public class TurnAction extends Action {
 		this.speedToTurn = speed;
 		this.resetGyro = resetGyro;
 				
-		autoDrive = AutoDriveAssembly.GetInstance();
-		navX = NavXSensor.GetInstance();
+		AutoDriveAssembly.initialize();
+		NavXSensor.initialize();
 	}
 	
 	public TurnAction(String name, double angleToTurn, double speed, boolean resetGyro)
@@ -33,8 +31,8 @@ public class TurnAction extends Action {
 		this.speedToTurn = speed;
 		this.resetGyro = resetGyro;
 		
-		autoDrive = AutoDriveAssembly.GetInstance();
-		navX = NavXSensor.GetInstance();
+		AutoDriveAssembly.initialize();
+		NavXSensor.initialize();
 	}
 	
 	// action entry
@@ -42,14 +40,14 @@ public class TurnAction extends Action {
 		
 		// if we're not resetting the gyro, we'll want to see what angle it is to start
 		if (resetGyro) {
-			navX.reset();
+			NavXSensor.reset();
 			initialAngle = 0.0;
 		} 
 		else
-			initialAngle = navX.getAngle();
+			initialAngle = NavXSensor.getAngle();
 		
 		// initialize motor assembly for auto
-		autoDrive.autoInit(resetGyro, initialAngle, false);
+		AutoDriveAssembly.autoInit(resetGyro, initialAngle, false);
 		
 		super.initialize();
 	}
@@ -62,9 +60,9 @@ public class TurnAction extends Action {
 			
 		// rotate to close the gap
 		if (angleDiff > 0.0)
-			autoDrive.rotateRight(speedToTurn);
+			AutoDriveAssembly.rotateRight(speedToTurn);
 		else
-			autoDrive.rotateLeft(speedToTurn);
+			AutoDriveAssembly.rotateLeft(speedToTurn);
 		
 		super.process();
 	}
@@ -75,7 +73,7 @@ public class TurnAction extends Action {
 			
 		// PWMDriveAssembly not supported
 		
-		autoDrive.autoStop();
+		AutoDriveAssembly.autoStop();
 		
 		// cleanup base class
 		super.cleanup();

@@ -9,15 +9,17 @@ import Utility.HardwareIDs;
 //Chill Out 1778 class for controlling the drivetrain during auto
 
 public class AutoDriveAssembly {
-	
-    // singleton class elements (ensures only one instance of this class)
-	private static final AutoDriveAssembly instance = new AutoDriveAssembly();
-	   
-	private AutoDriveAssembly() {
 		
-		ioComm = InputOutputComm.GetInstance();
-		navX = NavXSensor.GetInstance();
-		turnCtrl = TurnController.GetInstance();
+	private static boolean initialized = false;
+	
+	public static void initialize() {
+		
+		if (initialized)
+			return;
+		
+		//ioComm = InputOutputComm.GetInstance();
+		NavXSensor.initialize();
+		TurnController.initialize();
 		
 		// instantiate motion profile motor control objects
         mFrontLeft = new TalonSRX(HardwareIDs.LEFT_FRONT_TALON_ID);
@@ -53,26 +55,19 @@ public class AutoDriveAssembly {
         mFrontRight.setF(F_COEFF);
         mFrontRight.setMotionMagicCruiseVelocity(0);
         mFrontRight.setMotionMagicAcceleration(0);
+        
+        initialized = true;
 	}
-		
-	public static AutoDriveAssembly GetInstance() {
-		return instance;
-	}
-		
-	// instance data and methods
-	private InputOutputComm ioComm;
-	private NavXSensor navX;
-	private TurnController turnCtrl;
-	
+					
 	private static final double AUTO_DRIVE_ANGLE_CORRECT_COEFF = 0.02;
 	private static final double GYRO_CORRECT_COEFF = 0.03;
 			
 	// smart controllers (motion profiling)
-	private TalonSRX mFrontLeft, mFrontRight;
-	private TalonSRX mBackLeft, mBackRight;
+	private static TalonSRX mFrontLeft, mFrontRight;
+	private static TalonSRX mBackLeft, mBackRight;
 		
 	// used as angle baseline (if we don't reset gyro)
-	private double initialAngle = 0.0;
+	private static double initialAngle = 0.0;
 	
 	// original encoder variables
 	//private static final int ENCODER_PULSES_PER_REV = 250;  // E4P-250  - on the proto bot front motors
@@ -98,14 +93,14 @@ public class AutoDriveAssembly {
 	private static final double D_COEFF = 16.0;
 	private static final double F_COEFF = 0.0;  // Feedforward not used for closed loop position control
 		
-	private void resetMotors()
+	private static void resetMotors()
 	{
 		// disable brake mode (all motors on coast)
 	    mFrontLeft.enableBrakeMode(false);
 		mFrontRight.enableBrakeMode(false);
 		mBackLeft.enableBrakeMode(false);
 		mBackRight.enableBrakeMode(false);
-		ioComm.putBoolean(InputOutputComm.LogTable.kMainLog,"Auto/BrakeMode", false);
+		//ioComm.putBoolean(InputOutputComm.LogTable.kMainLog,"Auto/BrakeMode", false);
 		
 		// reset control mode to VBus mode (% pwr) 
 		mFrontLeft.changeControlMode(TalonSRX.TalonControlMode.PercentVbus);
@@ -121,14 +116,14 @@ public class AutoDriveAssembly {
 		
 	}
 		
-	private void configureMotorsVbus() 
+	private static void configureMotorsVbus() 
 	{		
 		// for auto - brake mode enabled
 	    mFrontLeft.enableBrakeMode(true);
 		mFrontRight.enableBrakeMode(true);
 		mBackLeft.enableBrakeMode(true);
 		mBackRight.enableBrakeMode(true);
-		ioComm.putBoolean(InputOutputComm.LogTable.kMainLog,"Auto/BrakeMode", true);
+		//ioComm.putBoolean(InputOutputComm.LogTable.kMainLog,"Auto/BrakeMode", true);
 		
 		// set control mode to VBus mode (% pwr) 
 		mFrontLeft.changeControlMode(TalonSRX.TalonControlMode.PercentVbus);
@@ -144,14 +139,14 @@ public class AutoDriveAssembly {
 		
 	}
 
-	private void configureMotorsMagic() 
+	private static void configureMotorsMagic() 
 	{		
 		// for auto - brake mode enabled
 	    mFrontLeft.enableBrakeMode(false);
 		mFrontRight.enableBrakeMode(false);
 		mBackLeft.enableBrakeMode(false);
 		mBackRight.enableBrakeMode(false);
-		ioComm.putBoolean(InputOutputComm.LogTable.kMainLog,"Auto/BrakeMode", false);
+		//ioComm.putBoolean(InputOutputComm.LogTable.kMainLog,"Auto/BrakeMode", false);
 		
         // configure left and right front motors for magic motion (closed-loop position control)
 		mFrontRight.changeControlMode(TalonSRX.TalonControlMode.MotionMagic);
@@ -167,31 +162,31 @@ public class AutoDriveAssembly {
         
 	}
 
-	public void resetPos()
+	public static void resetPos()
 	{		
 		// reset front left and right encoder pulses to zero
 		mFrontLeft.setPosition(0);
 		mFrontRight.setPosition(0);
 	}	 	        
 
-	public double getDistanceInches() {
+	public static double getDistanceInches() {
 		
 		// query encoder for pulses so far
 		double rightPos = mFrontRight.getPosition() * INCHES_PER_REV;
 		double leftPos = mFrontLeft.getPosition() * INCHES_PER_REV;
 				
 		String posStr = String.format("%.2f", rightPos);
-		ioComm.putString(InputOutputComm.LogTable.kMainLog,"Auto/EncoderRight", posStr);
+		//ioComm.putString(InputOutputComm.LogTable.kMainLog,"Auto/EncoderRight", posStr);
 		posStr = String.format("%.2f", leftPos);
-		ioComm.putString(InputOutputComm.LogTable.kMainLog,"Auto/EncoderLeft", posStr);
+		//ioComm.putString(InputOutputComm.LogTable.kMainLog,"Auto/EncoderLeft", posStr);
 		
 		return rightPos;
 	}
 	
-	public void autoInit(boolean resetGyro, double headingDeg, boolean magicMotion) {
+	public static void autoInit(boolean resetGyro, double headingDeg, boolean magicMotion) {
 				
 		if (resetGyro) {
-			navX.reset();
+			NavXSensor.reset();
 			initialAngle = 0.0;
 		}
 		else
@@ -209,10 +204,10 @@ public class AutoDriveAssembly {
 		resetPos();
    	}
 					
-	public void autoGyroStraight(double speed) {
+	public static void autoGyroStraight(double speed) {
 		// autonomous operation of drive straight - uses gyro
 		
-		double gyroAngle = navX.getAngle();
+		double gyroAngle = NavXSensor.getAngle();
 		
 		// subtract the initial angle offset, if any
 		gyroAngle -= initialAngle;
@@ -227,7 +222,7 @@ public class AutoDriveAssembly {
 		drive(leftSpeed, rightSpeed, 0.0);		 
 	}
 	
-	public void autoMagicStraight(double targetPosRevs, int speedRpm) {
+	public static void autoMagicStraight(double targetPosRevs, int speedRpm) {
 		
         // left front drive straight - uses motion magic
 		mFrontLeft.setMotionMagicCruiseVelocity(speedRpm);
@@ -242,7 +237,7 @@ public class AutoDriveAssembly {
 		// left and right back motors are following front motors
 	}
 	
-	public void autoMagicTurn(double targetPosRevsLeft, double targetPosRevsRight, int speedRpm) {
+	public static void autoMagicTurn(double targetPosRevsLeft, double targetPosRevsRight, int speedRpm) {
 		
         // left front drive straight - uses motion magic
 		mFrontLeft.setMotionMagicCruiseVelocity(speedRpm);
@@ -257,41 +252,41 @@ public class AutoDriveAssembly {
 		// left and right back motors are following front motors
 	}
 	
-	public void autoStop() {
+	public static void autoStop() {
 		resetMotors();
 	}
 	
 	// auto PID turn methods
-	public void autoPidTurnStart(double angleDeg, double speed) {
+	public static void autoPidTurnStart(double angleDeg, double speed) {
 		resetMotors();
-		turnCtrl.setAngle(angleDeg, speed);
-		turnCtrl.enable();
+		TurnController.setAngle(angleDeg, speed);
+		TurnController.enable();
 	}
 	
-	public void autoPidTurnProcess() {
-		double leftValue = turnCtrl.getLeft();
-		double rightValue = turnCtrl.getRight();
+	public static void autoPidTurnProcess() {
+		double leftValue = TurnController.getLeft();
+		double rightValue = TurnController.getRight();
 		drive(leftValue,rightValue,0.0);
 	}
 	
-	public void autoPidTurnStop() {
-		turnCtrl.disable();
+	public static void autoPidTurnStop() {
+		TurnController.disable();
 		resetMotors();
 	}
 		
-	public void teleopInit() {
+	public static void teleopInit() {
 	}
 	
-	public void teleopPeriodic() {	
+	public static void teleopPeriodic() {	
 	}
 	
-	public void disabledInit( )  {
+	public static void disabledInit( )  {
 		resetMotors();
 	}
 	
 	// CORE DRIVE METHOD
 	// Assumes parameters are PercentVbus (0.0 to 1.0)
-	public void drive(double leftValue, double rightValue, double strafe) {
+	public static void drive(double leftValue, double rightValue, double strafe) {
 		
 		double rightMotorPolarity = -1.0;  // right motor is inverted 
 		double leftMotorPolarity = 1.0;    // left motor is not inverted
@@ -300,7 +295,7 @@ public class AutoDriveAssembly {
 		String rightSpeedStr = String.format("%.2f", rightValue);
 		String myString2 = new String("leftSpeed = " + leftSpeedStr + " rightSpeed = " + rightSpeedStr);
 		//System.out.println(myString2);
-		ioComm.putString(InputOutputComm.LogTable.kMainLog,"Auto/AutoDrive", myString2);
+		//ioComm.putString(InputOutputComm.LogTable.kMainLog,"Auto/AutoDrive", myString2);
 
 		// set motor values directly
 		mFrontLeft.set(leftMotorPolarity*leftValue);
@@ -309,37 +304,37 @@ public class AutoDriveAssembly {
 		mBackRight.set(rightMotorPolarity*rightValue);
 	}
 	
-	public void driveDirection(double angle, double speed) {
-		double gyroAngle = navX.getAngle();	
+	public static void driveDirection(double angle, double speed) {
+		double gyroAngle = NavXSensor.getAngle();	
 		double driveAngle = (angle-gyroAngle)*GYRO_CORRECT_COEFF;
 		drive(driveAngle+speed, -driveAngle+speed, 0);
 	}
 	
-	public void turnToDirection(double angle, double power) {
-		double gyroAngle = navX.getAngle();
+	public static void turnToDirection(double angle, double power) {
+		double gyroAngle = NavXSensor.getAngle();
 		double driveAngle = (angle-gyroAngle)*(1/360)*power;
 		drive(driveAngle, -driveAngle, 0);
 	}
 	
-	public void driveForward(double forwardVel) {
+	public static void driveForward(double forwardVel) {
 		drive(forwardVel, forwardVel, 0);
 	}
 	
-	public void rotate(double angularVel) {
+	public static void rotate(double angularVel) {
 		drive(angularVel, -angularVel, 0);
 	}
 	
-	public void driveVelocity(double forwardVel, double angularVel) {
+	public static void driveVelocity(double forwardVel, double angularVel) {
 		drive((forwardVel+angularVel)/2.0,(forwardVel-angularVel)/2.0,0);
 	}
 		
 	//Turn methods
 	//===================================================
-	public void rotateLeft(double speed) {		
+	public static void rotateLeft(double speed) {		
 		drive(-speed, speed, 0);
 	}
 
-	public void rotateRight(double speed) {
+	public static void rotateRight(double speed) {
 		drive(speed, -speed, 0);
 	}
 }

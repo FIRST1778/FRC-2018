@@ -34,12 +34,12 @@ public class DriveTowardTargetAction extends Action {
 		this.speedX = speedX;
 		this.speedY = speedY;
 
-		autoDrive = AutoDriveAssembly.GetInstance();
-		rpiComm = RPIComm.GetInstance();
-		ioComm = InputOutputComm.GetInstance();
+		AutoDriveAssembly.initialize();
+		RPIComm.initialize();
+		InputOutputComm.initialize();
 		
 		// set the desired target X and Y
-		rpiComm.setDesired(desiredX, desiredY, threshX, threshY, speedX, speedY);
+		RPIComm.setDesired(desiredX, desiredY, threshX, threshY, speedX, speedY);
 	}
 	
 	public DriveTowardTargetAction(String name, double speedX, double speedY, double desiredX, double desiredY)
@@ -52,19 +52,19 @@ public class DriveTowardTargetAction extends Action {
 		this.speedX = speedX;
 		this.speedY = speedY;
 				
-		autoDrive = AutoDriveAssembly.GetInstance();
-		rpiComm = RPIComm.GetInstance();
-		ioComm = InputOutputComm.GetInstance();
+		AutoDriveAssembly.initialize();
+		RPIComm.initialize();
+		InputOutputComm.initialize();
 	}
 	
 	// action entry
 	public void initialize() {
 						
 		// reset the RPI vision object
-		rpiComm.autoInit();
+		RPIComm.autoInit();
 		
 		// set the desired target X and Y
-		rpiComm.setDesired(desiredX, desiredY, threshX, threshY, speedX, speedY);
+		RPIComm.setDesired(desiredX, desiredY, threshX, threshY, speedX, speedY);
 		
 		super.initialize();
 	}
@@ -73,12 +73,12 @@ public class DriveTowardTargetAction extends Action {
 	public void process()  {
 		
 		// do some drivey stuff
-		rpiComm.updateValues();
+		RPIComm.updateValues();
 		
 		double leftSpeed = speedY;
 		double rightSpeed = speedY;
 		
-		if (rpiComm.hasTarget()) {
+		if (RPIComm.hasTarget()) {
 			
 			// target found!  process and retrieve deltaX from desired location		
 			double deltaX = rpiComm.getDeltaX();
@@ -89,9 +89,9 @@ public class DriveTowardTargetAction extends Action {
 				driveIncrement = Math.copySign(TURN_SPEED, deltaX);
 
 			// log data
-			ioComm.putBoolean(InputOutputComm.LogTable.kMainLog,"Auto/hasTarget", true);		
-			ioComm.putDouble(InputOutputComm.LogTable.kMainLog,"Auto/desiredX", desiredX);		
-			ioComm.putDouble(InputOutputComm.LogTable.kMainLog,"Auto/deltaX", deltaX);		
+			InputOutputComm.putBoolean(InputOutputComm.LogTable.kMainLog,"Auto/hasTarget", true);		
+			InputOutputComm.putDouble(InputOutputComm.LogTable.kMainLog,"Auto/desiredX", desiredX);		
+			InputOutputComm.putDouble(InputOutputComm.LogTable.kMainLog,"Auto/deltaX", deltaX);		
 			
 			// calculate adjustment for drive toward target
 			leftSpeed += driveIncrement;		
@@ -100,11 +100,11 @@ public class DriveTowardTargetAction extends Action {
 		}
 		else {
 			// no target found - log it
-			ioComm.putBoolean(InputOutputComm.LogTable.kMainLog,"Auto/hasTarget", false);		
+			InputOutputComm.putBoolean(InputOutputComm.LogTable.kMainLog,"Auto/hasTarget", false);		
 		}
 		
 		// send drive speeds to motors
-		autoDrive.drive(leftSpeed, rightSpeed, 0);
+		AutoDriveAssembly.drive(leftSpeed, rightSpeed, 0);
 						
 		super.process();
 	}
@@ -113,7 +113,7 @@ public class DriveTowardTargetAction extends Action {
 	public void cleanup() {
 		// do some drivey cleanup
 					
-		autoDrive.autoStop();
+		AutoDriveAssembly.autoStop();
 		
 		// cleanup base class
 		super.cleanup();

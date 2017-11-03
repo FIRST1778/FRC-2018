@@ -27,14 +27,6 @@ public class Robot extends IterativeRobot {
 	SendableChooser<String> chooser = new SendableChooser<>();
 
 	protected AutoStateMachine autoSM;
-	protected RPIComm rpiComm;
-	protected InputOutputComm ioComm;
-	protected AutoDriveAssembly autoDrive;
-	protected FreezyDriveTrain freezyDrive;
-	protected BallManagement ballCtrl;
-	protected CameraControl camCtrl;
-	protected ClimberAssembly climber;
-	protected NavXSensor navX;
 
 	/**
 	 * This function is run when the robot is first started up and should be
@@ -46,17 +38,18 @@ public class Robot extends IterativeRobot {
 		chooser.addObject("My Auto", customAuto);
 		SmartDashboard.putData("Auto choices", chooser);
 		
-		rpiComm = RPIComm.GetInstance();
-		ioComm = InputOutputComm.GetInstance();
-		autoDrive = AutoDriveAssembly.GetInstance();
-		freezyDrive = FreezyDriveTrain.GetInstance();
-		ballCtrl = BallManagement.GetInstance();
-		camCtrl = CameraControl.GetInstance();
-		climber = ClimberAssembly.GetInstance();
+		RPIComm.initialize();
+		InputOutputComm.initialize();
+		AutoDriveAssembly.initialize();
+		FreezyDriveTrain.initialize();
+		BallManagement.initialize();
+		CameraControl.initialize();
+		ClimberAssembly.initialize();
+		NavXSensor.initialize();
 		
 		autoSM = new AutoStateMachine();
 		
-    	ioComm.putString(InputOutputComm.LogTable.kMainLog,"MainLog","robot initialized...");        
+    	//ioComm.putString(InputOutputComm.LogTable.kMainLog,"MainLog","robot initialized...");        
 
 	}
 
@@ -78,11 +71,11 @@ public class Robot extends IterativeRobot {
 		// defaultAuto);
 		System.out.println("Auto selected: " + autoSelected);
 
-    	ioComm.putString(InputOutputComm.LogTable.kMainLog,"MainLog","autonomous mode...");
-    	autoDrive.autoInit(true, 0.0, false);
-    	rpiComm.autoInit();
-    	camCtrl.autoInit();
-    	ballCtrl.autoInit();
+    	RPIComm.autoInit();
+    	InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"MainLog","autonomous mode...");
+    	AutoDriveAssembly.autoInit(true, 0.0, false);
+    	CameraControl.autoInit();
+    	BallManagement.autoInit();
     	
     	autoSM.start();
 
@@ -93,24 +86,24 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void autonomousPeriodic() {
-    	rpiComm.updateValues();
+    	RPIComm.updateValues();
     	
     	autoSM.process();
  
     	// debug only
-    	autoDrive.getDistanceInches();
+    	AutoDriveAssembly.getDistanceInches();
     	getGyroAngle();
    	
 	}
 
 	public void teleopInit() {
-    	ioComm.putString(InputOutputComm.LogTable.kMainLog,"MainLog","teleop mode...");
-
-    	rpiComm.teleopInit();
-    	ballCtrl.teleopInit();  	
-    	freezyDrive.teleopInit();	
-    	camCtrl.teleopInit();
-    	climber.teleopInit();
+    	InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"MainLog","teleop mode...");
+    	RPIComm.teleopInit();
+    	
+		BallManagement.teleopInit();  	
+    	FreezyDriveTrain.teleopInit();	
+    	CameraControl.teleopInit();
+    	ClimberAssembly.teleopInit();
 		
 	}
 	
@@ -119,11 +112,12 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void teleopPeriodic() {
-    	rpiComm.updateValues();  
-        ballCtrl.teleopPeriodic();	
-        freezyDrive.teleopPeriodic();   
-        camCtrl.teleopPeriodic();
-        climber.teleopPeriodic();
+    	RPIComm.updateValues();  
+		
+        FreezyDriveTrain.teleopPeriodic();   
+        BallManagement.teleopPeriodic();	
+        CameraControl.teleopPeriodic();
+        ClimberAssembly.teleopPeriodic();
 	}
 	
     /**
@@ -132,25 +126,26 @@ public class Robot extends IterativeRobot {
     
 	private double getGyroAngle() {
 		//double gyroAngle = 0.0;
-		//double gyroAngle = navX.getYaw();  // -180 deg to +180 deg
-		double gyroAngle = navX.getAngle();  // continuous angle (can be larger than 360 deg)
+		//double gyroAngle = NavXSensor.getYaw();  // -180 deg to +180 deg
+		double gyroAngle = NavXSensor.getAngle();  // continuous angle (can be larger than 360 deg)
 		
 		//System.out.println("getGyroAngle:  Gyro angle = " + gyroAngle);
 			
 		// send output data for test & debug
-	    ioComm.putBoolean(InputOutputComm.LogTable.kMainLog,"Auto/IMU_Connected",navX.isConnected());
-	    ioComm.putBoolean(InputOutputComm.LogTable.kMainLog,"Auto/IMU_Calibrating",navX.isCalibrating());
+	    //InputOutputComm.putBoolean(InputOutputComm.LogTable.kMainLog,"Auto/IMU_Connected",navX.isConnected());
+	    //InputOutputComm.putBoolean(InputOutputComm.LogTable.kMainLog,"Auto/IMU_Calibrating",navX.isCalibrating());
 
 		//System.out.println("gyroAngle = " + gyroAngle);
-	    ioComm.putDouble(InputOutputComm.LogTable.kMainLog,"Auto/GyroAngle", gyroAngle);		
+	    InputOutputComm.putDouble(InputOutputComm.LogTable.kMainLog,"Auto/GyroAngle", gyroAngle);		
 
 		return gyroAngle;
 	}
 	
     public void disabledInit() {
-    	autoDrive.disabledInit();
-    	ballCtrl.resetMotors();
-    	rpiComm.disabledInit();
+    	AutoDriveAssembly.disabledInit();
+    	
+    	BallManagement.resetMotors();
+    	RPIComm.disabledInit();
     }
 
 	/**

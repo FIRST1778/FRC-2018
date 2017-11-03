@@ -5,23 +5,22 @@ import Systems.BallManagement;
 public class ShootAction extends Action {
 
 	private int shooterStrength;
-	private BallManagement ballCtrl;
 	
 	public ShootAction() {
 		this.name = "<Shoot Action>";
 		shooterStrength = BallManagement.MOTOR_MEDIUM;
-		ballCtrl = BallManagement.GetInstance();
+		BallManagement.initialize();
 	}
 	
 	public ShootAction(String name, int shootStrength) {
 		this.name = name;
 		this.shooterStrength = shootStrength;
-		ballCtrl = BallManagement.GetInstance();
+		BallManagement.initialize();
 	}
 	
 	// action entry
 	public void initialize() {
-		ballCtrl.setShooterStrength(shooterStrength);
+		BallManagement.setShooterStrength(shooterStrength);
 		
 		super.initialize();
 	}
@@ -32,7 +31,7 @@ public class ShootAction extends Action {
 	}
 	
 	public void cleanup() {
-		ballCtrl.resetMotors();
+		BallManagement.resetMotors();
 		
 		super.cleanup();
 	}

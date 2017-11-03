@@ -5,10 +5,12 @@ import com.ctre.phoenix.MotorControl.CAN.TalonSRX;
 
 public class FreezyDriveTrain {
 	
-    // singleton class elements (ensures only one instance of this class)
-	private static final FreezyDriveTrain instance = new FreezyDriveTrain();
-    
-	private FreezyDriveTrain() {
+	private static boolean initialized = false;
+	
+	public static void initialize() {
+		if (initialized)
+			return;
+		
 		motorFrontL = new TalonSRX(LEFT_FRONT_TALON_ID);
 		motorFrontR = new TalonSRX(RIGHT_FRONT_TALON_ID);
 		motorRearL = new TalonSRX(LEFT_REAR_TALON_ID);
@@ -17,12 +19,10 @@ public class FreezyDriveTrain {
 		driveControl = new DriveControl();
 		
 		Controller.initialize();
-	}
 		
-	public static FreezyDriveTrain GetInstance() {
-		return instance;
+		initialized = true;
 	}
-	
+			
 	// TalonSRX IDs
 	private static final int LEFT_FRONT_TALON_ID = 3;
 	private static final int LEFT_REAR_TALON_ID = 7;
@@ -30,25 +30,25 @@ public class FreezyDriveTrain {
 	private static final int RIGHT_REAR_TALON_ID = 4;
 
 	// Initalizing TalonSRXs
-	private TalonSRX motorFrontL,motorFrontR;
-	private TalonSRX motorRearL,motorRearR;
+	private static TalonSRX motorFrontL,motorFrontR;
+	private static TalonSRX motorRearL,motorRearR;
 
-	private DriveControl driveControl;
+	private static DriveControl driveControl;
 		
 	// call to change the power given to the motor
-	public void ChangeSpeed(double powerL,double powerR){
+	public static void ChangeSpeed(double powerL,double powerR){
 		motorFrontL.set(powerL);
 		motorRearL.set(powerL);
 		motorFrontR.set(powerR);
 		motorRearR.set(powerR);
 	}
 	
-	public void teleopInit()
+	public static void teleopInit()
 	{
 		
 	}
 	
-	public void teleopPeriodic()
+	public static void teleopPeriodic()
 	{
     	// drive command for all controllers
    	 	driveControl.calculateDrive(Controller.Driver_Throttle(), Controller.Driver_Steering(),

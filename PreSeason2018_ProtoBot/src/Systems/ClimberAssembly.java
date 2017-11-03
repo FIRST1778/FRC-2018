@@ -10,12 +10,14 @@ import edu.wpi.first.wpilibj.Spark;
 
 public class ClimberAssembly {
 	
-    // singleton class elements (ensures only one instance of this class)
-	private static final ClimberAssembly instance = new ClimberAssembly();
-    
-	private ClimberAssembly() {
+	private static boolean initialized = false;
+	
+	public static void initialize() {
 		
-		ioComm = InputOutputComm.GetInstance();
+		if (initialized)
+			return;
+		
+		InputOutputComm.initialize();
 		
 		climberMotor = new TalonSRX(HardwareIDs.CLIMBER_TALON_ID);
 		
@@ -23,12 +25,10 @@ public class ClimberAssembly {
 		//climberMotor = new Spark(HardwareIDs.PROTOBOT_PWM_ID);
 				
 		gamepad = new Joystick(HardwareIDs.GAMEPAD_ID);
-	}
 		
-	public static ClimberAssembly GetInstance() {
-		return instance;
+		initialized = true;
 	}
-	
+			
 	private static final double CLIMBER_MOTOR_DEAD_ZONE = 0.1;
 
 	// apply speed conversion factor from joystick to motor
@@ -36,21 +36,20 @@ public class ClimberAssembly {
 	private static final double CLIMB_MOTOR_FACTOR = 1.0;
 	
 	// COMPETITION BOT climber
-	private InputOutputComm ioComm;
-	private TalonSRX climberMotor;
+	private static TalonSRX climberMotor;
 	
 	//******* DEBUG climber only (PROTOBOT)******
 	//private static Spark climberMotor;
 	//*******************************************
 	
-	private Joystick gamepad;
-	private double currentClimbValue = 0.0;
+	private static Joystick gamepad;
+	private static double currentClimbValue = 0.0;
 				
-	public void teleopInit() {
+	public static void teleopInit() {
 		currentClimbValue = 0.0;
 	}
 	
-	public void teleopPeriodic() {
+	public static void teleopPeriodic() {
 
 		double newClimbValue = gamepad.getRawAxis(HardwareIDs.CLIMBER_MOTOR_AXIS);
 		
@@ -69,6 +68,6 @@ public class ClimberAssembly {
 		climberMotor.set(newClimbValue);
 		
 		String climbValueStr = String.format("%.2f", newClimbValue);
-		ioComm.putString(InputOutputComm.LogTable.kMainLog,"Climber/speed", climbValueStr);
+		InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"Climber/speed", climbValueStr);
 	}
 }

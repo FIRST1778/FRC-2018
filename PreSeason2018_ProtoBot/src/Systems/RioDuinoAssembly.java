@@ -6,35 +6,36 @@ import edu.wpi.first.wpilibj.I2C;
 
 public class RioDuinoAssembly {
 	
-    // singleton class elements (ensures only one instance of this class)
-	private static final RioDuinoAssembly instance = new RioDuinoAssembly();
-    
-	private RioDuinoAssembly() {
+	private static boolean initialized = false;
+	
+	public static void initialize() {
+		
+		if (initialized)
+			return;
+		
 		i2cBus = new I2C(I2C.Port.kMXP, 4);	
 		
 		setTeamColor();
+		
+		initialized = true;
 	}
 		
-	public static RioDuinoAssembly GetInstance() {
-		return instance;
-	}
-
 	public static enum Color { Black, Red, Blue, Yellow, Orange, Green, Purple, Grey};
 	
 	// particulars about the team number and color
-	private DriverStation.Alliance dsTeamColor;
-	private int dsTeamLocation;
+	private static DriverStation.Alliance dsTeamColor;
+	private static int dsTeamLocation;
 
-	private Color teamColor;
+	private static Color teamColor;
 
-	private I2C i2cBus;
+	private static I2C i2cBus;
 		
-	public void setTeamColor(Color col) {
+	public static void setTeamColor(Color col) {
 		teamColor = col;
 		sendColor(teamColor);
 	}
 	
-	public void setTeamColor() {
+	public static void setTeamColor() {
 		dsTeamColor = DriverStation.getInstance().getAlliance();
 		dsTeamLocation = DriverStation.getInstance().getLocation();
 
@@ -46,32 +47,32 @@ public class RioDuinoAssembly {
 		 sendTeamColor(teamColor);
 	}
 		
-	public void autonomousInit() {
+	public static void autonomousInit() {
 	
 		setTeamColor();
 		//SendString("colorGreen");
 		SendString("autoInit");
 	}
 	
-	public void teleopInit() {
+	public static void teleopInit() {
 		
 		setTeamColor();
 		//SendString("colorGreen");
 		SendString("teleopInit");
 	}
 	
-	public void testInit() {
+	public static void testInit() {
 
 		setTeamColor();		
 		//SendString("colorOrange");		
 		SendString("testInit");
 	}
 	
-	public void disabledInit() {		
+	public static void disabledInit() {		
 		SendString("disabledInit");
 	}
 		
-	public void sendColor(Color col)
+	public static void sendColor(Color col)
 	{
 		switch (col) {
 		case Red:
@@ -99,7 +100,7 @@ public class RioDuinoAssembly {
 		}
 	}
 	
-	private void sendTeamColor(Color col)
+	private static void sendTeamColor(Color col)
 	{
 		switch (col) {
 		case Red:
@@ -112,12 +113,12 @@ public class RioDuinoAssembly {
 		}
 	}
 	
-	public void SendStateChange(char state)
+	public static void SendStateChange(char state)
 	{		
 		i2cBus.write(0x02, state);
 	}
 	
-	public void SendString(String writeStr)
+	public static void SendString(String writeStr)
 	{
 				
 		char[] CharArray = writeStr.toCharArray();

@@ -9,28 +9,26 @@ public class UltrasonicEvent extends Event {
 		
 	private String name;
 	private double desiredRangeInches;
-	private UltrasonicSensor ultra;
-	private InputOutputComm ioComm;
 	
 	public UltrasonicEvent()
 	{	
 		this.name = "<Ultrasonic Event>";
 		this.desiredRangeInches = 0.0;
-		ioComm = InputOutputComm.GetInstance();
+		InputOutputComm.initialize();
 	}
 	
 	public UltrasonicEvent(double rangeInches)
 	{
 		this.name = "<Ultrasonic Event>";
 		this.desiredRangeInches = rangeInches;
-		ioComm = InputOutputComm.GetInstance();
+		InputOutputComm.initialize();
 	}
 	
 	// overloaded initialize method
 	public void initialize()
 	{
 		//System.out.println("UltrasonicEvent initialized!");
-		ultra = UltrasonicSensor.GetInstance();
+		UltrasonicSensor.initialize();
 		
 		super.initialize();
 	}
@@ -42,12 +40,12 @@ public class UltrasonicEvent extends Event {
 	
 	public double getRange() {
 		
-		double currentRangeInches = ultra.getRange();
+		double currentRangeInches = UltrasonicSensor.getRange();
 		
 		String rangeStr = String.format("%.2f", currentRangeInches);
 	    String myString = new String("currentRangeInches = " + rangeStr);
 		//System.out.println(myString);
-		ioComm.putString(InputOutputComm.LogTable.kMainLog,"Auto/CurrentRange", myString);		
+	    InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"Auto/CurrentRange", myString);		
 		
 		return currentRangeInches;
 	}

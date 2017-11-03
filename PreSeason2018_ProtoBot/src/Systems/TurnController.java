@@ -9,12 +9,15 @@ import edu.wpi.first.wpilibj.PIDOutput;
 
 public class TurnController {
 
-    // singleton class elements (ensures only one instance of this class)
-	private static final TurnController instance = new TurnController();
+    private static boolean initialized = false;
     
-	private TurnController() {
-		navX = NavXSensor.GetInstance();	
-		ahrs = navX.getAHRS();
+	public static void initialize() {
+		
+		if (initialized)
+			return;
+		
+		NavXSensor.initialize();	
+		ahrs = NavXSensor.getAHRS();
 		
 		pidOut = new TurnOutput();
 
@@ -24,15 +27,12 @@ public class TurnController {
 		pidCtrl.setOutputRange(-maxSpeed, maxSpeed);
 		//pidCtrl.setAbsoluteTolerance(0.5);
 		pidCtrl.setContinuous(true);
-	}
 		
-	public static TurnController GetInstance() {
-		return instance;
+		initialized = true;
 	}
-	
+			
 	// instance data and methods
-	private NavXSensor navX;
-	private PIDController pidCtrl;
+	private static PIDController pidCtrl;
 	
 	// comp.bot - tuned 7/20/2017
 	private static final double kP = 0.075;
@@ -48,47 +48,47 @@ public class TurnController {
 	
 	private static final double maxSpeed = 0.5;
 	
-	private double angleTargetDeg = 0.0;	
-	private TurnOutput pidOut;
-	private AHRS ahrs;
+	private static double angleTargetDeg = 0.0;	
+	private static TurnOutput pidOut;
+	private static AHRS ahrs;
 	
-	public void setAngle(double angleDeg) {
+	public static void setAngle(double angleDeg) {
 		
 		angleTargetDeg = angleDeg;
 		pidCtrl.setOutputRange(-maxSpeed, maxSpeed);
 		pidCtrl.setSetpoint(angleTargetDeg);
 	}
 
-	public void setAngle(double angleDeg, double speed) {
+	public static void setAngle(double angleDeg, double speed) {
 		
 		angleTargetDeg = angleDeg;
 		pidCtrl.setOutputRange(-speed, speed);
 		pidCtrl.setSetpoint(angleTargetDeg);
 	}
 	
-	public void reset() {
+	public static void reset() {
 		disable();
-		navX.reset();
+		NavXSensor.reset();
 		angleTargetDeg = 0.0;
 	}
 	
-	public void enable() {
+	public static void enable() {
 		pidCtrl.enable();
 	}
 	
-	public void disable() {
+	public static void disable() {
 		pidCtrl.disable();
 	}
 	
-	public double getLeft() {
+	public static double getLeft() {
 		return pidOut.getValue();
 	}
 	
-	public double getRight() {
+	public static double getRight() {
 		return -pidOut.getValue();
 	}
 	
-	public class TurnOutput implements PIDOutput {
+	public static class TurnOutput implements PIDOutput {
 		private double myOutput = 0.0;
 		
 		public double getValue() {

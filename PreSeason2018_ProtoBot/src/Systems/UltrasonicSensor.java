@@ -10,26 +10,26 @@ import Utility.HardwareIDs;
 
 public class UltrasonicSensor {
 		
-    // singleton class elements (ensures only one instance of this class)
-	private static final UltrasonicSensor instance = new UltrasonicSensor();
-    
-	private UltrasonicSensor() {
+	private static boolean initialized = false;
+	
+	public static void initialize() {
+		if (initialized)
+			return;
+		
 		ultrasonicDevice = new Ultrasonic(HardwareIDs.TRIGGER_CHANNEL_ID,HardwareIDs.ECHO_CHANNEL_ID);
 		ultrasonicDevice.setAutomaticMode(true);
-	}
 		
-	public static UltrasonicSensor GetInstance() {
-		return instance;
+		initialized = true;
 	}
+			
+	private static Ultrasonic ultrasonicDevice;
 	
-	private Ultrasonic ultrasonicDevice;
-	
-	public void autoInit()
+	public static void autoInit()
 	{		
 		ultrasonicDevice.setEnabled(true);
 	}
 	
-	public double getRange() {				
+	public static double getRange() {				
 		return ultrasonicDevice.getRangeInches();
 	}
 }

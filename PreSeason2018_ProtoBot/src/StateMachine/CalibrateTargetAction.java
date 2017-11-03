@@ -10,8 +10,6 @@ public class CalibrateTargetAction extends Action {
 	private double desiredX, desiredY;
 	private double threshX, threshY;
 	private double speedX, speedY;
-	private AutoDriveAssembly autoDrive;
-	private RPIComm rpiComm;
 	
 	public CalibrateTargetAction() {
 		this.name = "<Calibrate Target Action>";	
@@ -22,8 +20,8 @@ public class CalibrateTargetAction extends Action {
 		this.speedX = 0.0;
 		this.speedY = 0.0;
 		
-		autoDrive = AutoDriveAssembly.GetInstance();		
-		rpiComm = RPIComm.GetInstance();
+		AutoDriveAssembly.initialize();		
+		RPIComm.initialize();
 	}
 	
 	public CalibrateTargetAction(String name, double desiredX, double desiredY, double threshX, double threshY, double speedX, double speedY)
@@ -36,20 +34,20 @@ public class CalibrateTargetAction extends Action {
 		this.speedX = speedX;
 		this.speedY = speedY;
 		
-		autoDrive = AutoDriveAssembly.GetInstance();		
-		rpiComm = RPIComm.GetInstance();
+		AutoDriveAssembly.initialize();		
+		RPIComm.initialize();
 	}
 	
 	// action entry
 	public void initialize() {
 		
 		// reset the RPi Vision Table
-		rpiComm.autoInit();
+		RPIComm.autoInit();
 						
 		// set the desired target X and Y
-		rpiComm.setDesired(desiredX, desiredY, threshX, threshY, speedX, speedY);
+		RPIComm.setDesired(desiredX, desiredY, threshX, threshY, speedX, speedY);
 		
-		rpiComm.setMovementModes(true, true);  // forward and lateral movement
+		RPIComm.setMovementModes(true, true);  // forward and lateral movement
 				
 		super.initialize();
 	}
@@ -57,20 +55,20 @@ public class CalibrateTargetAction extends Action {
 	// called periodically
 	public void process()  {
 		
-		rpiComm.updateValues();
+		RPIComm.updateValues();
 		
-		if (rpiComm.hasTarget()) {
+		if (RPIComm.hasTarget()) {
 			
-			rpiComm.targetProcessing();
+			RPIComm.targetProcessing();
 			
-			double leftVal = rpiComm.getLeftDriveValue();
-			double rightVal = rpiComm.getRightDriveValue();
+			double leftVal = RPIComm.getLeftDriveValue();
+			double rightVal = RPIComm.getRightDriveValue();
 			
-			autoDrive.drive(leftVal, rightVal, 0);
+			AutoDriveAssembly.drive(leftVal, rightVal, 0);
 		}
 		else {
 			// no target - stop motors
-			autoDrive.drive(0, 0, 0);
+			AutoDriveAssembly.drive(0, 0, 0);
 		}
 		
 		super.process();
@@ -79,7 +77,7 @@ public class CalibrateTargetAction extends Action {
 	// state cleanup and exit
 	public void cleanup() {
 		// do some calibrate cleanup
-		autoDrive.drive(0, 0, 0);
+		AutoDriveAssembly.drive(0, 0, 0);
 					
 		// cleanup base class
 		super.cleanup();
