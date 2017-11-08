@@ -11,8 +11,7 @@ public class DriveControl {
     private double wheelDeadband = 0.02;
 	
 	public DriveControl()  {
-		InputOutputComm.initialize();
-		FreezyDriveTrain.initialize();
+		
 	}
 	
 	public void calculateDrive(double throttle, double wheel, boolean isQuickTurn){

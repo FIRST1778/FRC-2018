@@ -29,7 +29,7 @@ public class NavXSensor {
 	}
 			
 	// instance data and methods
-	private static AHRS ahrs;
+	private static AHRS ahrs = null;
 	
 	private static double yawOffset = 0.0;
 	
@@ -42,7 +42,7 @@ public class NavXSensor {
 	public static void reset()
 	{
 		System.out.println("NavXSensor::reset called!");
-		
+				
 		if (ahrs != null) 
 		{
 			ahrs.reset();
@@ -98,7 +98,7 @@ public class NavXSensor {
 		
 		if (ahrs != null) {
 			yaw = ahrs.getYaw();	
-		}			
+		}		
 		
 		return yaw;
 		

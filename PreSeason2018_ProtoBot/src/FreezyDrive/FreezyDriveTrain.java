@@ -5,6 +5,17 @@ import com.ctre.phoenix.MotorControl.CAN.TalonSRX;
 
 public class FreezyDriveTrain {
 	
+	// TalonSRX IDs
+	private static final int LEFT_FRONT_TALON_ID = 3;
+	private static final int LEFT_REAR_TALON_ID = 7;
+	private static final int RIGHT_FRONT_TALON_ID = 8;
+	private static final int RIGHT_REAR_TALON_ID = 4;
+
+	// Initalizing TalonSRXs
+	private static TalonSRX motorFrontL,motorFrontR;
+	private static TalonSRX motorRearL,motorRearR;
+
+	private static DriveControl driveControl;
 	private static boolean initialized = false;
 	
 	public static void initialize() {
@@ -23,17 +34,6 @@ public class FreezyDriveTrain {
 		initialized = true;
 	}
 			
-	// TalonSRX IDs
-	private static final int LEFT_FRONT_TALON_ID = 3;
-	private static final int LEFT_REAR_TALON_ID = 7;
-	private static final int RIGHT_FRONT_TALON_ID = 8;
-	private static final int RIGHT_REAR_TALON_ID = 4;
-
-	// Initalizing TalonSRXs
-	private static TalonSRX motorFrontL,motorFrontR;
-	private static TalonSRX motorRearL,motorRearR;
-
-	private static DriveControl driveControl;
 		
 	// call to change the power given to the motor
 	public static void ChangeSpeed(double powerL,double powerR){

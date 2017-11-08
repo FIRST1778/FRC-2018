@@ -40,16 +40,18 @@ public class Robot extends IterativeRobot {
 		
 		RPIComm.initialize();
 		InputOutputComm.initialize();
-		AutoDriveAssembly.initialize();
+
 		FreezyDriveTrain.initialize();
-		BallManagement.initialize();
 		CameraControl.initialize();
+		BallManagement.initialize();
 		ClimberAssembly.initialize();
+		
 		NavXSensor.initialize();
+
+		//autoSM = new AutoStateMachine();
+		//AutoDriveAssembly.initialize();
 		
-		autoSM = new AutoStateMachine();
-		
-    	//ioComm.putString(InputOutputComm.LogTable.kMainLog,"MainLog","robot initialized...");        
+    	InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"MainLog","robot initialized...");        
 
 	}
 
@@ -73,12 +75,13 @@ public class Robot extends IterativeRobot {
 
     	RPIComm.autoInit();
     	InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"MainLog","autonomous mode...");
-    	AutoDriveAssembly.autoInit(true, 0.0, false);
+    	
     	CameraControl.autoInit();
     	BallManagement.autoInit();
     	
-    	autoSM.start();
-
+    	
+    	//autoSM.start();
+    	//AutoDriveAssembly.autoInit(true, 0.0, false);
 	}
 
 	/**
@@ -88,11 +91,11 @@ public class Robot extends IterativeRobot {
 	public void autonomousPeriodic() {
     	RPIComm.updateValues();
     	
-    	autoSM.process();
+    	//autoSM.process();
  
     	// debug only
-    	AutoDriveAssembly.getDistanceInches();
-    	getGyroAngle();
+    	//AutoDriveAssembly.getDistanceInches();
+    	//getGyroAngle();
    	
 	}
 
@@ -100,8 +103,8 @@ public class Robot extends IterativeRobot {
     	InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"MainLog","teleop mode...");
     	RPIComm.teleopInit();
     	
-		BallManagement.teleopInit();  	
     	FreezyDriveTrain.teleopInit();	
+		BallManagement.teleopInit();  	
     	CameraControl.teleopInit();
     	ClimberAssembly.teleopInit();
 		
@@ -142,10 +145,11 @@ public class Robot extends IterativeRobot {
 	}
 	
     public void disabledInit() {
-    	AutoDriveAssembly.disabledInit();
-    	
-    	BallManagement.resetMotors();
     	RPIComm.disabledInit();
+
+    	BallManagement.resetMotors();
+    	//AutoDriveAssembly.disabledInit();
+
     }
 
 	/**
