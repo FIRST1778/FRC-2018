@@ -48,8 +48,8 @@ public class Robot extends IterativeRobot {
 		
 		NavXSensor.initialize();
 
-		//autoSM = new AutoStateMachine();
-		//AutoDriveAssembly.initialize();
+		autoSM = new AutoStateMachine();
+		AutoDriveAssembly.initialize();
 		
     	InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"MainLog","robot initialized...");        
 
@@ -78,10 +78,9 @@ public class Robot extends IterativeRobot {
     	
     	CameraControl.autoInit();
     	BallManagement.autoInit();
-    	
-    	
-    	//autoSM.start();
-    	//AutoDriveAssembly.autoInit(true, 0.0, false);
+    	 	
+    	AutoDriveAssembly.autoInit(true, 0.0, false);
+    	autoSM.start();
 	}
 
 	/**
@@ -91,11 +90,11 @@ public class Robot extends IterativeRobot {
 	public void autonomousPeriodic() {
     	RPIComm.updateValues();
     	
-    	//autoSM.process();
+    	autoSM.process();
  
     	// debug only
-    	//AutoDriveAssembly.getDistanceInches();
-    	//getGyroAngle();
+    	AutoDriveAssembly.getDistanceInches();
+    	getGyroAngle();
    	
 	}
 
@@ -148,7 +147,7 @@ public class Robot extends IterativeRobot {
     	RPIComm.disabledInit();
 
     	BallManagement.resetMotors();
-    	//AutoDriveAssembly.disabledInit();
+    	AutoDriveAssembly.disabledInit();
 
     }
 
