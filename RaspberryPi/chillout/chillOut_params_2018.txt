@@ -1,0 +1,11 @@
+roborio_ipaddr = 10.17.78.52
+minArea = 10
+maxArea = 3000
+minHue = 0
+maxHue = 58
+minSat = 249
+maxSat = 255
+minVal = 12
+maxVal = 47
+dilationFactor = 3
+exposure = 8
