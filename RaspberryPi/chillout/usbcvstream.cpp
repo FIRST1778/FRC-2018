@@ -8,6 +8,9 @@
 #include <cstdio>
 #include <iostream>
 
+#include <networktables/NetworkTable.h>
+#include <networktables/NetworkTableInstance.h>
+
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
@@ -17,6 +20,10 @@
 #include <fcntl.h>
 
 #include "cscore.h"
+
+// image properties
+const int frameWidth = 320;
+const int frameHeight = 240;
 
 // Target 1
 const cv::Point highCenter(160,80);
@@ -36,8 +43,9 @@ const cv::Point lowSize(80,30);
 const cv::Point lowUL(middleCenter.x - (lowSize.x/2), lowCenter.y - (lowSize.y/2));
 const cv::Point lowLR(middleCenter.x + (lowSize.x/2), lowCenter.y + (lowSize.y/2));
 
-// address properties
+// networktable properties
 char roborio_ipaddr[32] = "10.17.78.52";
+std::shared_ptr<nt::NetworkTable> table;
 
 // image filtering properties
 cs::VideoProperty minHueProp, maxHueProp;
@@ -62,11 +70,14 @@ int exposure = 100;
 int desiredExposure = 100;
 bool autoExposureState = true;
 
+cs::VideoProperty manualControlProp;
+bool manualControl = false;
+
 cs::VideoProperty autoModeProp;
 bool autoMode = false;
 
 cs::VideoProperty autoStageProp;
-int autoStage = 1;
+int autoStage = 4;
 
 cs::VideoProperty saveToFileProp;
 bool saveToFile = false;
@@ -147,6 +158,7 @@ void write_param_file()
 void create_web_properties(cs::CvSource cvsource)
 {
 	// add properties controllable by webpage
+	manualControlProp = cvsource.CreateBooleanProperty("Manual_Ctrl",false,false);
 	autoModeProp = cvsource.CreateBooleanProperty("Auto_Mode",false,false);
 	autoStageProp = cvsource.CreateProperty("Auto_Stage",cs::VideoProperty::Kind::kInteger,1,4,1,autoStage,autoStage);
 	minHueProp = cvsource.CreateProperty("Min_Hue",cs::VideoProperty::Kind::kInteger,0,255,1,minHue,minHue);
@@ -156,7 +168,7 @@ void create_web_properties(cs::CvSource cvsource)
 	minValProp = cvsource.CreateProperty("Min_Value",cs::VideoProperty::Kind::kInteger,0,255,1,minVal,minVal);
 	maxValProp = cvsource.CreateProperty("Max_Value",cs::VideoProperty::Kind::kInteger,0,255,1,maxVal,maxVal);
 	dilationProp = cvsource.CreateProperty("Dilation",cs::VideoProperty::Kind::kInteger,1,15,1,dilationFactor,dilationFactor);
-	exposureProp = cvsource.CreateProperty("Exposure",cs::VideoProperty::Kind::kInteger,0,100,1,exposure,exposure);
+	exposureProp = cvsource.CreateProperty("Exposure",cs::VideoProperty::Kind::kInteger,0,300,1,exposure,exposure);
 	minAreaProp = cvsource.CreateProperty("Min_Area",cs::VideoProperty::Kind::kInteger,1,1000,1,minArea,minArea);
 	//maxAreaProp = cvsource.CreateProperty("Max_Area",cs::VideoProperty::Kind::kInteger,1,2000,1,maxArea,maxArea);
 	saveToFileProp = cvsource.CreateBooleanProperty("Save_to_File",false,false);
@@ -165,6 +177,7 @@ void create_web_properties(cs::CvSource cvsource)
 
 void get_values()
 {
+	manualControl = manualControlProp.Get();
 	autoMode = autoModeProp.Get();
 	autoStage = autoStageProp.Get();
 	minHue = minHueProp.Get();
@@ -178,6 +191,19 @@ void get_values()
 	minArea = minAreaProp.Get();
 	//maxArea = maxAreaProp.Get();
 	saveToFile = saveToFileProp.Get();
+}
+
+bool checkAutoState()
+{
+	if (manualControl) 
+	{
+		return autoMode;
+	}
+	else
+	{
+		// check networktable auto state
+		return table->GetEntry("autoCam").GetBoolean(false);
+	}
 }
 
 void autoExposureOn()
@@ -203,12 +229,10 @@ int main() {
   // read in parameter file
   read_param_file();
 	
-  camera.SetVideoMode(cs::VideoMode::kMJPEG, 320, 240, 30);
-  //cs::MjpegServer mjpegServer{"httpserver", 8081};
-  //mjpegServer.SetSource(camera);
+  camera.SetVideoMode(cs::VideoMode::kMJPEG, frameWidth, frameHeight, 30);
   cs::CvSink cvsink{"cvsink"};
   cvsink.SetSource(camera);
-  cs::CvSource cvsource{"cvsource", cs::VideoMode::kMJPEG, 320, 240, 30};
+  cs::CvSource cvsource{"cvsource", cs::VideoMode::kMJPEG, frameWidth, frameHeight, 30};
   cs::MjpegServer cvMjpegServer{"cvhttpserver", 8082};
   cvMjpegServer.SetSource(cvsource);
 
@@ -223,7 +247,18 @@ int main() {
   
   // images for teleop
   cv::Mat overlayImg;
-  
+
+  // reset autoExposure to true 
+  autoExposureOn();
+  autoExposureState = true;
+ 
+	// initialize network table for comm with the robot
+	auto tableInstance = nt::NetworkTableInstance::GetDefault();
+	//tableInstance.SetServer("Roborio-1778-frc.local");  // send data to roborio
+	tableInstance.StartServer();     // debug only - if roborio not present
+	table = tableInstance.GetTable("RPIComm/Data_Table");
+
+  // enter forever streaming loop
   int frameCtr = 0;
   for (;;) {
     uint64_t time = cvsink.GrabFrame(inputImg);
@@ -253,7 +288,7 @@ int main() {
 	get_values();                 
 	  
 	
-    if (autoMode)   // autonomous
+    if (checkAutoState())   // autonomous state check
     {
 		// set autoExposure to false (if not already done)
 		if (autoExposureState == true)
@@ -345,16 +380,34 @@ int main() {
 			cv::drawContours(inputImg, hulls, targetIndex, colorGreen, 2, 8, hierarchy, 0, cv::Point());
 			cv::circle(inputImg, mc[targetIndex], 3 ,colorBlue,2,6,0);
 
+			// write target info to network table
+			table->GetEntry("targets").SetBoolean(true);
+			//table->GetEntry("targetX").SetDouble(mc[targetIndex].x - imageCenterX);
+			//table->GetEntry("targetY").SetDouble(mc[targetIndex].y - imageCenterY);
+			table->GetEntry("targetX").SetDouble(mc[targetIndex].x);
+			table->GetEntry("targetY").SetDouble(mc[targetIndex].y);
+			table->GetEntry("targetArea").SetDouble(targetArea[targetIndex]);
+			table->GetEntry("frameWidth").SetDouble((double)frameWidth);
+			table->GetEntry("frameHeight").SetDouble((double)frameHeight);
+
 			//printf("Target area %3.0f detected at (%3.0f,%3.0f)\n",
 			//	targetArea[targetIndex], mc[targetIndex].x - imageCenterX,
 			//			     mc[targetIndex].y - imageCenterY);
 		}
+		else
+		{
+			// write to network table that no target is detected
+			table->GetEntry("targets").SetBoolean(false);
+		}
+		
 		if (autoStage == 4)
 			cvsource.PutFrame(inputImg);
 
 	}
 	else   // teleop
 	{
+			// reset target field for teleop
+			table->GetEntry("targets").SetBoolean(false);
 		
 		// set autoExposure to true (if not already done)
 		if (autoExposureState == false)

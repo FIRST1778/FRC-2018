@@ -1,11 +1,11 @@
 roborio_ipaddr = 10.17.78.52
 minArea = 10
 maxArea = 3000
-minHue = 0
-maxHue = 58
-minSat = 249
+minHue = 39
+maxHue = 62
+minSat = 144
 maxSat = 255
-minVal = 12
-maxVal = 47
+minVal = 40
+maxVal = 255
 dilationFactor = 3
-exposure = 8
+exposure = 9

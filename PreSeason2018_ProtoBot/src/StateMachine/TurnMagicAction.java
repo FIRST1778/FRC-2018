@@ -6,16 +6,19 @@ import Systems.AutoDriveAssembly;
 import Systems.NavXSensor;
 
 public class TurnMagicAction extends Action {
-	private double leftRevs = 0.0;
-	private double rightRevs = 0.0;
+	//private double leftRevs = 0.0;
+	//private double rightRevs = 0.0;
+	private double leftPosInches = 0.0;
+	private double rightPosInches = 0.0;
 	private int speedToTurn = 0; 	
-	private final double REVS_PER_INCH = 1/(6 * 3.14159);   // assume 6 inch diameter wheels
 			
 	public TurnMagicAction(double leftPosInches, double rightPosInches, int speed)
 	{
 		this.name = "<Turn Magic Action>";
-		this.leftRevs = leftPosInches * REVS_PER_INCH;
-		this.rightRevs = rightPosInches * REVS_PER_INCH;
+		//this.leftRevs = leftPosInches * REVS_PER_INCH;
+		//this.rightRevs = rightPosInches * REVS_PER_INCH;
+		this.leftPosInches = leftPosInches;
+		this.rightPosInches = rightPosInches;
 		this.speedToTurn = speed;
 				
 		AutoDriveAssembly.initialize();
@@ -24,8 +27,10 @@ public class TurnMagicAction extends Action {
 	public TurnMagicAction(String name, double leftPosInches, double rightPosInches, int speed)
 	{
 		this.name =  name;
-		this.leftRevs = leftPosInches * REVS_PER_INCH;
-		this.rightRevs = rightPosInches * REVS_PER_INCH;
+		//this.leftRevs = leftPosInches * REVS_PER_INCH;
+		//this.rightRevs = rightPosInches * REVS_PER_INCH;
+		this.leftPosInches = leftPosInches;
+		this.rightPosInches = rightPosInches;
 		this.speedToTurn = speed;
 		
 		AutoDriveAssembly.initialize();
@@ -36,7 +41,7 @@ public class TurnMagicAction extends Action {
 				
 		// initialize motor assembly for auto - use motion magic (closed loop control targets)
 		AutoDriveAssembly.autoInit(true, 0.0, true);
-		AutoDriveAssembly.autoMagicTurn(leftRevs, rightRevs, speedToTurn);
+		AutoDriveAssembly.autoMagicTurn(leftPosInches, rightPosInches, speedToTurn);
 		
 		super.initialize();
 	}

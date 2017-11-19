@@ -34,7 +34,7 @@ public class AutoDriveAssembly {
         
         // configure left front motor encoder and PID
         mFrontLeft.setFeedbackDevice(FeedbackDevice.QuadEncoder);
-        mFrontLeft.configEncoderCodesPerRev(ENCODER_PULSES_PER_REV);
+        //mFrontLeft.configEncoderCodesPerRev(ENCODER_PULSES_PER_REV);    // deprecated 2018
         mFrontLeft.reverseSensor(LEFT_REVERSE_SENSOR);   // left motor encoder polarity
         mFrontLeft.setProfile(0);
         mFrontLeft.setP(P_COEFF);
@@ -46,7 +46,7 @@ public class AutoDriveAssembly {
         
         // configure right front motor encoder and PID
         mFrontRight.setFeedbackDevice(FeedbackDevice.QuadEncoder);
-        mFrontRight.configEncoderCodesPerRev(ENCODER_PULSES_PER_REV);
+        //mFrontRight.configEncoderCodesPerRev(ENCODER_PULSES_PER_REV);    // deprecated 2018
         mFrontRight.reverseSensor(RIGHT_REVERSE_SENSOR);   // right motor encoder polarity
         mFrontRight.setProfile(0);
         mFrontRight.setP(P_COEFF);
@@ -83,15 +83,25 @@ public class AutoDriveAssembly {
 	public static final boolean RIGHT_REVERSE_SENSOR = false;	// encoder polarity - right
 	public static final boolean LEFT_REVERSE_SENSOR = true;		// encoder polarity - left
 	
-	public static final int ENCODER_PULSES_PER_REV = 256;  // 63R  - on the competition bot front motors
+	//public static final int ENCODER_PULSES_PER_REV = 256;  // 63R  - on the competition bot front motors
+	public static final int ENCODER_PULSES_PER_REV = 256*4;  // 63R  - on the competition bot front motors
 
 	//public static final double INCHES_PER_REV = (6 * 3.14159);   // 6-in diameter wheel (theoretical)
 	public static final double INCHES_PER_REV = (5.9 * 3.14159);   // 5.9-in diameter wheel (worn)
 			
+	public static final double INCHES_PER_ENCODER_PULSE = INCHES_PER_REV/ENCODER_PULSES_PER_REV;
+	public static final double RPM_TO_UNIT_PER_100MS = ENCODER_PULSES_PER_REV/(60*10);
+	
 	// PIDF values - comp.bot version tuned 7/20/2017
-	private static final double P_COEFF = 20.0;
+	//private static final double P_COEFF = 20.0;
+	//private static final double I_COEFF = 0.0;  // Integral not needed for closed loop position control
+	//private static final double D_COEFF = 16.0;
+	//private static final double F_COEFF = 0.0;  // Feedforward not used for closed loop position control
+
+	// PIDF values - proto.bot - tuned 
+	private static final double P_COEFF = 6.0;
 	private static final double I_COEFF = 0.0;  // Integral not needed for closed loop position control
-	private static final double D_COEFF = 16.0;
+	private static final double D_COEFF = 2.0;
 	private static final double F_COEFF = 0.0;  // Feedforward not used for closed loop position control
 		
 	private static void resetMotors()
@@ -176,12 +186,13 @@ public class AutoDriveAssembly {
 
 	public static double getDistanceInches() {
 		
-		// query encoder for pulses so far
+		// query encoder for pulses so far - deprecated in 2018
 		//double rightPos = mFrontRight.getPosition() * INCHES_PER_REV;
 		//double leftPos = mFrontLeft.getPosition() * INCHES_PER_REV;
 		
-		double rightPos = mFrontRight.getPosition() * INCHES_PER_REV/1000;  //??? off by factor of 1000
-		double leftPos = mFrontLeft.getPosition() * INCHES_PER_REV/1000;
+		// Encoders now read only raw encoder values - convert raw to inches directly
+		double rightPos = mFrontRight.getPosition()*INCHES_PER_ENCODER_PULSE;
+		double leftPos = mFrontLeft.getPosition()*INCHES_PER_ENCODER_PULSE;
 				
 		String posStr = String.format("%.2f", rightPos);
 		InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"Auto/EncoderRight", posStr);
@@ -230,32 +241,37 @@ public class AutoDriveAssembly {
 		drive(leftSpeed, rightSpeed, 0.0);		 
 	}
 	
-	public static void autoMagicStraight(double targetPosRevs, int speedRpm) {
+	public static void autoMagicStraight(double targetPosInches, int speedRpm) {
+		
+		int nativeUnitsPer100ms = (int) ((double)speedRpm * RPM_TO_UNIT_PER_100MS);
+		int accelNativeUnits = (int) ((double)150.0 * RPM_TO_UNIT_PER_100MS);
 		
         // left front drive straight - uses motion magic
-		mFrontLeft.setMotionMagicCruiseVelocity(speedRpm);
-		mFrontLeft.setMotionMagicAcceleration(speedRpm);
-		mFrontLeft.set(targetPosRevs);
+		mFrontLeft.setMotionMagicCruiseVelocity(nativeUnitsPer100ms);
+		mFrontLeft.setMotionMagicAcceleration(accelNativeUnits);
+		mFrontLeft.set(targetPosInches/INCHES_PER_ENCODER_PULSE);
 		
         // right front drive straight - uses motion magic
-		mFrontRight.setMotionMagicCruiseVelocity(speedRpm);
-		mFrontRight.setMotionMagicAcceleration(speedRpm);
-		mFrontRight.set(targetPosRevs);	
+		mFrontRight.setMotionMagicCruiseVelocity(nativeUnitsPer100ms);
+		mFrontRight.setMotionMagicAcceleration(accelNativeUnits);
+		mFrontRight.set(targetPosInches/INCHES_PER_ENCODER_PULSE);
 		
 		// left and right back motors are following front motors
 	}
 	
-	public static void autoMagicTurn(double targetPosRevsLeft, double targetPosRevsRight, int speedRpm) {
+	public static void autoMagicTurn(double targetPosInchesLeft, double targetPosInchesRight, int speedRpm) {
+
+		int nativeUnitsPer100ms = (int) ((double)speedRpm * RPM_TO_UNIT_PER_100MS);
 		
         // left front drive straight - uses motion magic
-		mFrontLeft.setMotionMagicCruiseVelocity(speedRpm);
-		mFrontLeft.setMotionMagicAcceleration(speedRpm);
-		mFrontLeft.set(targetPosRevsLeft);
+		mFrontLeft.setMotionMagicCruiseVelocity(nativeUnitsPer100ms);
+		mFrontLeft.setMotionMagicAcceleration(nativeUnitsPer100ms);
+		mFrontLeft.set(targetPosInchesLeft/INCHES_PER_ENCODER_PULSE);
 		
         // right front drive straight - uses motion magic
-		mFrontRight.setMotionMagicCruiseVelocity(speedRpm);
-		mFrontRight.setMotionMagicAcceleration(speedRpm);
-		mFrontRight.set(targetPosRevsRight);	
+		mFrontRight.setMotionMagicCruiseVelocity(nativeUnitsPer100ms);
+		mFrontRight.setMotionMagicAcceleration(nativeUnitsPer100ms);
+		mFrontRight.set(targetPosInchesRight/INCHES_PER_ENCODER_PULSE);
 		
 		// left and right back motors are following front motors
 	}
