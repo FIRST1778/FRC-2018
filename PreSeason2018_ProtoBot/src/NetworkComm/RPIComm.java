@@ -29,10 +29,8 @@ public class RPIComm {
 
 		InputOutputComm.initialize();
 		
-		//table = NetworkTable.getTable("InputOutput1778/DataTable");   // Deprecated in 2018
-		
 		tableInstance = NetworkTableInstance.getDefault();
-		table = tableInstance.getTable("InputOutput1778/DataTable");		
+		table = tableInstance.getTable("RPIComm/Data_Table");		
         
 		table.getEntry("autoCam").setBoolean(false);
 		
@@ -48,7 +46,8 @@ public class RPIComm {
         
 	public static boolean targetCentered = false;
 	
-	public static double numTargets, targetX, targetY, targetArea, targetDistance;
+	public static boolean targetsDetected = false;
+	public static double targetX, targetY, targetArea, targetDistance;
 	private static double desiredX, desiredY;
 	private static double threshX, threshY;
 	private static double speedX, speedY;
@@ -81,7 +80,7 @@ public class RPIComm {
     }
     
     public static void autoInit() {
-    	numTargets = 0;
+    	targetsDetected = false;
     	desiredX = frameWidth/2;
     	desiredY = frameHeight/2;
     	targetX = frameWidth/2;
@@ -96,7 +95,7 @@ public class RPIComm {
     }
     
     public static void teleopInit() {
-    	numTargets = 0;
+    	targetsDetected = false;
     	desiredX = frameWidth/2;
     	desiredY = frameHeight/2;
     	targetX = frameWidth/2;
@@ -131,7 +130,7 @@ public class RPIComm {
 		double defaultDoubleVal = 0.0;
 		
 		// Pull data from grip
-		numTargets = table.getEntry("targets").getDouble(defaultDoubleVal);
+		targetsDetected = table.getEntry("targets").getBoolean(false);
 		targetX = table.getEntry("targetX").getDouble(defaultDoubleVal);
 		targetY = table.getEntry("targetY").getDouble(defaultDoubleVal);
 		targetArea = table.getEntry("targetArea").getDouble(defaultDoubleVal);
@@ -141,7 +140,7 @@ public class RPIComm {
     }
     
     public static void targetProcessing() {
-		if (numTargets > 0) {
+		if (targetsDetected == true) {
 			
 			// Debug only - print out values read from network table
 			//System.out.println("Time_ms= " + System.currentTimeMillis() + " targets = " + numTargets + ", delta = (" + deltaX + ", " + deltaY + ")");
@@ -227,7 +226,7 @@ public class RPIComm {
 	
 	// Returns true if the target is visible, returns false otherwise
 	public static boolean hasTarget() {
-		return (numTargets > 0);
+		return targetsDetected;
 	}
 	
 	public static double getFrameWidth() {
