@@ -195,15 +195,26 @@ void get_values()
 
 bool checkAutoState()
 {
+	// check networktable auto state
+	bool ntAutoState = table->GetEntry("autoCam").GetBoolean(false);
+	
 	if (manualControl) 
 	{
-		return autoMode;
+		// if operating manually, update network table auto state
+		if (ntAutoState != autoMode)
+		{
+			table->GetEntry("autoCam").SetBoolean(autoMode);
+			ntAutoState = autoMode;
+		}
 	}
-	else
+	else 
 	{
-		// check networktable auto state
-		return table->GetEntry("autoCam").GetBoolean(false);
+		// if operating by NT, update autoMode
+		autoMode = ntAutoState;
 	}
+	
+	// return auto state
+	return autoMode;
 }
 
 void autoExposureOn()
@@ -248,15 +259,17 @@ int main() {
   // images for teleop
   cv::Mat overlayImg;
 
-  // reset autoExposure to true 
-  autoExposureOn();
-  autoExposureState = true;
  
 	// initialize network table for comm with the robot
 	auto tableInstance = nt::NetworkTableInstance::GetDefault();
 	//tableInstance.SetServer("Roborio-1778-frc.local");  // send data to roborio
 	tableInstance.StartServer();     // debug only - if roborio not present
 	table = tableInstance.GetTable("RPIComm/Data_Table");
+	
+	//Initial state: set networktable auto state to false and reset autoExposure to true 
+	table->GetEntry("autoCam").SetBoolean(false);
+	autoExposureOn();
+	autoExposureState = true;
 
   // enter forever streaming loop
   int frameCtr = 0;
