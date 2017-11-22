@@ -15,14 +15,7 @@ public class AutoStateMachine {
 		
 	public AutoStateMachine()
 	{
-		try {
-			// initialize the parser utility
-			AutoNetworkBuilder.initialize();
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-		}
-		
+		AutoNetworkBuilder.initialize();	
 		InputOutputComm.initialize();
 		NavXSensor.initialize();
 		

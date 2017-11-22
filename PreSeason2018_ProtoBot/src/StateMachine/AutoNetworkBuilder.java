@@ -1,13 +1,6 @@
 package StateMachine;
 
 import java.util.ArrayList;
-import java.io.BufferedInputStream;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.util.prefs.BackingStoreException;
-import java.util.prefs.Preferences;
-
 import Systems.BallManagement;
 import Systems.CameraControl;
 
@@ -32,20 +25,15 @@ public class AutoNetworkBuilder {
 	private final static double CAL_SPEED_FINE_Y = 0.35;
 	private final static double CAL_SPEED_EXTRAFINE_X = 0.3;
 	private final static double CAL_SPEED_EXTRAFINE_Y = 0.0;
-	
-	private final static String PREF_ROOT = "ChillOutAutonomousNetworks";
-	private static Preferences prefRoot, prefs;
-	
+		
 	private static ArrayList<AutoNetwork> autoNets;
 	
 	private static boolean initialized = false;
 		
-	public static void initialize() throws Exception {
+	public static void initialize() {
 		
 		if (!initialized) {
 			autoNets = null;
-			prefRoot = Preferences.userRoot();
-			prefs = prefRoot.node(PREF_ROOT);
 			
 			initialized = true;
 		}
@@ -53,28 +41,13 @@ public class AutoNetworkBuilder {
 	
 	public static ArrayList<AutoNetwork> readInNetworks() {
 		
-		try {
-			if (!initialized)
-				initialize();
-			}
-		catch (Exception e) {
-			e.printStackTrace();
-		}
+		if (!initialized)
+			initialize();
 		
 		autoNets = new ArrayList<AutoNetwork>();
 			
 		/***** use only when storing the preferences first time *****/
-		
-		// clear current preferences keys from previous runs
-		try {
-			prefs.clear();
-			Preferences node = prefs.node("<Do Nothing Network>");
-			node.removeNode();
-		}
-		catch (BackingStoreException e) {
-			e.printStackTrace();
-		}
-		
+				
 		// create networks
 		autoNets.add(AutoChooser.DO_NOTHING, createDoNothingNetwork());	
 		autoNets.add(AutoChooser.DRIVE_FORWARD, createDriveForward());	
@@ -97,30 +70,10 @@ public class AutoNetworkBuilder {
 
 		//autoNets.add(AutoChooser.DEPOSIT_GEAR_AND_SHOOT_RED_CENTER, createDepositGearAndShootRedCenter());	
 		//autoNets.add(AutoChooser.DEPOSIT_GEAR_AND_SHOOT_BLUE_CENTER, createDepositGearAndShootBlueCenter());	
-	
-		// add the networks to the prefs object
-		int counter = 0;
-		for (AutoNetwork a: autoNets)
-			a.persistWrite(counter++,prefs);		
-				
-		// store networks to file
-	    try {
-	        FileOutputStream fos = new FileOutputStream("/home/lvuser/chillOutAutoNets.xml");
-	        prefs.exportSubtree(fos);
-	        fos.close();
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	    }	   
-		
-		/**** TODO: normal operation - read in preferences file ***/
-		
+			
 		return autoNets;
 	}
-	
-	private void parseSingleNetwork() {
-		
-	}
-		
+			
 	// **** DO NOTHING Network ***** 
 	private static AutoNetwork createDoNothingNetwork() {
 		
