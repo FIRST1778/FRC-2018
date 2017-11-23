@@ -8,6 +8,10 @@
 #include <cstdio>
 #include <iostream>
 
+#include <ctime>
+#include <unistd.h>
+#include <sys/time.h>
+
 #include <networktables/NetworkTable.h>
 #include <networktables/NetworkTableInstance.h>
 
@@ -65,10 +69,15 @@ int maxArea = 3000;
 cs::VideoProperty dilationProp;
 int dilationFactor = 3;
 
-cs::VideoProperty exposureProp;
-int exposure = 100;
-int desiredExposure = 100;
-bool autoExposureState = true;
+cs::VideoProperty autonomousExposureProp;
+int autonomousExposure = 100;
+int desiredAutonomousExposure = 100;
+
+cs::VideoProperty teleopExposureProp;
+int teleopExposure = 100;
+int desiredTeleopExposure = 100;
+
+bool teleopExposureState = true;
 
 cs::VideoProperty manualControlProp;
 bool manualControl = false;
@@ -84,6 +93,11 @@ bool saveToFile = false;
 
 cs::UsbCamera camera{"usbcam", 0};
 
+// FPS vars
+double fps;
+timeval startTimer, endTimer;
+
+// draw overlay graphics on image
 void draw_overlay(cv::Mat& inImg) 
 {
 		
@@ -95,6 +109,18 @@ void draw_overlay(cv::Mat& inImg)
 	cv::rectangle(inImg, highUL, highLR, cv::Scalar(255, 0, 0), 2, 8, 0);					
 	cv::rectangle(inImg,middleUL,middleLR, cv::Scalar(0, 255, 0), 2, 8, 0);					
 	cv::rectangle(inImg,lowUL, lowLR, cv::Scalar(0, 0, 255), 2, 8, 0);					
+
+}
+
+void overlay_fps(cv::Mat& inImg)
+{
+	char str[64];
+	
+	sprintf(str,"Chill Out! 1778 EYE-cicle Vision");
+	cv::putText(inImg,str,cv::Point2f(5,10),cv::FONT_HERSHEY_PLAIN, 0.8, cv::Scalar(255,255,0,255), 1, 8);
+
+	sprintf(str,"%3.1f FPS",fps);
+	cv::putText(inImg,str,cv::Point2f(5,frameHeight-5),cv::FONT_HERSHEY_PLAIN, 0.8, cv::Scalar(0,255,255,255), 1, 8);
 }
 
 void read_param_file()
@@ -113,9 +139,10 @@ void read_param_file()
 		fscanf(parameter_file,"minVal = %d\n",&minVal);
 		fscanf(parameter_file,"maxVal = %d\n",&maxVal);
 		fscanf(parameter_file,"dilationFactor = %d\n",&dilationFactor);
-		fscanf(parameter_file,"exposure = %d\n",&exposure);
-		desiredExposure = exposure;
-		
+		fscanf(parameter_file,"autonomousExposure = %d\n",&autonomousExposure);
+		fscanf(parameter_file,"teleopExposure = %d\n",&teleopExposure);
+		desiredAutonomousExposure = autonomousExposure;
+		desiredTeleopExposure = teleopExposure;
 	}
 	fclose(parameter_file);
 	printf("File read complete.\n");
@@ -130,7 +157,8 @@ void read_param_file()
 	printf("minVal = %d\n",minVal);
 	printf("maxVal = %d\n",maxVal);
 	printf("dilationFactor = %d\n",dilationFactor);
-	printf("exposure = %d\n",exposure);
+	printf("autonomousExposure = %d\n",autonomousExposure);
+	printf("teleopExposure = %d\n",teleopExposure);
 }
 
 void write_param_file()
@@ -149,13 +177,15 @@ void write_param_file()
 		fprintf(parameter_file,"minVal = %d\n",minVal);
 		fprintf(parameter_file,"maxVal = %d\n",maxVal);
 		fprintf(parameter_file,"dilationFactor = %d\n",dilationFactor);
-		fprintf(parameter_file,"exposure = %d\n",exposure);
+		fprintf(parameter_file,"autonomousExposure = %d\n",autonomousExposure);
+		fprintf(parameter_file,"teleopExposure = %d\n",teleopExposure);
 	}
 	fclose(parameter_file);
 	printf("File write complete.\n");	
 }
 
-void create_web_properties(cs::CvSource cvsource)
+// create and link web controls for monitoring
+void create_web_properties(cs::CvSource& cvsource)
 {
 	// add properties controllable by webpage
 	manualControlProp = cvsource.CreateBooleanProperty("Manual_Ctrl",false,false);
@@ -168,13 +198,14 @@ void create_web_properties(cs::CvSource cvsource)
 	minValProp = cvsource.CreateProperty("Min_Value",cs::VideoProperty::Kind::kInteger,0,255,1,minVal,minVal);
 	maxValProp = cvsource.CreateProperty("Max_Value",cs::VideoProperty::Kind::kInteger,0,255,1,maxVal,maxVal);
 	dilationProp = cvsource.CreateProperty("Dilation",cs::VideoProperty::Kind::kInteger,1,15,1,dilationFactor,dilationFactor);
-	exposureProp = cvsource.CreateProperty("Exposure",cs::VideoProperty::Kind::kInteger,0,300,1,exposure,exposure);
+	autonomousExposureProp = cvsource.CreateProperty("Exposure_Auto",cs::VideoProperty::Kind::kInteger,0,150,1,autonomousExposure,autonomousExposure);
+	teleopExposureProp = cvsource.CreateProperty("Exposure_Teleop",cs::VideoProperty::Kind::kInteger,0,150,1,teleopExposure,teleopExposure);
 	minAreaProp = cvsource.CreateProperty("Min_Area",cs::VideoProperty::Kind::kInteger,1,1000,1,minArea,minArea);
 	//maxAreaProp = cvsource.CreateProperty("Max_Area",cs::VideoProperty::Kind::kInteger,1,2000,1,maxArea,maxArea);
 	saveToFileProp = cvsource.CreateBooleanProperty("Save_to_File",false,false);
-
 }
 
+// retrieves values from the webpage
 void get_values()
 {
 	manualControl = manualControlProp.Get();
@@ -187,12 +218,15 @@ void get_values()
 	minVal = minValProp.Get();
 	maxVal = maxValProp.Get();
 	dilationFactor = dilationProp.Get();
-	desiredExposure = exposureProp.Get();
+	desiredAutonomousExposure = autonomousExposureProp.Get();
+	desiredTeleopExposure = teleopExposureProp.Get();
 	minArea = minAreaProp.Get();
 	//maxArea = maxAreaProp.Get();
 	saveToFile = saveToFileProp.Get();
 }
 
+// check whether we are in autonomous or teleop
+// checks either the webpage or networktable for state info
 bool checkAutoState()
 {
 	// check networktable auto state
@@ -217,26 +251,187 @@ bool checkAutoState()
 	return autoMode;
 }
 
-void autoExposureOn()
-{
-	printf("Auto Exposure On.\n");	
-	camera.SetExposureAuto();
-}
-
-void autoExposureOff()
-{
-	printf("Auto Exposure Off.\n");	
-	camera.SetExposureManual(exposure);
-}
-
 void set_exposure(int exposure) 
 {
 	printf("Exposure level set to %d.\n",exposure);	
 	camera.SetExposureManual(exposure);
 }
 
+// autonomous image processing function
+void processAuto(cv::Mat& inputImg, cs::CvSource& cvsource)
+{
+    // interim stage images used for auto
+    cv::Mat hsvImg, binaryImg, dilationImg, contourImg; 
+
+	// set teleopExposureState to false (if not already done)
+	if (teleopExposureState == true)
+	{
+		set_exposure(autonomousExposure);
+		teleopExposureState = false;
+	}
+	
+	// check to see if desired exposure changed
+	if (autonomousExposure != desiredAutonomousExposure)
+	{
+		autonomousExposure = desiredAutonomousExposure;
+		set_exposure(autonomousExposure);
+	}
+	
+	cv::cvtColor( inputImg, hsvImg, CV_BGR2HSV );
+	cv::inRange(hsvImg, cv::Scalar(minHue, minSat, minVal), cv::Scalar(maxHue, maxSat, maxVal), binaryImg);		/*green*/
+	if (autoStage == 1)
+		cvsource.PutFrame(binaryImg);
+
+	// dilate image (unify pieces)
+	int dil = dilationFactor;
+	int dil2 = dilationFactor*2 + 1;
+	cv::Mat dilateElement = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(dil2,dil2), cv::Point(dil,dil));
+	dilate(binaryImg, dilationImg, dilateElement);
+	if (autoStage == 2)
+		cvsource.PutFrame(dilationImg);
+
+	// find contours from dilated image, place in list (vector)
+	std::vector<cv::Vec4i> hierarchy;
+	std::vector<std::vector<cv::Point>> contours;
+	cv::findContours(dilationImg, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE,cv::Point(0,0));
+
+	std::vector<std::vector<cv::Point>> hulls (contours.size());	
+	for (int i=0; i< contours.size(); i++)
+	{
+		cv::convexHull(cv::Mat(contours[i]), hulls[i], false);
+	}
+
+	// create stats for each convex hull	
+	std::vector<cv::Moments>mu(hulls.size());	  // hull moments
+	std::vector<cv::Point2f>mc(hulls.size());       // hull mass centers
+	std::vector<double>targetArea(hulls.size());   // hull areas
+
+	for (int i=0; i<hulls.size(); i++)
+	{
+		mu[i] = cv::moments(hulls[i], false);   // find moments
+		mc[i] = cv::Point2f(mu[i].m10/mu[i].m00, mu[i].m01/mu[i].m00);
+		targetArea[i] = cv::contourArea(hulls[i]);
+	}
+
+	int maxTargetArea = -1;
+	int targetIndex = -1;
+	bool targetDetected = false;
+	for (int i=0; i<hulls.size(); i++)
+	{
+		// see if this target meets the minimum area requirement
+		if (targetArea[i] > minArea)
+		{
+			targetDetected = true;
+
+			// see if this target is the biggest so far
+			if (targetArea[i] > maxTargetArea)
+			{
+				targetIndex = i;
+				maxTargetArea = targetArea[i];
+			}
+		}
+	}
+
+	// create contour image
+	contourImg = cv::Mat::zeros(binaryImg.size(),CV_8UC3);
+	for (int i=0; i< contours.size(); i++)
+	{
+		cv::Scalar colorGreen = cv::Scalar(0, 0, 255);  // green
+		cv::Scalar colorWhite = cv::Scalar(255, 255, 255);  // white
+		cv::drawContours(contourImg, hulls, i, colorWhite, 2, 8, hierarchy, 0, cv::Point());
+	}
+	if (autoStage == 3)
+		cvsource.PutFrame(contourImg);
+
+	// if target meets criteria, do stuff
+	if (targetDetected)
+	{		
+		// draw the target on one of the images
+		cv::Scalar colorWhite = cv::Scalar(255, 255, 255);  // white
+		cv::Scalar colorGreen = cv::Scalar(0, 255, 0);  // green
+		cv::Scalar colorBlue = cv::Scalar(255, 0, 0);  // blue
+		cv::drawContours(inputImg, hulls, targetIndex, colorGreen, 2, 8, hierarchy, 0, cv::Point());
+		cv::circle(inputImg, mc[targetIndex], 3 ,colorBlue,2,6,0);
+
+		// write target info to network table
+		table->GetEntry("targets").SetBoolean(true);
+		//table->GetEntry("targetX").SetDouble(mc[targetIndex].x - imageCenterX);
+		//table->GetEntry("targetY").SetDouble(mc[targetIndex].y - imageCenterY);
+		table->GetEntry("targetX").SetDouble(mc[targetIndex].x);
+		table->GetEntry("targetY").SetDouble(mc[targetIndex].y);
+		table->GetEntry("targetArea").SetDouble(targetArea[targetIndex]);
+		table->GetEntry("frameWidth").SetDouble((double)frameWidth);
+		table->GetEntry("frameHeight").SetDouble((double)frameHeight);
+
+		//printf("Target area %3.0f detected at (%3.0f,%3.0f)\n",
+		//	targetArea[targetIndex], mc[targetIndex].x - imageCenterX,
+		//			     mc[targetIndex].y - imageCenterY);
+	}
+	else
+	{
+		// write that no target info found to network table
+		table->GetEntry("targets").SetBoolean(false);
+	}
+		
+	if (autoStage == 4)
+	{
+		overlay_fps(inputImg);		
+		cvsource.PutFrame(inputImg);
+	}
+}
+
+// teleop image processing function
+void processTeleop(cv::Mat& inputImg, cs::CvSource& cvsource)
+{
+	// interim stage images for teleop
+	cv::Mat overlayImg;
+
+	// reset target field for teleop
+	table->GetEntry("targets").SetBoolean(false);
+		
+	// set teleopExposure to true (if not already done)
+	if (teleopExposureState == false)
+	{
+		set_exposure(teleopExposure);
+		teleopExposureState = true;
+	}
+	
+	// check to see if desired exposure changed
+	if (teleopExposure != desiredTeleopExposure)
+	{
+		teleopExposure = desiredTeleopExposure;
+		set_exposure(teleopExposure);
+	}
+
+	overlayImg = inputImg;
+	
+	draw_overlay(overlayImg);
+	overlay_fps(overlayImg);
+	
+	cvsource.PutFrame(overlayImg);
+}
+
+double calculateFps(int frameCount)
+{
+	gettimeofday(&endTimer,0);
+	
+	long sec = (endTimer.tv_sec - startTimer.tv_sec);
+	long u_sec = (endTimer.tv_usec - startTimer.tv_usec);
+	
+	double elapsedSec = (double) sec + (double)u_sec/1e6;
+	std::cout << "frameCount = " << frameCount << " elapsedSec = " << elapsedSec << std::endl;
+	double fps = (double) frameCount / elapsedSec;
+	
+	startTimer = endTimer;
+	
+	return fps;
+}
+
 int main() {
 	
+  // read first timeval
+  gettimeofday(&startTimer,0);
+  
   // read in parameter file
   read_param_file();
 	
@@ -252,26 +447,20 @@ int main() {
 
   // camera (input) image
   cv::Mat inputImg;
-  
-  // images used for auto
-  cv::Mat hsvImg, binaryImg, dilationImg, contourImg; 
-  
-  // images for teleop
-  cv::Mat overlayImg;
-
- 
+   
 	// initialize network table for comm with the robot
 	auto tableInstance = nt::NetworkTableInstance::GetDefault();
 	//tableInstance.SetServer("Roborio-1778-frc.local");  // send data to roborio
 	tableInstance.StartServer();     // debug only - if roborio not present
 	table = tableInstance.GetTable("RPIComm/Data_Table");
 	
-	//Initial state: set networktable auto state to false and reset autoExposure to true 
+	//Initial state: set networktable auto state to false and reset exposure to teleop level 
 	table->GetEntry("autoCam").SetBoolean(false);
-	autoExposureOn();
-	autoExposureState = true;
+	set_exposure(teleopExposure);
+	teleopExposureState = true;
 
   // enter forever streaming loop
+  int startFrameCtr = 0;
   int frameCtr = 0;
   for (;;) {
     uint64_t time = cvsink.GrabFrame(inputImg);
@@ -281,9 +470,12 @@ int main() {
     }
     frameCtr++;
     
-    if ((frameCtr % 30) == 0)
+    if ((frameCtr % 15) == 0)
     {
-		std::cout << "got " << frameCtr << " frames at time " << time << " size " << inputImg.size()
+		fps = calculateFps(frameCtr-startFrameCtr);
+		startFrameCtr = frameCtr;
+		
+		std::cout << "got " << frameCtr << " frames at time: " << time << " fps: " << fps << " size: " << inputImg.size()
 				<< std::endl;
 				
 	    // if commanded, save current params to file
@@ -299,139 +491,14 @@ int main() {
 	
 	// get webpage control values
 	get_values();                 
-	  
-	
+	 
     if (checkAutoState())   // autonomous state check
     {
-		// set autoExposure to false (if not already done)
-		if (autoExposureState == true)
-		{
-			autoExposureOff();
-			autoExposureState = false;
-		}
-		
-		// check to see if desired exposure changed
-		if (exposure != desiredExposure)
-		{
-			exposure = desiredExposure;
-			set_exposure(exposure);
-		}
-		
-		cv::cvtColor( inputImg, hsvImg, CV_BGR2HSV );
-		cv::inRange(hsvImg, cv::Scalar(minHue, minSat, minVal), cv::Scalar(maxHue, maxSat, maxVal), binaryImg);		/*green*/
-		if (autoStage == 1)
-			cvsource.PutFrame(binaryImg);
-
-		// dilate image (unify pieces)
-		int dil = dilationFactor;
-		int dil2 = dilationFactor*2 + 1;
-		cv::Mat dilateElement = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(dil2,dil2), cv::Point(dil,dil));
-		dilate(binaryImg, dilationImg, dilateElement);
-		if (autoStage == 2)
-			cvsource.PutFrame(dilationImg);
-
-		// find contours from dilated image, place in list (vector)
-		std::vector<cv::Vec4i> hierarchy;
-		std::vector<std::vector<cv::Point>> contours;
-		cv::findContours(dilationImg, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE,cv::Point(0,0));
-
-		std::vector<std::vector<cv::Point>> hulls (contours.size());	
-		for (int i=0; i< contours.size(); i++)
-		{
-			cv::convexHull(cv::Mat(contours[i]), hulls[i], false);
-		}
-
-		// create stats for each convex hull	
-		std::vector<cv::Moments>mu(hulls.size());	  // hull moments
-		std::vector<cv::Point2f>mc(hulls.size());       // hull mass centers
-		std::vector<double>targetArea(hulls.size());   // hull areas
-
-		for (int i=0; i<hulls.size(); i++)
-		{
-			mu[i] = cv::moments(hulls[i], false);   // find moments
-			mc[i] = cv::Point2f(mu[i].m10/mu[i].m00, mu[i].m01/mu[i].m00);
-			targetArea[i] = cv::contourArea(hulls[i]);
-		}
-
-		int maxTargetArea = -1;
-		int targetIndex = -1;
-		bool targetDetected = false;
-		for (int i=0; i<hulls.size(); i++)
-		{
-			// see if this target meets the minimum area requirement
-			if (targetArea[i] > minArea)
-			{
-				targetDetected = true;
-
-				// see if this target is the biggest so far
-				if (targetArea[i] > maxTargetArea)
-				{
-					targetIndex = i;
-					maxTargetArea = targetArea[i];
-				}
-			}
-		}
-
-		// create contour image
-		contourImg = cv::Mat::zeros(binaryImg.size(),CV_8UC3);
-		for (int i=0; i< contours.size(); i++)
-		{
-			cv::Scalar colorGreen = cv::Scalar(0, 0, 255);  // green
-			cv::Scalar colorWhite = cv::Scalar(255, 255, 255);  // white
-			cv::drawContours(contourImg, hulls, i, colorWhite, 2, 8, hierarchy, 0, cv::Point());
-		}
-		if (autoStage == 3)
-			cvsource.PutFrame(contourImg);
-
-		// if target meets criteria, do stuff
-		if (targetDetected)
-		{		
-			// draw the target on one of the images
-			cv::Scalar colorWhite = cv::Scalar(255, 255, 255);  // white
-			cv::Scalar colorGreen = cv::Scalar(0, 255, 0);  // green
-			cv::Scalar colorBlue = cv::Scalar(255, 0, 0);  // blue
-			cv::drawContours(inputImg, hulls, targetIndex, colorGreen, 2, 8, hierarchy, 0, cv::Point());
-			cv::circle(inputImg, mc[targetIndex], 3 ,colorBlue,2,6,0);
-
-			// write target info to network table
-			table->GetEntry("targets").SetBoolean(true);
-			//table->GetEntry("targetX").SetDouble(mc[targetIndex].x - imageCenterX);
-			//table->GetEntry("targetY").SetDouble(mc[targetIndex].y - imageCenterY);
-			table->GetEntry("targetX").SetDouble(mc[targetIndex].x);
-			table->GetEntry("targetY").SetDouble(mc[targetIndex].y);
-			table->GetEntry("targetArea").SetDouble(targetArea[targetIndex]);
-			table->GetEntry("frameWidth").SetDouble((double)frameWidth);
-			table->GetEntry("frameHeight").SetDouble((double)frameHeight);
-
-			//printf("Target area %3.0f detected at (%3.0f,%3.0f)\n",
-			//	targetArea[targetIndex], mc[targetIndex].x - imageCenterX,
-			//			     mc[targetIndex].y - imageCenterY);
-		}
-		else
-		{
-			// write to network table that no target is detected
-			table->GetEntry("targets").SetBoolean(false);
-		}
-		
-		if (autoStage == 4)
-			cvsource.PutFrame(inputImg);
-
+		processAuto(inputImg, cvsource);
 	}
 	else   // teleop
 	{
-			// reset target field for teleop
-			table->GetEntry("targets").SetBoolean(false);
-		
-		// set autoExposure to true (if not already done)
-		if (autoExposureState == false)
-		{
-			autoExposureOn();
-			autoExposureState = true;
-		}
-
-		overlayImg = inputImg;
-		draw_overlay(overlayImg);
-		cvsource.PutFrame(overlayImg);
+		processTeleop(inputImg, cvsource);		
 	}
   }
 }
