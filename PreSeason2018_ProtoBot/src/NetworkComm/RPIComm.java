@@ -14,8 +14,8 @@ public class RPIComm {
 	private static NetworkTableInstance tableInstance;
 
 	// camera image parameters
-    private static int frameWidth = 160;
-    private static int frameHeight = 120;
+    private static int frameWidth = 320;
+    private static int frameHeight = 240;
    	
 	// Target accuracy thresholds
 	private static final double X_THRESHOLD = 5;
@@ -29,10 +29,18 @@ public class RPIComm {
 
 		InputOutputComm.initialize();
 		
-		tableInstance = NetworkTableInstance.getDefault();
+		// if using Roborio-hosted network table
+		//tableInstance = NetworkTableInstance.getDefault();
+		
+		// if using RPi-hosted network table
+		 tableInstance = NetworkTableInstance.create();
+		 tableInstance.setNetworkIdentity("Roborio_RPI_Client");
+		 tableInstance.startClient("10.17.78.179",1735);
+		
 		table = tableInstance.getTable("RPIComm/Data_Table");		
-        
-		table.getEntry("autoCam").setBoolean(false);
+       
+		//table.getEntry("autoCam").setBoolean(false);
+		table.getEntry("autoCam").setDouble(0.0);
 		
 		threshX = X_THRESHOLD;
 		threshY = Y_THRESHOLD;
@@ -90,8 +98,8 @@ public class RPIComm {
     	
 		reset();
 		
-		//table.putBoolean("autoCam", true);
-		table.getEntry("autoCam").setBoolean(false);  // keep camera auto exposure on with RPi
+		//table.getEntry("autoCam").setBoolean(true);  // tell the raspberry pi that we are in auto
+		table.getEntry("autoCam").setDouble(1.0);  // tell the raspberry pi that we are in auto
     }
     
     public static void teleopInit() {
@@ -105,12 +113,14 @@ public class RPIComm {
     	
 		reset();
 		
-		table.getEntry("autoCam").setBoolean(false);
+		//table.getEntry("autoCam").setBoolean(false); // tell the raspberry pi that we are in teleop
+		table.getEntry("autoCam").setDouble(0.0);  // tell the raspberry pi that we are in teleop
     }
     
     public static void disabledInit() {
     	
-		table.getEntry("autoCam").setBoolean(false);
+		//table.getEntry("autoCam").setBoolean(false);
+		table.getEntry("autoCam").setDouble(0.0); 
     }
   
         

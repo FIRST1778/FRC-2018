@@ -28,6 +28,7 @@
 // image properties
 const int frameWidth = 320;
 const int frameHeight = 240;
+const int maxFps = 20;
 
 // Target 1
 const cv::Point highCenter(160,80);
@@ -190,6 +191,8 @@ void create_web_properties(cs::CvSource& cvsource)
 	// add properties controllable by webpage
 	manualControlProp = cvsource.CreateBooleanProperty("Manual_Ctrl",false,false);
 	autoModeProp = cvsource.CreateBooleanProperty("Auto_Mode",false,false);
+	teleopExposureProp = cvsource.CreateProperty("Exposure_Teleop",cs::VideoProperty::Kind::kInteger,0,150,1,teleopExposure,teleopExposure);
+	autonomousExposureProp = cvsource.CreateProperty("Exposure_Auto",cs::VideoProperty::Kind::kInteger,0,150,1,autonomousExposure,autonomousExposure);
 	autoStageProp = cvsource.CreateProperty("Auto_Stage",cs::VideoProperty::Kind::kInteger,1,4,1,autoStage,autoStage);
 	minHueProp = cvsource.CreateProperty("Min_Hue",cs::VideoProperty::Kind::kInteger,0,255,1,minHue,minHue);
 	maxHueProp = cvsource.CreateProperty("Max_Hue",cs::VideoProperty::Kind::kInteger,0,255,1,maxHue,maxHue);
@@ -198,8 +201,6 @@ void create_web_properties(cs::CvSource& cvsource)
 	minValProp = cvsource.CreateProperty("Min_Value",cs::VideoProperty::Kind::kInteger,0,255,1,minVal,minVal);
 	maxValProp = cvsource.CreateProperty("Max_Value",cs::VideoProperty::Kind::kInteger,0,255,1,maxVal,maxVal);
 	dilationProp = cvsource.CreateProperty("Dilation",cs::VideoProperty::Kind::kInteger,1,15,1,dilationFactor,dilationFactor);
-	autonomousExposureProp = cvsource.CreateProperty("Exposure_Auto",cs::VideoProperty::Kind::kInteger,0,150,1,autonomousExposure,autonomousExposure);
-	teleopExposureProp = cvsource.CreateProperty("Exposure_Teleop",cs::VideoProperty::Kind::kInteger,0,150,1,teleopExposure,teleopExposure);
 	minAreaProp = cvsource.CreateProperty("Min_Area",cs::VideoProperty::Kind::kInteger,1,1000,1,minArea,minArea);
 	//maxAreaProp = cvsource.CreateProperty("Max_Area",cs::VideoProperty::Kind::kInteger,1,2000,1,maxArea,maxArea);
 	saveToFileProp = cvsource.CreateBooleanProperty("Save_to_File",false,false);
@@ -230,14 +231,24 @@ void get_values()
 bool checkAutoState()
 {
 	// check networktable auto state
-	bool ntAutoState = table->GetEntry("autoCam").GetBoolean(false);
+	// using double instead of boolean for interop with roborio
+	
+	//bool ntAutoState = table->GetEntry("autoCam").GetBoolean(false);
+	
+	double ntAutoNum = table->GetEntry("autoCam").GetDouble(0.0);
+	bool ntAutoState = (ntAutoNum > 0.0) ? true : false;
 	
 	if (manualControl) 
 	{
 		// if operating manually, update network table auto state
 		if (ntAutoState != autoMode)
 		{
-			table->GetEntry("autoCam").SetBoolean(autoMode);
+			//table->GetEntry("autoCam").SetBoolean(autoMode);
+			if (autoMode == true)
+				table->GetEntry("autoCam").SetDouble(1.0);
+			else
+				table->GetEntry("autoCam").SetDouble(0.0);
+				
 			ntAutoState = autoMode;
 		}
 	}
@@ -435,10 +446,10 @@ int main() {
   // read in parameter file
   read_param_file();
 	
-  camera.SetVideoMode(cs::VideoMode::kMJPEG, frameWidth, frameHeight, 30);
+  camera.SetVideoMode(cs::VideoMode::kMJPEG, frameWidth, frameHeight, maxFps);
   cs::CvSink cvsink{"cvsink"};
   cvsink.SetSource(camera);
-  cs::CvSource cvsource{"cvsource", cs::VideoMode::kMJPEG, frameWidth, frameHeight, 30};
+  cs::CvSource cvsource{"cvsource", cs::VideoMode::kMJPEG, frameWidth, frameHeight, maxFps};
   cs::MjpegServer cvMjpegServer{"cvhttpserver", 8082};
   cvMjpegServer.SetSource(cvsource);
 
