@@ -466,7 +466,8 @@ int main() {
 	table = tableInstance.GetTable("RPIComm/Data_Table");
 	
 	//Initial state: set networktable auto state to false and reset exposure to teleop level 
-	table->GetEntry("autoCam").SetBoolean(false);
+	//table->GetEntry("autoCam").SetBoolean(false);
+	table->GetEntry("autoCam").SetDouble(0.0);
 	set_exposure(teleopExposure);
 	teleopExposureState = true;
 
