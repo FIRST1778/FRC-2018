@@ -98,8 +98,8 @@ public class RPIComm {
     	
 		reset();
 		
-		//table.getEntry("autoCam").setBoolean(true);  // tell the raspberry pi that we are in auto
-		table.getEntry("autoCam").setDouble(1.0);  // tell the raspberry pi that we are in auto
+		table.getEntry("autoCam").setBoolean(true);  // tell the raspberry pi that we are in auto
+		//table.getEntry("autoCam").setDouble(1.0);  // tell the raspberry pi that we are in auto
     }
     
     public static void teleopInit() {
@@ -113,14 +113,14 @@ public class RPIComm {
     	
 		reset();
 		
-		//table.getEntry("autoCam").setBoolean(false); // tell the raspberry pi that we are in teleop
-		table.getEntry("autoCam").setDouble(0.0);  // tell the raspberry pi that we are in teleop
+		table.getEntry("autoCam").setBoolean(false); // tell the raspberry pi that we are in teleop
+		//table.getEntry("autoCam").setDouble(0.0);  // tell the raspberry pi that we are in teleop
     }
     
     public static void disabledInit() {
     	
-		//table.getEntry("autoCam").setBoolean(false);
-		table.getEntry("autoCam").setDouble(0.0); 
+		table.getEntry("autoCam").setBoolean(false);
+		//table.getEntry("autoCam").setDouble(0.0); 
     }
   
         

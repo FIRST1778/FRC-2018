@@ -17,16 +17,17 @@ public class AutoChooser {
 	// debug networks
 	public static final int TURNING_FOREVER = 5;
 	public static final int PACING_FOREVER = 6;
+	public static final int FOLLOW_FOREVER = 7;
 
 	// legacy networks
-	public static final int DRIVE_AND_SHOOT_BLUE_LEFT = 7;
-	public static final int DRIVE_AND_SHOOT_RED_RIGHT = 8;
-	public static final int DEPOSIT_GEAR_AND_SHOOT_RED_CENTER = 9;
-	public static final int DEPOSIT_GEAR_AND_SHOOT_BLUE_CENTER = 10;
-	public static final int SHOOT_AND_DRIVE_BLUE_LEFT = 11;
-	public static final int SHOOT_AND_DRIVE_RED_RIGHT = 12;
-	public static final int DRIVE_AND_SHOOT_NEAR = 13;
-	public static final int DRIVE_AND_SHOOT_MEDIUM = 14;
+	public static final int DRIVE_AND_SHOOT_BLUE_LEFT = 8;
+	public static final int DRIVE_AND_SHOOT_RED_RIGHT = 9;
+	public static final int DEPOSIT_GEAR_AND_SHOOT_RED_CENTER = 10;
+	public static final int DEPOSIT_GEAR_AND_SHOOT_BLUE_CENTER = 11;
+	public static final int SHOOT_AND_DRIVE_BLUE_LEFT = 12;
+	public static final int SHOOT_AND_DRIVE_RED_RIGHT = 13;
+	public static final int DRIVE_AND_SHOOT_NEAR = 14;
+	public static final int DRIVE_AND_SHOOT_MEDIUM = 15;
 	
 	// internal selection class used for SendableChooser only
 	public class ModeSelection {
@@ -54,6 +55,7 @@ public class AutoChooser {
 		chooser_basic.addObject("DEPOSIT_GEAR_AND_SHOOT_BLUE_CENTER", new ModeSelection(DEPOSIT_GEAR_AND_SHOOT_BLUE_CENTER));
 		chooser_basic.addObject("TURNING_FOREVER", new ModeSelection(TURNING_FOREVER));
 		chooser_basic.addObject("PACING_FOREVER", new ModeSelection(PACING_FOREVER));
+		chooser_basic.addObject("FOLLOW_FOREVER", new ModeSelection(FOLLOW_FOREVER));
 				
 		SmartDashboard.putData("AutoChooser_Basic", chooser_basic);
 	}

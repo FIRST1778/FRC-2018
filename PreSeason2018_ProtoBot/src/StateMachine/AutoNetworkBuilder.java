@@ -58,6 +58,7 @@ public class AutoNetworkBuilder {
 
 		autoNets.add(AutoChooser.TURNING_FOREVER, createTurningForeverNetwork());
 		autoNets.add(AutoChooser.PACING_FOREVER, createPacingForeverNetwork());
+		autoNets.add(AutoChooser.FOLLOW_FOREVER, createTargetFollowerNetwork());
 
 		// debug networks
 		//autoNets.add(AutoChooser.DRIVE_AND_SHOOT_NEAR, createDriveAndShootNear());	
@@ -1042,8 +1043,10 @@ public class AutoNetworkBuilder {
 		idleState.addAction(doSomething3);
 		idleState.addEvent(timer1);
 		
+		// high threshold y should only go lateral, no driving forward or backward
+		// (160, 120) is center of (320,240) image
 		AutoState targetCalState = new AutoState("<Cal Target FOREVER State 1>");
-		CalibrateTargetAction calTarget = new CalibrateTargetAction("<Cal Target Action 1>",80, 60, 5, 5, 0.2, 0.2);
+		CalibrateTargetAction calTarget = new CalibrateTargetAction("<Cal Target Action 1>",160, 120, 25, 100, 0.25, 0.25);
 		IdleAction doSomething4 = new IdleAction("<Placeholder Action 4>");
 		IdleAction doSomething5 = new IdleAction("<Placeholder Action 5>");
 		targetCalState.addAction(calTarget);
