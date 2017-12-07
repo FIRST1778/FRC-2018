@@ -233,21 +233,23 @@ bool checkAutoState()
 	// check networktable auto state
 	// using double instead of boolean for interop with roborio
 	
-	//bool ntAutoState = table->GetEntry("autoCam").GetBoolean(false);
+	bool ntAutoState = table->GetEntry("autoCam").GetBoolean(false);
 	
-	double ntAutoNum = table->GetEntry("autoCam").GetDouble(0.0);
-	bool ntAutoState = (ntAutoNum > 0.0) ? true : false;
+	//double ntAutoNum = table->GetEntry("autoCam").GetDouble(0.0);
+	//bool ntAutoState = (ntAutoNum > 0.0) ? true : false;
 	
 	if (manualControl) 
 	{
 		// if operating manually, update network table auto state
 		if (ntAutoState != autoMode)
 		{
-			//table->GetEntry("autoCam").SetBoolean(autoMode);
+			table->GetEntry("autoCam").SetBoolean(autoMode);
+			/*
 			if (autoMode == true)
 				table->GetEntry("autoCam").SetDouble(1.0);
 			else
 				table->GetEntry("autoCam").SetDouble(0.0);
+			*/
 				
 			ntAutoState = autoMode;
 		}
