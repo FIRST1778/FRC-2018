@@ -122,7 +122,7 @@ public class AutoNetworkBuilder {
 		*/
 		
 		AutoState driveState = new AutoState("<Drive State 1>");
-		DriveForwardMagicAction driveForwardMagic = new DriveForwardMagicAction("<Drive Forward Magic Action>", 60.0, 300, true, 0.0);
+		DriveForwardMagicAction driveForwardMagic = new DriveForwardMagicAction("<Drive Forward Magic Action>", 120.0, 400, 750, true, 0.0);
 		TimeEvent timer2 = new TimeEvent(20.0);  // drive forward timer event
 		driveState.addAction(driveForwardMagic);
 		driveState.addEvent(timer2);
@@ -167,7 +167,7 @@ public class AutoNetworkBuilder {
 		*/
 		
 		AutoState driveState = new AutoState("<Drive State 1>");
-		DriveForwardMagicAction driveForwardMagic = new DriveForwardMagicAction("<Drive Forward Magic Action>", 61.5, 300, true, 0.0);
+		DriveForwardMagicAction driveForwardMagic = new DriveForwardMagicAction("<Drive Forward Magic Action>", 61.5, 300, 150, true, 0.0);
 		//TimeEvent timer2 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
 		ClosedLoopPositionEvent pos1 = new ClosedLoopPositionEvent(61.5, 0.5, 1.0);
 		driveState.addAction(driveForwardMagic);
@@ -278,7 +278,7 @@ public class AutoNetworkBuilder {
 		*/
 		
 		AutoState driveState = new AutoState("<Drive State 1>");
-		DriveForwardMagicAction driveForwardMagic = new DriveForwardMagicAction("<Drive Forward Magic Action>", 79.0, 300, true, 0.0);
+		DriveForwardMagicAction driveForwardMagic = new DriveForwardMagicAction("<Drive Forward Magic Action>", 79.0, 300, 150, true, 0.0);
 		//TimeEvent timer2 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
 		ClosedLoopPositionEvent pos1 = new ClosedLoopPositionEvent(79.0, 0.5, 1.0);
 		driveState.addAction(driveForwardMagic);
@@ -452,7 +452,7 @@ public class AutoNetworkBuilder {
 		*/
 		
 		AutoState driveState1 = new AutoState("<Drive Magic State 1>");
-		DriveForwardMagicAction driveForwardMagic = new DriveForwardMagicAction("<Drive Forward Magic Action>", 120.0, 150, true, 0.0);
+		DriveForwardMagicAction driveForwardMagic = new DriveForwardMagicAction("<Drive Forward Magic Action>", 60.0, 200, 150, true, 0.0);
 		TimeEvent timer2 = new TimeEvent(5.0);  // drive forward timer event
 		driveState1.addAction(driveForwardMagic);
 		driveState1.addEvent(timer2);
@@ -487,7 +487,7 @@ public class AutoNetworkBuilder {
 		*/
 		
 		AutoState driveState2 = new AutoState("<Drive Magic State 2>");
-		DriveForwardMagicAction driveForwardMagic2 = new DriveForwardMagicAction("<Drive Forward Magic Action>", 120.0, 150, true, 0.0);
+		DriveForwardMagicAction driveForwardMagic2 = new DriveForwardMagicAction("<Drive Forward Magic Action>", 60.0, 200, 150, true, 0.0);
 		TimeEvent timer5 = new TimeEvent(5.0);  // drive forward timer event
 		driveState2.addAction(driveForwardMagic2);
 		driveState2.addEvent(timer5);

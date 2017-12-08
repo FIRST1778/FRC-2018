@@ -39,8 +39,8 @@ public class RPIComm {
 		
 		table = tableInstance.getTable("RPIComm/Data_Table");		
        
-		//table.getEntry("autoCam").setBoolean(false);
-		table.getEntry("autoCam").setDouble(0.0);
+		table.getEntry("autoCam").setBoolean(false);
+		//table.getEntry("autoCam").setDouble(0.0);
 		
 		threshX = X_THRESHOLD;
 		threshY = Y_THRESHOLD;

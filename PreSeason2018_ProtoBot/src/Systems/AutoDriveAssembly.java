@@ -99,9 +99,9 @@ public class AutoDriveAssembly {
 	//private static final double F_COEFF = 0.0;  // Feedforward not used for closed loop position control
 
 	// PIDF values - proto.bot - tuned 
-	private static final double P_COEFF = 6.0;
+	private static final double P_COEFF = 10.0;
 	private static final double I_COEFF = 0.0;  // Integral not needed for closed loop position control
-	private static final double D_COEFF = 2.0;
+	private static final double D_COEFF = 0.0;
 	private static final double F_COEFF = 0.0;  // Feedforward not used for closed loop position control
 		
 	private static void resetMotors()
@@ -241,10 +241,10 @@ public class AutoDriveAssembly {
 		drive(leftSpeed, rightSpeed, 0.0);		 
 	}
 	
-	public static void autoMagicStraight(double targetPosInches, int speedRpm) {
+	public static void autoMagicStraight(double targetPosInches, int speedRpm, int accelRpm) {
 		
 		int nativeUnitsPer100ms = (int) ((double)speedRpm * RPM_TO_UNIT_PER_100MS);
-		int accelNativeUnits = (int) ((double)150.0 * RPM_TO_UNIT_PER_100MS);
+		int accelNativeUnits = (int) ((double)accelRpm * RPM_TO_UNIT_PER_100MS);
 		
         // left front drive straight - uses motion magic
 		mFrontLeft.setMotionMagicCruiseVelocity(nativeUnitsPer100ms);
