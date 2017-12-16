@@ -1,5 +1,6 @@
 package FreezyDrive;
 
+import com.ctre.phoenix.MotorControl.ControlMode;
 import com.ctre.phoenix.MotorControl.CAN.TalonSRX;
 
 
@@ -37,10 +38,10 @@ public class FreezyDriveTrain {
 		
 	// call to change the power given to the motor
 	public static void ChangeSpeed(double powerL,double powerR){
-		motorFrontL.set(powerL);
-		motorRearL.set(powerL);
-		motorFrontR.set(powerR);
-		motorRearR.set(powerR);
+		motorFrontL.set(ControlMode.PercentOutput,powerL);
+		motorRearL.set(ControlMode.PercentOutput, powerL);
+		motorFrontR.set(ControlMode.PercentOutput, powerR);
+		motorRearR.set(ControlMode.PercentOutput, powerR);
 	}
 	
 	public static void teleopInit()

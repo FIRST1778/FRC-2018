@@ -1,19 +1,22 @@
 package Systems;
 
 import com.ctre.phoenix.MotorControl.CAN.TalonSRX;
+import com.ctre.phoenix.MotorControl.ControlMode;
+import com.ctre.phoenix.MotorControl.FeedbackDevice;
+
+/* deprecated 2018
 import com.ctre.phoenix.MotorControl.SmartMotorController.FeedbackDevice;
 import com.ctre.phoenix.MotorControl.SmartMotorController.FeedbackDeviceStatus;
 import com.ctre.phoenix.MotorControl.SmartMotorController.TalonControlMode;
+*/
 
 import NetworkComm.InputOutputComm;
 import Utility.HardwareIDs;
-import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.PIDController;
 import edu.wpi.first.wpilibj.Relay;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.Spark;
-import edu.wpi.first.wpilibj.Utility;
 
 public class BallManagement {
 	
@@ -37,6 +40,8 @@ public class BallManagement {
 	private static final double DEAD_ZONE_THRESHOLD = 0.05;
 	
 	// Shooter PIDF values - comp.bot version - not yet tuned
+	private static final int TIMEOUT_MS = 100;
+	private static final int PROFILE_SLOT = 0;
 	private static final double P_COEFF = 3.45;
 	private static final double I_COEFF = 0.0;
 	private static final double D_COEFF = 0.0;
@@ -57,7 +62,7 @@ public class BallManagement {
 		InputOutputComm.initialize();
 		
 		// reset trigger init time
-		initTriggerTime = Utility.getFPGATime();		
+		initTriggerTime = RobotController.getFPGATime();
 
         // create and reset collector relay
 		collectorSolenoid = new Spark(HardwareIDs.COLLECTOR_SOLENOID_PWM_ID);
@@ -77,8 +82,10 @@ public class BallManagement {
 		shooterMotor = new TalonSRX(HardwareIDs.SHOOTER_TALON_ID);
 		
 		// set up shooter motor sensor
-		shooterMotor.reverseSensor(false);
-		shooterMotor.setFeedbackDevice(FeedbackDevice.QuadEncoder);
+		//shooterMotor.reverseSensor(false);    // deprecated 2018
+		//shooterMotor.setFeedbackDevice(FeedbackDevice.QuadEncoder);   // deprecated 2018
+		shooterMotor.setSensorPhase(true);
+		shooterMotor.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, TIMEOUT_MS);
 
 		// FOR REFERENCE ONLY:
 		//shooterMotor.configEncoderCodesPerRev(12);   // use this ONLY if you are NOT reading Native units
@@ -87,17 +94,24 @@ public class BallManagement {
 		//shooterMotor.changeControlMode(TalonControlMode.PercentVbus);
 		
 		// configure shooter motor for closed loop speed control
+		shooterMotor.set(ControlMode.Velocity, 0);
+		shooterMotor.config_kP(PROFILE_SLOT, P_COEFF, TIMEOUT_MS);
+		shooterMotor.config_kI(PROFILE_SLOT, I_COEFF, TIMEOUT_MS);
+		shooterMotor.config_kD(PROFILE_SLOT, D_COEFF, TIMEOUT_MS);
+		shooterMotor.config_kF(PROFILE_SLOT, F_COEFF, TIMEOUT_MS);
+		shooterMotor.selectProfileSlot(PROFILE_SLOT);
+		
+		// set PID(F) for shooter motor (one profile only)
+		/*  deprecated 2018
 		shooterMotor.changeControlMode(TalonControlMode.Speed);
 		shooterMotor.configNominalOutputVoltage(+0.0f, -0.0f);
 		shooterMotor.configPeakOutputVoltage(+12.0f, -12.0f);
-		
-		// set PID(F) for shooter motor (one profile only)
 		shooterMotor.setProfile(0);
-		
 		shooterMotor.setP(P_COEFF);
 		shooterMotor.setI(I_COEFF);
 		shooterMotor.setD(D_COEFF);
 		shooterMotor.setF(F_COEFF);
+		*/
 		
 		// make sure all motors are off
 		resetMotors();
@@ -139,10 +153,10 @@ public class BallManagement {
 	
 	public static void resetMotors()
 	{		
-		shooterMotor.set(0);
-		feederMotor.set(0);	
+		shooterMotor.set(ControlMode.PercentOutput, 0);
+		feederMotor.set(ControlMode.PercentOutput, 0);	
+		collectorMotor.set(ControlMode.PercentOutput, 0);
 		transportMotor.set(0);
-		collectorMotor.set(0);
 		agitatorServo.set(AGITATOR_OFF);
 		
 		feeding = false;
@@ -160,7 +174,7 @@ public class BallManagement {
 		InputOutputComm.putDouble(InputOutputComm.LogTable.kMainLog,"BallMgmt/ShooterRpm_Target", shooter_rpm);		
 
 		// set motor to the specified value
-		shooterMotor.set(motorSettings[newIndex]);	
+		shooterMotor.set(ControlMode.Velocity, motorSettings[newIndex]);	
 
 		// if turning off motors...
 		if (newIndex == MOTOR_OFF) {
@@ -186,7 +200,7 @@ public class BallManagement {
 		}
 		
 		// reset trigger init time
-		initTriggerTime = Utility.getFPGATime();		
+		initTriggerTime = RobotController.getFPGATime();
 	}
 	
 	public static void startFeeding() {
@@ -194,7 +208,7 @@ public class BallManagement {
 				
         double feederLevel = FEEDER_LEVEL;
         InputOutputComm.putDouble(InputOutputComm.LogTable.kMainLog,"BallMgmt/FeederLevel", feederLevel);		
-        feederMotor.set(feederLevel);
+        feederMotor.set(ControlMode.PercentOutput, feederLevel);
         
         
         double agitatorLevel = AGITATOR_ON;
@@ -209,7 +223,7 @@ public class BallManagement {
 		
         double feederLevel = 0;
         InputOutputComm.putDouble(InputOutputComm.LogTable.kMainLog,"BallMgmt/FeederLevel", feederLevel);		
-        feederMotor.set(feederLevel);	
+        feederMotor.set(ControlMode.PercentOutput, feederLevel);	
         
         double agitatorLevel = AGITATOR_OFF;  // setting half will turn off continuous servo
         //double agitatorLevel = 0;
@@ -269,7 +283,7 @@ public class BallManagement {
 	
 	private static void checkShooterControls() {
 		// fire controls - using a timer to debounce
-		double currentTime = Utility.getFPGATime();
+		double currentTime =  RobotController.getFPGATime();
 
 		// if not enough time has passed, no polling allowed!
 		if ((currentTime - initTriggerTime) < TRIGGER_CYCLE_WAIT_US)
@@ -296,7 +310,7 @@ public class BallManagement {
 		//collectorOff();
 		resetMotors();
 		
-        initTriggerTime = Utility.getFPGATime();
+        initTriggerTime = RobotController.getFPGATime();
 	}
 
 	public static void teleopInit() {
@@ -319,7 +333,7 @@ public class BallManagement {
 		}.start();
 		*/
 		
-        initTriggerTime = Utility.getFPGATime();
+        initTriggerTime = RobotController.getFPGATime();
         
 	}
 	
@@ -328,11 +342,13 @@ public class BallManagement {
 		checkCollectorControls();
 		checkShooterControls();
 		
-		// DEBUG - report on shooter motor native values		
-		double speed_rpm = shooterMotor.getSpeed() * NATIVE_TO_RPM_FACTOR;
+		// DEBUG - report on shooter motor native values	
+		double speed_rpm = shooterMotor.getSelectedSensorVelocity() * NATIVE_TO_RPM_FACTOR;
+		//double speed_rpm = shooterMotor.getSpeed() * NATIVE_TO_RPM_FACTOR;  // deprecated 2018
 		InputOutputComm.putDouble(InputOutputComm.LogTable.kMainLog,"BallMgmt/ShooterRpm_Actual", speed_rpm);
 						
-		double motorOutput = shooterMotor.getOutputVoltage()/shooterMotor.getBusVoltage();
+		double motorOutput = shooterMotor.getMotorOutputVoltage()/shooterMotor.getBusVoltage();
+		//double motorOutput = shooterMotor.getOutputVoltage()/shooterMotor.getBusVoltage();  // deprecated 2018
 		InputOutputComm.putDouble(InputOutputComm.LogTable.kMainLog,"BallMgmt/motorOutput", motorOutput);
 
 		double closedLoopError = shooterMotor.getClosedLoopError();

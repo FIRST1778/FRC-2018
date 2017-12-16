@@ -11,8 +11,9 @@ public class TurnMagicAction extends Action {
 	private double leftPosInches = 0.0;
 	private double rightPosInches = 0.0;
 	private int speedToTurn = 0; 	
+	private int accelToTurn = 0;
 			
-	public TurnMagicAction(double leftPosInches, double rightPosInches, int speed)
+	public TurnMagicAction(double leftPosInches, double rightPosInches, int speed, int accel)
 	{
 		this.name = "<Turn Magic Action>";
 		//this.leftRevs = leftPosInches * REVS_PER_INCH;
@@ -20,11 +21,12 @@ public class TurnMagicAction extends Action {
 		this.leftPosInches = leftPosInches;
 		this.rightPosInches = rightPosInches;
 		this.speedToTurn = speed;
+		this.accelToTurn = accel;
 				
 		AutoDriveAssembly.initialize();
 	}
 	
-	public TurnMagicAction(String name, double leftPosInches, double rightPosInches, int speed)
+	public TurnMagicAction(String name, double leftPosInches, double rightPosInches, int speed, int accel)
 	{
 		this.name =  name;
 		//this.leftRevs = leftPosInches * REVS_PER_INCH;
@@ -32,6 +34,7 @@ public class TurnMagicAction extends Action {
 		this.leftPosInches = leftPosInches;
 		this.rightPosInches = rightPosInches;
 		this.speedToTurn = speed;
+		this.accelToTurn = accel;
 		
 		AutoDriveAssembly.initialize();
 	}
@@ -41,7 +44,7 @@ public class TurnMagicAction extends Action {
 				
 		// initialize motor assembly for auto - use motion magic (closed loop control targets)
 		AutoDriveAssembly.autoInit(true, 0.0, true);
-		AutoDriveAssembly.autoMagicTurn(leftPosInches, rightPosInches, speedToTurn);
+		AutoDriveAssembly.autoMagicTurn(leftPosInches, rightPosInches, speedToTurn, accelToTurn);
 		
 		super.initialize();
 	}

@@ -1,7 +1,9 @@
 package Systems;
 
 import com.ctre.phoenix.MotorControl.CAN.TalonSRX;
-import com.ctre.phoenix.MotorControl.SmartMotorController.FeedbackDevice;
+import com.ctre.phoenix.MotorControl.ControlMode;
+import com.ctre.phoenix.MotorControl.FeedbackDevice;
+import com.ctre.phoenix.MotorControl.NeutralMode;
 
 import NetworkComm.InputOutputComm;
 import Utility.HardwareIDs;
@@ -11,6 +13,8 @@ import Utility.HardwareIDs;
 public class AutoDriveAssembly {
 		
 	private static boolean initialized = false;
+	private static final int TIMEOUT_MS = 100;
+	private static final int PROFILE_SLOT = 0;
 	
 	public static void initialize() {
 		
@@ -23,31 +27,53 @@ public class AutoDriveAssembly {
 		
 		// instantiate motion profile motor control objects
         mFrontLeft = new TalonSRX(HardwareIDs.LEFT_FRONT_TALON_ID);
-        mFrontLeft.reverseOutput(LEFT_REVERSE_MOTOR);	   // left motor PID polarity (magic motion mode only)
-		//mBackLeft = new TalonSRX(HardwareIDs.LEFT_REAR_TALON_ID);
+        //mFrontLeft.reverseOutput(LEFT_REVERSE_MOTOR);	       // deprecated 2018
+        mFrontLeft.setInverted(LEFT_REVERSE_MOTOR);  // left motor PID polarity (magic motion mode only)
+        
+        //mBackLeft = new TalonSRX(HardwareIDs.LEFT_REAR_TALON_ID);
 		//mBackLeft.reverseOutput(false);	   // left back motor feedback polarity (follower mode only)
 
 		mFrontRight = new TalonSRX(HardwareIDs.RIGHT_FRONT_TALON_ID);
-		mFrontRight.reverseOutput(RIGHT_REVERSE_MOTOR);  // right motor PID polarity (magic motion mode only)
+		//mFrontRight.reverseOutput(RIGHT_REVERSE_MOTOR);      // deprecated 2018
+		mFrontRight.setInverted(RIGHT_REVERSE_MOTOR);  // right motor PID polarity (magic motion mode only)
+
 		//mBackRight = new TalonSRX(HardwareIDs.RIGHT_REAR_TALON_ID);
 		//mBackRight.reverseOutput(true);  // right back motor feedback polarity (follower mode only)
         
         // configure left front motor encoder and PID
-        mFrontLeft.setFeedbackDevice(FeedbackDevice.QuadEncoder);
+        //mFrontLeft.setFeedbackDevice(FeedbackDevice.QuadEncoder); // deprecated 2018
+        mFrontLeft.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, TIMEOUT_MS);
+        
         //mFrontLeft.configEncoderCodesPerRev(ENCODER_PULSES_PER_REV);    // deprecated 2018
-        mFrontLeft.reverseSensor(LEFT_REVERSE_SENSOR);   // left motor encoder polarity
-        mFrontLeft.setProfile(0);
+        //mFrontLeft.reverseSensor(LEFT_REVERSE_SENSOR);       // deprecated 2018
+        mFrontLeft.setSensorPhase(ALIGNED_LEFT_SENSOR);   // left motor encoder polarity
+        
+        /* deprecated 2018
+        mFrontLeft.setProfile(0);      
         mFrontLeft.setP(P_COEFF);
         mFrontLeft.setI(I_COEFF);
         mFrontLeft.setD(D_COEFF);
         mFrontLeft.setF(F_COEFF);
         mFrontLeft.setMotionMagicCruiseVelocity(0);
         mFrontLeft.setMotionMagicAcceleration(0);
+        */
+        mFrontLeft.config_kP(PROFILE_SLOT, P_COEFF, TIMEOUT_MS);
+        mFrontLeft.config_kI(PROFILE_SLOT, I_COEFF, TIMEOUT_MS);
+        mFrontLeft.config_kD(PROFILE_SLOT, D_COEFF, TIMEOUT_MS);
+        mFrontLeft.config_kF(PROFILE_SLOT, F_COEFF, TIMEOUT_MS);
+        mFrontLeft.selectProfileSlot(PROFILE_SLOT);
+        mFrontLeft.configMotionCruiseVelocity(0, TIMEOUT_MS);
+        mFrontLeft.configMotionAcceleration(0, TIMEOUT_MS);
         
         // configure right front motor encoder and PID
-        mFrontRight.setFeedbackDevice(FeedbackDevice.QuadEncoder);
-        //mFrontRight.configEncoderCodesPerRev(ENCODER_PULSES_PER_REV);    // deprecated 2018
-        mFrontRight.reverseSensor(RIGHT_REVERSE_SENSOR);   // right motor encoder polarity
+        //mFrontRight.setFeedbackDevice(FeedbackDevice.QuadEncoder);  // deprecated 2018
+        mFrontRight.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, 100);
+        
+       //mFrontRight.configEncoderCodesPerRev(ENCODER_PULSES_PER_REV);    // deprecated 2018
+        //mFrontRight.reverseSensor(RIGHT_REVERSE_SENSOR);   // deprecated 2018
+        mFrontRight.setSensorPhase(ALIGNED_RIGHT_SENSOR);   // right motor encoder polarity
+        
+        /* deprecated 2018
         mFrontRight.setProfile(0);
         mFrontRight.setP(P_COEFF);
         mFrontRight.setI(I_COEFF);
@@ -55,6 +81,14 @@ public class AutoDriveAssembly {
         mFrontRight.setF(F_COEFF);
         mFrontRight.setMotionMagicCruiseVelocity(0);
         mFrontRight.setMotionMagicAcceleration(0);
+        */
+        mFrontRight.config_kP(PROFILE_SLOT, P_COEFF, TIMEOUT_MS);
+        mFrontRight.config_kI(PROFILE_SLOT, I_COEFF, TIMEOUT_MS);
+        mFrontRight.config_kD(PROFILE_SLOT, D_COEFF, TIMEOUT_MS);
+        mFrontRight.config_kF(PROFILE_SLOT, F_COEFF, TIMEOUT_MS);
+        mFrontRight.selectProfileSlot(PROFILE_SLOT);
+        mFrontRight.configMotionCruiseVelocity(0, TIMEOUT_MS);
+        mFrontRight.configMotionAcceleration(0, TIMEOUT_MS);
         
         initialized = true;
 	}
@@ -80,8 +114,10 @@ public class AutoDriveAssembly {
 	//public static final boolean RIGHT_REVERSE_MOTOR = false;  // proto-bot PID motor polarity - right
 	//public static final boolean LEFT_REVERSE_MOTOR = true;	// proto-bot PID motor polarity - left
 	
-	public static final boolean RIGHT_REVERSE_SENSOR = false;	// encoder polarity - right
-	public static final boolean LEFT_REVERSE_SENSOR = true;		// encoder polarity - left
+	//public static final boolean RIGHT_REVERSE_SENSOR = false;	// encoder polarity - right
+	//public static final boolean LEFT_REVERSE_SENSOR = true;	// encoder polarity - left
+	public static final boolean ALIGNED_RIGHT_SENSOR = true;	// encoder polarity - right
+	public static final boolean ALIGNED_LEFT_SENSOR = false;    // encoder polarity - left
 	
 	//public static final int ENCODER_PULSES_PER_REV = 256;  // 63R  - on the competition bot front motors
 	public static final int ENCODER_PULSES_PER_REV = 256*4;  // 63R  - on the competition bot front motors
@@ -107,81 +143,106 @@ public class AutoDriveAssembly {
 	private static void resetMotors()
 	{
 		// disable brake mode (all motors on coast)
-	    mFrontLeft.enableBrakeMode(false);
-		mFrontRight.enableBrakeMode(false);
-		//mBackLeft.enableBrakeMode(false);
-		//mBackRight.enableBrakeMode(false);
+		mFrontLeft.setNeutralMode(NeutralMode.Coast);
+		mFrontRight.setNeutralMode(NeutralMode.Coast);
+		//mBackLeft.setNeutralMode(NeutralMode.Coast);
+		//mBackRight.setNeutralMode(NeutralMode.Coast);
+
+		//mFrontLeft.enableBrakeMode(false);    // deprecated 2018
+		//mFrontRight.enableBrakeMode(false);	// deprecated 2018
+		//mBackLeft.enableBrakeMode(false);		// deprecated 2018
+		//mBackRight.enableBrakeMode(false);    // deprecated 2018
+		
 		//ioComm.putBoolean(InputOutputComm.LogTable.kMainLog,"Auto/BrakeMode", false);
 		
 		// reset control mode to VBus mode (% pwr) 
-		mFrontLeft.changeControlMode(TalonSRX.TalonControlMode.PercentVbus);
-		mFrontRight.changeControlMode(TalonSRX.TalonControlMode.PercentVbus);
-		//mBackLeft.changeControlMode(TalonSRX.TalonControlMode.PercentVbus);
-		//mBackRight.changeControlMode(TalonSRX.TalonControlMode.PercentVbus);
+		mFrontLeft.enableVoltageCompensation(true);   // NOT tested
+		mFrontRight.enableVoltageCompensation(true);  // NOT tested
+		//mBackLeft.enableVoltageCompensation(true);   // NOT tested
+		//mBackRight.enableVoltageCompensation(true);  // NOT tested
+
+		//mFrontLeft.changeControlMode(TalonSRX.TalonControlMode.PercentVbus);    // deprecated 2018
+		//mFrontRight.changeControlMode(TalonSRX.TalonControlMode.PercentVbus);   // deprecated 2018	
+		//mBackLeft.changeControlMode(TalonSRX.TalonControlMode.PercentVbus);     // deprecated 2018
+		//mBackRight.changeControlMode(TalonSRX.TalonControlMode.PercentVbus);    // deprecated 2018
 
 		// turn all motors to zero power
-		mFrontLeft.set(0);
-		mFrontRight.set(0);
-		//mBackLeft.set(0);
-		//mBackRight.set(0);
+		mFrontLeft.set(ControlMode.PercentOutput,0.0);
+		mFrontRight.set(ControlMode.PercentOutput,0.0);		
+		//mBackLeft.set(ControlMode.PercentOutput,0.0);
+		//mBackRight.set(ControlMode.PercentOutput,0.0);
+
+		//mFrontLeft.set(0);    // deprecated 2018
+		//mFrontRight.set(0);   // deprecated 2018
+		//mBackLeft.set(0);     // deprecated 2018
+		//mBackRight.set(0);    // deprecated 2018
 		
 	}
 		
 	private static void configureMotorsVbus() 
 	{		
 		// for auto - brake mode enabled
-	    mFrontLeft.enableBrakeMode(true);
-		mFrontRight.enableBrakeMode(true);
-		//mBackLeft.enableBrakeMode(true);
-		//mBackRight.enableBrakeMode(true);
+		mFrontLeft.setNeutralMode(NeutralMode.Brake);
+		mFrontRight.setNeutralMode(NeutralMode.Brake);
+		//mBackLeft.setNeutralMode(NeutralMode.Brake);
+		//mBackRight.setNeutralMode(NeutralMode.Brake);
 		
 		//ioComm.putBoolean(InputOutputComm.LogTable.kMainLog,"Auto/BrakeMode", true);
 		
 		// set control mode to VBus mode (% pwr) 
-		mFrontLeft.changeControlMode(TalonSRX.TalonControlMode.PercentVbus);
-		mFrontRight.changeControlMode(TalonSRX.TalonControlMode.PercentVbus);
-		//mBackLeft.changeControlMode(TalonSRX.TalonControlMode.PercentVbus);
-		//mBackRight.changeControlMode(TalonSRX.TalonControlMode.PercentVbus);
+		//mFrontLeft.changeControlMode(TalonSRX.TalonControlMode.PercentVbus);   // deprecated 2018
+		//mFrontRight.changeControlMode(TalonSRX.TalonControlMode.PercentVbus);  // deprecated 2018
+		//mBackLeft.changeControlMode(TalonSRX.TalonControlMode.PercentVbus);    // deprecated 2018
+		//mBackRight.changeControlMode(TalonSRX.TalonControlMode.PercentVbus);   // deprecated 2018
 
 		// turn all motors to zero power		
-		mFrontLeft.set(0);
-		mFrontRight.set(0);
-		
-		//mBackLeft.set(0);
-		//mBackRight.set(0);
+		mFrontLeft.set(ControlMode.PercentOutput,0);
+		mFrontRight.set(ControlMode.PercentOutput,0);		
+		//mBackLeft.set(ControlMode.PercentOutput,0);
+		//mBackRight.set(ControlMode.PercentOutput,0);
+	
+		//mFrontLeft.set(0);   // deprecated 2018
+		//mFrontRight.set(0);  // deprecated 2018
+		//mBackLeft.set(0);    // deprecated 2018
+		//mBackRight.set(0);   // deprecated 2018
 		
 	}
 
 	private static void configureMotorsMagic() 
 	{		
-		// for auto - brake mode enabled
-	    mFrontLeft.enableBrakeMode(false);
-		mFrontRight.enableBrakeMode(false);
-		
-		//mBackLeft.enableBrakeMode(false);
-		//mBackRight.enableBrakeMode(false);
+		// for auto - brake mode NOT enabled
+		mFrontLeft.setNeutralMode(NeutralMode.Coast);
+		mFrontRight.setNeutralMode(NeutralMode.Coast);
+		//mBackLeft.setNeutralMode(NeutralMode.Coast);
+		//mBackRight.setNeutralMode(NeutralMode.Coast);
 		
 		//ioComm.putBoolean(InputOutputComm.LogTable.kMainLog,"Auto/BrakeMode", false);
 		
         // configure left and right front motors for magic motion (closed-loop position control)
-		mFrontRight.changeControlMode(TalonSRX.TalonControlMode.MotionMagic);
-        mFrontLeft.changeControlMode(TalonSRX.TalonControlMode.MotionMagic);	
+		mFrontRight.set(ControlMode.MotionMagic, 0);
+		mFrontLeft.set(ControlMode.MotionMagic, 0);
+        //mBackRight.follow(mFrontRight);
+        //mBackLeft.follow(mFrontLeft);
+		
+		//mFrontRight.changeControlMode(TalonSRX.TalonControlMode.MotionMagic);  // deprecated 2018
+        //mFrontLeft.changeControlMode(TalonSRX.TalonControlMode.MotionMagic);   // deprecated 2018	
 
         // Assign back right to follow front right
-        //mBackRight.changeControlMode(CANTalon.TalonControlMode.Follower);
-        //mBackRight.set(HardwareIDs.RIGHT_FRONT_TALON_ID);
+        //mBackRight.changeControlMode(CANTalon.TalonControlMode.Follower);     // deprecated 2018
+        //mBackRight.set(HardwareIDs.RIGHT_FRONT_TALON_ID);     				// deprecated 2018
         
         // Assign back left to follow front left
-        //mBackLeft.changeControlMode(CANTalon.TalonControlMode.Follower);
-        //mBackRight.set(HardwareIDs.LEFT_FRONT_TALON_ID);		
-        
+        //mBackLeft.changeControlMode(CANTalon.TalonControlMode.Follower);     // deprecated 2018
+        //mBackRight.set(HardwareIDs.LEFT_FRONT_TALON_ID);		     			// deprecated 2018        
 	}
 
 	public static void resetPos()
 	{		
 		// reset front left and right encoder pulses to zero
-		mFrontLeft.setPosition(0);
-		mFrontRight.setPosition(0);
+		mFrontLeft.set(ControlMode.Position, 0);
+		mFrontRight.set(ControlMode.Position, 0);	
+		//mFrontLeft.setPosition(0);     		// deprecated 2018
+		//mFrontRight.setPosition(0);			// deprecated 2018
 	}	 	        
 
 	public static double getDistanceInches() {
@@ -191,8 +252,10 @@ public class AutoDriveAssembly {
 		//double leftPos = mFrontLeft.getPosition() * INCHES_PER_REV;
 		
 		// Encoders now read only raw encoder values - convert raw to inches directly
-		double rightPos = mFrontRight.getPosition()*INCHES_PER_ENCODER_PULSE;
-		double leftPos = mFrontLeft.getPosition()*INCHES_PER_ENCODER_PULSE;
+		double rightPos = mFrontRight.getSelectedSensorPosition()*INCHES_PER_ENCODER_PULSE;
+		double leftPos = mFrontLeft.getSelectedSensorPosition()*INCHES_PER_ENCODER_PULSE;
+		//double rightPos = mFrontRight.getPosition()*INCHES_PER_ENCODER_PULSE;   // deprecated 2018
+		//double leftPos = mFrontLeft.getPosition()*INCHES_PER_ENCODER_PULSE;		// deprecated 2018
 				
 		String posStr = String.format("%.2f", rightPos);
 		InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"Auto/EncoderRight", posStr);
@@ -245,33 +308,54 @@ public class AutoDriveAssembly {
 		
 		int nativeUnitsPer100ms = (int) ((double)speedRpm * RPM_TO_UNIT_PER_100MS);
 		int accelNativeUnits = (int) ((double)accelRpm * RPM_TO_UNIT_PER_100MS);
-		
+
         // left front drive straight - uses motion magic
+		mFrontLeft.configMotionCruiseVelocity(nativeUnitsPer100ms, TIMEOUT_MS);
+		mFrontLeft.configMotionAcceleration(accelNativeUnits, TIMEOUT_MS);
+		mFrontLeft.set(ControlMode.Position, targetPosInches/INCHES_PER_ENCODER_PULSE);
+		
+        // right front drive straight - uses motion magic
+        mFrontRight.configMotionCruiseVelocity(nativeUnitsPer100ms, TIMEOUT_MS);
+        mFrontRight.configMotionAcceleration(accelNativeUnits, TIMEOUT_MS);
+        mFrontRight.set(ControlMode.Position, targetPosInches/INCHES_PER_ENCODER_PULSE);
+
+		/* deprecated 2018
 		mFrontLeft.setMotionMagicCruiseVelocity(nativeUnitsPer100ms);
 		mFrontLeft.setMotionMagicAcceleration(accelNativeUnits);
 		mFrontLeft.set(targetPosInches/INCHES_PER_ENCODER_PULSE);
-		
-        // right front drive straight - uses motion magic
+
 		mFrontRight.setMotionMagicCruiseVelocity(nativeUnitsPer100ms);
 		mFrontRight.setMotionMagicAcceleration(accelNativeUnits);
 		mFrontRight.set(targetPosInches/INCHES_PER_ENCODER_PULSE);
+		*/
 		
 		// left and right back motors are following front motors
 	}
 	
-	public static void autoMagicTurn(double targetPosInchesLeft, double targetPosInchesRight, int speedRpm) {
+	public static void autoMagicTurn(double targetPosInchesLeft, double targetPosInchesRight, int speedRpm, int accelRpm) {
 
 		int nativeUnitsPer100ms = (int) ((double)speedRpm * RPM_TO_UNIT_PER_100MS);
+		int accelNativeUnits = (int) ((double)accelRpm * RPM_TO_UNIT_PER_100MS);
 		
         // left front drive straight - uses motion magic
+		mFrontLeft.configMotionCruiseVelocity(nativeUnitsPer100ms, TIMEOUT_MS);
+		mFrontLeft.configMotionAcceleration(accelNativeUnits, TIMEOUT_MS);
+		mFrontLeft.set(ControlMode.Position, targetPosInchesLeft/INCHES_PER_ENCODER_PULSE);
+		
+        // right front drive straight - uses motion magic
+        mFrontRight.configMotionCruiseVelocity(nativeUnitsPer100ms, TIMEOUT_MS);
+        mFrontRight.configMotionAcceleration(accelNativeUnits, TIMEOUT_MS);
+        mFrontRight.set(ControlMode.Position, targetPosInchesRight/INCHES_PER_ENCODER_PULSE);
+		
+		/* deprecated 2018
 		mFrontLeft.setMotionMagicCruiseVelocity(nativeUnitsPer100ms);
 		mFrontLeft.setMotionMagicAcceleration(nativeUnitsPer100ms);
 		mFrontLeft.set(targetPosInchesLeft/INCHES_PER_ENCODER_PULSE);
-		
-        // right front drive straight - uses motion magic
+
 		mFrontRight.setMotionMagicCruiseVelocity(nativeUnitsPer100ms);
 		mFrontRight.setMotionMagicAcceleration(nativeUnitsPer100ms);
 		mFrontRight.set(targetPosInchesRight/INCHES_PER_ENCODER_PULSE);
+		*/
 		
 		// left and right back motors are following front motors
 	}
@@ -322,10 +406,15 @@ public class AutoDriveAssembly {
 		//ioComm.putString(InputOutputComm.LogTable.kMainLog,"Auto/AutoDrive", myString2);
 
 		// set motor values directly
-		mFrontLeft.set(leftMotorPolarity*leftValue);
-		//mBackLeft.set(leftMotorPolarity*leftValue);		
-		mFrontRight.set(rightMotorPolarity*rightValue);
-		//mBackRight.set(rightMotorPolarity*rightValue);
+		mFrontLeft.set(ControlMode.PercentOutput, leftMotorPolarity*leftValue);
+		mFrontRight.set(ControlMode.PercentOutput, rightMotorPolarity*rightValue);
+		//mBackLeft.set(ControlMode.PercentOutput, leftMotorPolarity*rightValue);
+		//mBackRight.set(ControlMode.PercentOutput, rightMotorPolarity*rightValue);
+		
+		//mFrontLeft.set(leftMotorPolarity*leftValue);           // deprecated 2018
+		//mFrontRight.set(rightMotorPolarity*rightValue);        // deprecated 2018
+		//mBackLeft.set(leftMotorPolarity*leftValue);            // deprecated 2018		
+		//mBackRight.set(rightMotorPolarity*rightValue);         // deprecated 2018
 	}
 	
 	public static void driveDirection(double angle, double speed) {

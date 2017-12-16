@@ -1,5 +1,6 @@
 package Systems;
 
+import com.ctre.phoenix.MotorControl.ControlMode;
 import com.ctre.phoenix.MotorControl.CAN.TalonSRX;
 
 import NetworkComm.InputOutputComm;
@@ -65,7 +66,7 @@ public class ClimberAssembly {
 		
 		// set motor and persisted climb value
 		currentClimbValue = newClimbValue;
-		climberMotor.set(newClimbValue);
+		climberMotor.set(ControlMode.PercentOutput, newClimbValue);
 		
 		String climbValueStr = String.format("%.2f", newClimbValue);
 		InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"Climber/speed", climbValueStr);
