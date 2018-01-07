@@ -3,6 +3,7 @@ package StateMachine;
 import java.util.ArrayList;
 import NetworkComm.InputOutputComm;
 import Systems.NavXSensor;
+import edu.wpi.first.wpilibj.DriverStation;
 
 public class AutoStateMachine {
 		
@@ -10,6 +11,16 @@ public class AutoStateMachine {
 		
 	private ArrayList<AutoNetwork> autoNetworks;
 
+	private final int SWITCH = 0;
+	private final int SCALE = 1;
+	private final int OPP_SWITCH = 2;
+	
+	private final int UNDEFINED = 0;
+	private final int LEFT = 1;
+	private final int RIGHT = 2;
+	
+	private int[] fieldAllianceColors = {UNDEFINED, UNDEFINED, UNDEFINED};
+	
 	private AutoNetwork currentNetwork;
 	private AutoChooser autoChooser;
 		
@@ -29,6 +40,9 @@ public class AutoStateMachine {
 				
 	public void start()
 	{
+				
+		// check switch and scale lighting combination
+		getFieldColorConfig();
 		
 		// determine if we are running auto or not
 		int networkIndex = getNetworkIndex();
@@ -78,24 +92,125 @@ public class AutoStateMachine {
 	// If all switches are false (zero), auto is disabled
 	private int getNetworkIndex()
 	{
-		// grab the selected auto mode from the driver station
-		int value = autoChooser.getAutoChoice();
+		// grab the selected action and position from the driver station
+		int action = autoChooser.getAction();
+		int position = autoChooser.getPosition();
 		
-		if (value == 0)
+		int netIndex = AutoNetworkBuilder.DO_NOTHING;
+		
+		if (action == AutoChooser.DO_NOTHING)
 		{
-			// all switches off means no auto modes selected - auto state machine operation disabled
+			// auto state machine operation disabled
 			autoNetworkEnable = false;
 		}
 		else
 		{
 			// Non-zero network - auto mode selected!
 			autoNetworkEnable = true;
+			
+			switch (position) {
+			case AutoChooser.LEFT_POSITION:
+				netIndex = leftPositionLogic(action);
+				break;
+			case AutoChooser.CENTER_POSITION:
+				netIndex = centerPositionLogic(action);
+				break;
+			case AutoChooser.RIGHT_POSITION:
+				netIndex = rightPositionLogic(action);
+				break;
+			default:
+				// no position defined - do nothing
+				autoNetworkEnable = false;
+			}
 		}
 		
 		// return index value for network selected
-		return value;
+		return netIndex;
 		
 	}
 	
+	// logic for left position and desired action
+	private int leftPositionLogic(int desiredAction)
+	{
+		int netIndex = AutoNetworkBuilder.DO_NOTHING;
+		
+		if (fieldAllianceColors[SWITCH] == LEFT) {
+			// first priority - turn on switch
+			netIndex = AutoNetworkBuilder.DEPOSIT_CUBE_SWITCH_LEFT;
+		}
+		else if (fieldAllianceColors[SCALE] == LEFT) {
+			// second priority - turn on scale
+			netIndex = AutoNetworkBuilder.DEPOSIT_CUBE_SCALE_LEFT;
+		}
+		else if (fieldAllianceColors[OPP_SWITCH] == LEFT) {
+			// third priority - turn off opp switch
+			netIndex = AutoNetworkBuilder.DEPOSIT_CUBE_OPP_SWITCH_LEFT;
+		}
+		else {
+			// if no colors on our side, just drive forward
+			netIndex = AutoNetworkBuilder.DRIVE_FORWARD;
+		}
+		
+		return netIndex;
+	}
+	
+	private int centerPositionLogic(int desiredAction)
+	{
+		int netIndex = AutoNetworkBuilder.DO_NOTHING;
+		
+		if (fieldAllianceColors[SWITCH] == LEFT) {
+			// first priority - turn on switch
+			netIndex = AutoNetworkBuilder.DEPOSIT_CUBE_SWITCH_CENTER_LEFT;
+		}
+		else if (fieldAllianceColors[SWITCH] == RIGHT) {
+			// second priority - turn on scale
+			netIndex = AutoNetworkBuilder.DEPOSIT_CUBE_SWITCH_CENTER_RIGHT;
+		}
+		else {
+			// this should never happen unless field alliance colors are undefined
+			netIndex = AutoNetworkBuilder.DRIVE_FORWARD;
+		}
 
+		return netIndex;
+	}
+	
+	private int rightPositionLogic(int desiredAction) 
+	{
+		int netIndex = AutoNetworkBuilder.DO_NOTHING;
+		
+		if (fieldAllianceColors[SWITCH] == RIGHT) {
+			// first priority - turn on switch
+			netIndex = AutoNetworkBuilder.DEPOSIT_CUBE_SWITCH_RIGHT;
+		}
+		else if (fieldAllianceColors[SCALE] == RIGHT) {
+			// second priority - turn on scale
+			netIndex = AutoNetworkBuilder.DEPOSIT_CUBE_SCALE_RIGHT;
+		}
+		else if (fieldAllianceColors[OPP_SWITCH] == RIGHT) {
+			// third priority - turn off opp switch
+			netIndex = AutoNetworkBuilder.DEPOSIT_CUBE_OPP_SWITCH_RIGHT;
+		}
+		else {
+			// if no colors on our side, just drive forward
+			netIndex = AutoNetworkBuilder.DRIVE_FORWARD;
+		}
+
+		return netIndex;
+	}
+	
+	// retrieves color configuration of field elements relative to alliance side
+	private void getFieldColorConfig()
+	{
+		String gameData;
+		gameData = DriverStation.getInstance().getGameSpecificMessage();
+
+		for (int i=0; i < 3; i++)
+		{
+			if (gameData.charAt(i) == 'L')
+				fieldAllianceColors[i] = LEFT;
+			else
+				fieldAllianceColors[i] = RIGHT;
+		}
+	}
+	
 }
