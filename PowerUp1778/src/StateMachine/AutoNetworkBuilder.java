@@ -1,7 +1,6 @@
 package StateMachine;
 
 import java.util.ArrayList;
-import Systems.BallManagement;
 import Systems.CameraControl;
 
 public class AutoNetworkBuilder {
@@ -65,8 +64,8 @@ public class AutoNetworkBuilder {
 		
 		AutoNetwork autoNet = new AutoNetwork("<Do Nothing Network>");
 		
-		AutoState camState = new AutoState("<Move Camera>");
-		CameraAction camAct = new CameraAction("<Camera Move>",CameraControl.GEAR_CAM_POS);
+		AutoState camState = new AutoState("<Camera State>");
+		CameraAction camAct = new CameraAction("<Camera Action>");
 		TimeEvent timer1 = new TimeEvent(0.1);  // timer event
 		camState.addAction(camAct);
 		camState.addEvent(timer1);
@@ -92,8 +91,8 @@ public class AutoNetworkBuilder {
 		
 		AutoNetwork autoNet = new AutoNetwork("<Drive Forward Network>");
 		
-		AutoState camState = new AutoState("<Move Camera>");
-		CameraAction camAct = new CameraAction("<Camera Move>",CameraControl.GEAR_CAM_POS);
+		AutoState camState = new AutoState("<Camera State>");
+		CameraAction camAct = new CameraAction("<Camera Action>");
 		TimeEvent timer1 = new TimeEvent(0.1);  // timer event
 		camState.addAction(camAct);
 		camState.addEvent(timer1);
@@ -138,8 +137,8 @@ public class AutoNetworkBuilder {
 		
 		AutoNetwork autoNet = new AutoNetwork("<Deposit Cube Switch (left side) Network>");
 		
-		AutoState camState = new AutoState("<Move Camera>");
-		CameraAction camAct = new CameraAction("<Camera Move>",CameraControl.GEAR_CAM_POS);
+		AutoState camState = new AutoState("<Camera State>");
+		CameraAction camAct = new CameraAction("<Camera Action>");
 		TimeEvent timer1 = new TimeEvent(0.1);  // timer event
 		camState.addAction(camAct);
 		camState.addEvent(timer1);
@@ -169,12 +168,14 @@ public class AutoNetworkBuilder {
 		*/
 		
 		AutoState turnRightState = new AutoState("<Turn Right State>");
-		TurnPIDAction turnPidAction = new TurnPIDAction("<Turn right PID action>", 50.0, 0.35, true);
+		TurnPIDAction turnPidAction = new TurnPIDAction("<Turn right PID action>", 90.0, 0.35, true);
 		//TimeEvent timer3 = new TimeEvent(2.5);  // timer event - allow PID time to settle
-		ClosedLoopAngleEvent angle1 = new ClosedLoopAngleEvent(50.0,2.0,1.0);
+		ClosedLoopAngleEvent angle1 = new ClosedLoopAngleEvent(90.0,2.0,1.0);
 		turnRightState.addAction(turnPidAction);
 		//turnRightState.addEvent(timer3);
 		turnRightState.addEvent(angle1);
+		
+		// TODO - Raise cube
 		
 		AutoState driveState2 = new AutoState("<Drive State 2>");
 		DriveForwardAction driveForward2 = new DriveForwardAction("<Drive Forward Action 2>", 0.25, true, 0.0);  // don't reset gyro - use absolute heading (60 deg) 
@@ -182,6 +183,8 @@ public class AutoNetworkBuilder {
 		//TimeEvent timer4 = new TimeEvent(1.0);   // don't drive all the way to the peg - just check alignment
 		driveState2.addAction(driveForward2);
 		driveState2.addEvent(timer4);
+		
+		// TODO - Drop cube
 		
 		AutoState idleState2 = new AutoState("<Idle State 2>");
 		DriveForwardAction driveForward4 = new DriveForwardAction("<Drive Forward Action 4 -reset>", 0.0, true, 0.0);  // reset gyro
@@ -215,8 +218,8 @@ public class AutoNetworkBuilder {
 		
 		AutoNetwork autoNet = new AutoNetwork("<Deposit Cube Scale (left side) Network>");
 		
-		AutoState camState = new AutoState("<Move Camera>");
-		CameraAction camAct = new CameraAction("<Camera Move>",CameraControl.GEAR_CAM_POS);
+		AutoState camState = new AutoState("<Camera State>");
+		CameraAction camAct = new CameraAction("<Camera Action>");
 		TimeEvent timer1 = new TimeEvent(0.1);  // timer event
 		camState.addAction(camAct);
 		camState.addEvent(timer1);
@@ -246,12 +249,14 @@ public class AutoNetworkBuilder {
 		*/
 		
 		AutoState turnRightState = new AutoState("<Turn Right State>");
-		TurnPIDAction turnPidAction = new TurnPIDAction("<Turn right PID action>", 50.0, 0.35, true);
+		TurnPIDAction turnPidAction = new TurnPIDAction("<Turn right PID action>", 90.0, 0.35, true);
 		//TimeEvent timer3 = new TimeEvent(2.5);  // timer event - allow PID time to settle
-		ClosedLoopAngleEvent angle1 = new ClosedLoopAngleEvent(50.0,2.0,1.0);
+		ClosedLoopAngleEvent angle1 = new ClosedLoopAngleEvent(90.0,2.0,1.0);
 		turnRightState.addAction(turnPidAction);
 		//turnRightState.addEvent(timer3);
 		turnRightState.addEvent(angle1);
+		
+		// TODO - raise cube
 		
 		AutoState driveState2 = new AutoState("<Drive State 2>");
 		DriveForwardAction driveForward2 = new DriveForwardAction("<Drive Forward Action 2>", 0.25, true, 0.0);  // don't reset gyro - use absolute heading (60 deg) 
@@ -259,6 +264,8 @@ public class AutoNetworkBuilder {
 		//TimeEvent timer4 = new TimeEvent(1.0);   // don't drive all the way to the peg - just check alignment
 		driveState2.addAction(driveForward2);
 		driveState2.addEvent(timer4);
+		
+		// TODO - drop cube
 		
 		AutoState idleState2 = new AutoState("<Idle State 2>");
 		DriveForwardAction driveForward4 = new DriveForwardAction("<Drive Forward Action 4 -reset>", 0.0, true, 0.0);  // reset gyro
@@ -292,8 +299,8 @@ public class AutoNetworkBuilder {
 		
 		AutoNetwork autoNet = new AutoNetwork("<Deposit Cube Opp Switch (left side) Network>");
 		
-		AutoState camState = new AutoState("<Move Camera>");
-		CameraAction camAct = new CameraAction("<Camera Move>",CameraControl.GEAR_CAM_POS);
+		AutoState camState = new AutoState("<Camera State>");
+		CameraAction camAct = new CameraAction("<Camera Action>");
 		TimeEvent timer1 = new TimeEvent(0.1);  // timer event
 		camState.addAction(camAct);
 		camState.addEvent(timer1);
@@ -323,12 +330,14 @@ public class AutoNetworkBuilder {
 		*/
 		
 		AutoState turnRightState = new AutoState("<Turn Right State>");
-		TurnPIDAction turnPidAction = new TurnPIDAction("<Turn right PID action>", 50.0, 0.35, true);
+		TurnPIDAction turnPidAction = new TurnPIDAction("<Turn right PID action>", 90.0, 0.35, true);
 		//TimeEvent timer3 = new TimeEvent(2.5);  // timer event - allow PID time to settle
-		ClosedLoopAngleEvent angle1 = new ClosedLoopAngleEvent(50.0,2.0,1.0);
+		ClosedLoopAngleEvent angle1 = new ClosedLoopAngleEvent(90.0,2.0,1.0);
 		turnRightState.addAction(turnPidAction);
 		//turnRightState.addEvent(timer3);
 		turnRightState.addEvent(angle1);
+		
+		// TODO - Raise cube
 		
 		AutoState driveState2 = new AutoState("<Drive State 2>");
 		DriveForwardAction driveForward2 = new DriveForwardAction("<Drive Forward Action 2>", 0.25, true, 0.0);  // don't reset gyro - use absolute heading (60 deg) 
@@ -336,6 +345,8 @@ public class AutoNetworkBuilder {
 		//TimeEvent timer4 = new TimeEvent(1.0);   // don't drive all the way to the peg - just check alignment
 		driveState2.addAction(driveForward2);
 		driveState2.addEvent(timer4);
+		
+		// TODO - drop cube
 		
 		AutoState idleState2 = new AutoState("<Idle State 2>");
 		DriveForwardAction driveForward4 = new DriveForwardAction("<Drive Forward Action 4 -reset>", 0.0, true, 0.0);  // reset gyro
@@ -371,8 +382,8 @@ public class AutoNetworkBuilder {
 		
 		AutoNetwork autoNet = new AutoNetwork("<Deposit Cube Switch (center left) Network>");
 		
-		AutoState camState = new AutoState("<Move Camera>");
-		CameraAction camAct = new CameraAction("<Camera Move>",CameraControl.GEAR_CAM_POS);
+		AutoState camState = new AutoState("<Camera State>");
+		CameraAction camAct = new CameraAction("<Camera Action>");
 		TimeEvent timer1 = new TimeEvent(0.1);  // timer event
 		camState.addAction(camAct);
 		camState.addEvent(timer1);
@@ -401,13 +412,13 @@ public class AutoNetworkBuilder {
 		turnRightState.addEvent(gyroRight);
 		*/
 		
-		AutoState turnRightState = new AutoState("<Turn Right State>");
-		TurnPIDAction turnPidAction = new TurnPIDAction("<Turn right PID action>", 50.0, 0.35, true);
+		AutoState turnLeftState = new AutoState("<Turn Left State>");
+		TurnPIDAction turnPidAction1 = new TurnPIDAction("<Turn Left PID action>", -90.0, 0.35, true);
 		//TimeEvent timer3 = new TimeEvent(2.5);  // timer event - allow PID time to settle
-		ClosedLoopAngleEvent angle1 = new ClosedLoopAngleEvent(50.0,2.0,1.0);
-		turnRightState.addAction(turnPidAction);
+		ClosedLoopAngleEvent angle1 = new ClosedLoopAngleEvent(-90.0,2.0,1.0);
+		turnLeftState.addAction(turnPidAction1);
 		//turnRightState.addEvent(timer3);
-		turnRightState.addEvent(angle1);
+		turnLeftState.addEvent(angle1);
 		
 		AutoState driveState2 = new AutoState("<Drive State 2>");
 		DriveForwardAction driveForward2 = new DriveForwardAction("<Drive Forward Action 2>", 0.25, true, 0.0);  // don't reset gyro - use absolute heading (60 deg) 
@@ -415,6 +426,25 @@ public class AutoNetworkBuilder {
 		//TimeEvent timer4 = new TimeEvent(1.0);   // don't drive all the way to the peg - just check alignment
 		driveState2.addAction(driveForward2);
 		driveState2.addEvent(timer4);
+		
+		AutoState turnRightState = new AutoState("<Turn Right State>");
+		TurnPIDAction turnPidAction2 = new TurnPIDAction("<Turn Right PID action>", 90.0, 0.35, true);
+		//TimeEvent timer5 = new TimeEvent(2.5);  // timer event - allow PID time to settle
+		ClosedLoopAngleEvent angle2 = new ClosedLoopAngleEvent(90.0,2.0,1.0);
+		turnRightState.addAction(turnPidAction2);
+		//turnRightState.addEvent(timer5);
+		turnRightState.addEvent(angle2);
+		
+		// TODO - Raise cube
+
+		AutoState driveState3 = new AutoState("<Drive State 3>");
+		DriveForwardAction driveForward3 = new DriveForwardAction("<Drive Forward Action 3>", 0.25, true, 0.0);  // don't reset gyro - use absolute heading (60 deg) 
+		TimeEvent timer6 = new TimeEvent(3.0);
+		//TimeEvent timer6 = new TimeEvent(1.0);   // don't drive all the way - just check alignment
+		driveState2.addAction(driveForward3);
+		driveState2.addEvent(timer6);
+
+		// TODO - drop cube
 		
 		AutoState idleState2 = new AutoState("<Idle State 2>");
 		DriveForwardAction driveForward4 = new DriveForwardAction("<Drive Forward Action 4 -reset>", 0.0, true, 0.0);  // reset gyro
@@ -424,14 +454,18 @@ public class AutoNetworkBuilder {
 				
 		// connect each event with a state to move to
 		camState.associateNextState(driveState);
-		driveState.associateNextState(turnRightState);
-		turnRightState.associateNextState(driveState2);
-		driveState2.associateNextState(idleState2);
+		driveState.associateNextState(turnLeftState);
+		turnLeftState.associateNextState(driveState2);
+		driveState2.associateNextState(turnRightState);
+		turnRightState.associateNextState(driveState3);
+		driveState3.associateNextState(idleState2);
 						
 		autoNet.addState(camState);
 		autoNet.addState(driveState);
-		autoNet.addState(turnRightState);
+		autoNet.addState(turnLeftState);
 		autoNet.addState(driveState2);
+		autoNet.addState(turnRightState);
+		autoNet.addState(driveState3);
 		autoNet.addState(idleState2);
 				
 		return autoNet;
@@ -450,8 +484,8 @@ public class AutoNetworkBuilder {
 		
 		AutoNetwork autoNet = new AutoNetwork("<Deposit Cube Switch (center right) Network>");
 		
-		AutoState camState = new AutoState("<Move Camera>");
-		CameraAction camAct = new CameraAction("<Camera Move>",CameraControl.GEAR_CAM_POS);
+		AutoState camState = new AutoState("<Camera State>");
+		CameraAction camAct = new CameraAction("<Camera Action>");
 		TimeEvent timer1 = new TimeEvent(0.1);  // timer event
 		camState.addAction(camAct);
 		camState.addEvent(timer1);
@@ -481,9 +515,9 @@ public class AutoNetworkBuilder {
 		*/
 		
 		AutoState turnRightState = new AutoState("<Turn Right State>");
-		TurnPIDAction turnPidAction = new TurnPIDAction("<Turn right PID action>", 50.0, 0.35, true);
+		TurnPIDAction turnPidAction = new TurnPIDAction("<Turn right PID action>", 90.0, 0.35, true);
 		//TimeEvent timer3 = new TimeEvent(2.5);  // timer event - allow PID time to settle
-		ClosedLoopAngleEvent angle1 = new ClosedLoopAngleEvent(50.0,2.0,1.0);
+		ClosedLoopAngleEvent angle1 = new ClosedLoopAngleEvent(90.0,2.0,1.0);
 		turnRightState.addAction(turnPidAction);
 		//turnRightState.addEvent(timer3);
 		turnRightState.addEvent(angle1);
@@ -494,6 +528,26 @@ public class AutoNetworkBuilder {
 		//TimeEvent timer4 = new TimeEvent(1.0);   // don't drive all the way to the peg - just check alignment
 		driveState2.addAction(driveForward2);
 		driveState2.addEvent(timer4);
+
+		AutoState turnLeftState = new AutoState("<Turn Left State>");
+		TurnPIDAction turnPidAction2 = new TurnPIDAction("<Turn left PID action>", -90.0, 0.35, true);
+		//TimeEvent timer5 = new TimeEvent(2.5);  // timer event - allow PID time to settle
+		ClosedLoopAngleEvent angle2 = new ClosedLoopAngleEvent(-90.0,2.0,1.0);
+		turnLeftState.addAction(turnPidAction2);
+		//turnLeftState.addEvent(timer5);
+		turnLeftState.addEvent(angle2);
+
+		
+		// TODO - Raise cube
+
+		AutoState driveState3 = new AutoState("<Drive State 3>");
+		DriveForwardAction driveForward3 = new DriveForwardAction("<Drive Forward Action 3>", 0.25, true, 0.0);  // don't reset gyro - use absolute heading (60 deg) 
+		TimeEvent timer6 = new TimeEvent(3.0);
+		//TimeEvent timer6 = new TimeEvent(1.0);   // don't drive all the way - just check alignment
+		driveState2.addAction(driveForward3);
+		driveState2.addEvent(timer6);
+
+		// TODO - drop cube
 		
 		AutoState idleState2 = new AutoState("<Idle State 2>");
 		DriveForwardAction driveForward4 = new DriveForwardAction("<Drive Forward Action 4 -reset>", 0.0, true, 0.0);  // reset gyro
@@ -505,12 +559,16 @@ public class AutoNetworkBuilder {
 		camState.associateNextState(driveState);
 		driveState.associateNextState(turnRightState);
 		turnRightState.associateNextState(driveState2);
-		driveState2.associateNextState(idleState2);
+		driveState2.associateNextState(turnLeftState);
+		turnLeftState.associateNextState(driveState3);
+		driveState3.associateNextState(idleState2);
 						
 		autoNet.addState(camState);
 		autoNet.addState(driveState);
 		autoNet.addState(turnRightState);
 		autoNet.addState(driveState2);
+		autoNet.addState(turnLeftState);
+		autoNet.addState(driveState3);
 		autoNet.addState(idleState2);
 				
 		return autoNet;
@@ -529,8 +587,8 @@ public class AutoNetworkBuilder {
 		
 		AutoNetwork autoNet = new AutoNetwork("<Deposit Cube Switch (Right Side) Network>");
 				
-		AutoState camState = new AutoState("<Move Camera>");
-		CameraAction camAct = new CameraAction("<Camera Move>",CameraControl.GEAR_CAM_POS);
+		AutoState camState = new AutoState("<Camera State>");
+		CameraAction camAct = new CameraAction("<Camera Action>");
 		TimeEvent timer1 = new TimeEvent(0.1);  // timer event
 		camState.addAction(camAct);
 		camState.addEvent(timer1);
@@ -560,12 +618,14 @@ public class AutoNetworkBuilder {
 		*/
 		
 		AutoState turnLeftState = new AutoState("<Turn Left State>");
-		TurnPIDAction turnPidAction = new TurnPIDAction("<Turn left PID action>", -62.5, 0.35, true);
+		TurnPIDAction turnPidAction = new TurnPIDAction("<Turn left PID action>", -90.0, 0.35, true);
 		//TimeEvent timer3 = new TimeEvent(2.5);  // timer event - allow PID time to settle
-		ClosedLoopAngleEvent angle1 = new ClosedLoopAngleEvent(-62.5,2.0,1.0);
+		ClosedLoopAngleEvent angle1 = new ClosedLoopAngleEvent(-90.0,2.0,1.0);
 		turnLeftState.addAction(turnPidAction);
 		//turnLeftState.addEvent(timer3);
 		turnLeftState.addEvent(angle1);
+		
+		// TODO - raise cube
 		
 		AutoState driveState2 = new AutoState("<Drive State 2>");
 		DriveForwardAction driveForward2 = new DriveForwardAction("<Drive Forward Action 2>", 0.25, true, 0.0);   // don't reset gyro - use heading -60 deg
@@ -573,6 +633,8 @@ public class AutoNetworkBuilder {
 		//TimeEvent timer4 = new TimeEvent(1.0);    // don't drive all the way to the peg - just check alignment
 		driveState2.addAction(driveForward2);
 		driveState2.addEvent(timer4);
+		
+		// TODO - drop cube
 		
 		AutoState idleState2 = new AutoState("<Idle State 2>");
 		IdleAction deadEnd = new IdleAction("<Dead End Action>");
@@ -607,8 +669,8 @@ public class AutoNetworkBuilder {
 		
 		AutoNetwork autoNet = new AutoNetwork("<Deposit Cube Scale (Right Side) Network>");
 				
-		AutoState camState = new AutoState("<Move Camera>");
-		CameraAction camAct = new CameraAction("<Camera Move>",CameraControl.GEAR_CAM_POS);
+		AutoState camState = new AutoState("<Camera State>");
+		CameraAction camAct = new CameraAction("<Camera Action>");
 		TimeEvent timer1 = new TimeEvent(0.1);  // timer event
 		camState.addAction(camAct);
 		camState.addEvent(timer1);
@@ -638,12 +700,14 @@ public class AutoNetworkBuilder {
 		*/
 		
 		AutoState turnLeftState = new AutoState("<Turn Left State>");
-		TurnPIDAction turnPidAction = new TurnPIDAction("<Turn left PID action>", -62.5, 0.35, true);
+		TurnPIDAction turnPidAction = new TurnPIDAction("<Turn left PID action>", -90.0, 0.35, true);
 		//TimeEvent timer3 = new TimeEvent(2.5);  // timer event - allow PID time to settle
-		ClosedLoopAngleEvent angle1 = new ClosedLoopAngleEvent(-62.5,2.0,1.0);
+		ClosedLoopAngleEvent angle1 = new ClosedLoopAngleEvent(-90.0,2.0,1.0);
 		turnLeftState.addAction(turnPidAction);
 		//turnLeftState.addEvent(timer3);
 		turnLeftState.addEvent(angle1);
+		
+		// TODO - Raise cube
 		
 		AutoState driveState2 = new AutoState("<Drive State 2>");
 		DriveForwardAction driveForward2 = new DriveForwardAction("<Drive Forward Action 2>", 0.25, true, 0.0);   // don't reset gyro - use heading -60 deg
@@ -651,6 +715,8 @@ public class AutoNetworkBuilder {
 		//TimeEvent timer4 = new TimeEvent(1.0);    // don't drive all the way to the peg - just check alignment
 		driveState2.addAction(driveForward2);
 		driveState2.addEvent(timer4);
+		
+		// TODO - drop cube
 		
 		AutoState idleState2 = new AutoState("<Idle State 2>");
 		IdleAction deadEnd = new IdleAction("<Dead End Action>");
@@ -685,8 +751,8 @@ public class AutoNetworkBuilder {
 		
 		AutoNetwork autoNet = new AutoNetwork("<Deposit Cube Opp Switch (Right Side) Network>");
 				
-		AutoState camState = new AutoState("<Move Camera>");
-		CameraAction camAct = new CameraAction("<Camera Move>",CameraControl.GEAR_CAM_POS);
+		AutoState camState = new AutoState("<Camera State>");
+		CameraAction camAct = new CameraAction("<Camera Action>");
 		TimeEvent timer1 = new TimeEvent(0.1);  // timer event
 		camState.addAction(camAct);
 		camState.addEvent(timer1);
@@ -716,12 +782,14 @@ public class AutoNetworkBuilder {
 		*/
 		
 		AutoState turnLeftState = new AutoState("<Turn Left State>");
-		TurnPIDAction turnPidAction = new TurnPIDAction("<Turn left PID action>", -62.5, 0.35, true);
+		TurnPIDAction turnPidAction = new TurnPIDAction("<Turn left PID action>", -90.0, 0.35, true);
 		//TimeEvent timer3 = new TimeEvent(2.5);  // timer event - allow PID time to settle
-		ClosedLoopAngleEvent angle1 = new ClosedLoopAngleEvent(-62.5,2.0,1.0);
+		ClosedLoopAngleEvent angle1 = new ClosedLoopAngleEvent(-90.0,2.0,1.0);
 		turnLeftState.addAction(turnPidAction);
 		//turnLeftState.addEvent(timer3);
 		turnLeftState.addEvent(angle1);
+		
+		// TODO - Raise cube
 		
 		AutoState driveState2 = new AutoState("<Drive State 2>");
 		DriveForwardAction driveForward2 = new DriveForwardAction("<Drive Forward Action 2>", 0.25, true, 0.0);   // don't reset gyro - use heading -60 deg
@@ -729,6 +797,8 @@ public class AutoNetworkBuilder {
 		//TimeEvent timer4 = new TimeEvent(1.0);    // don't drive all the way to the peg - just check alignment
 		driveState2.addAction(driveForward2);
 		driveState2.addEvent(timer4);
+		
+		// TODO - drop cube
 		
 		AutoState idleState2 = new AutoState("<Idle State 2>");
 		IdleAction deadEnd = new IdleAction("<Dead End Action>");
@@ -760,65 +830,65 @@ public class AutoNetworkBuilder {
 		
 		AutoNetwork autoNet = new AutoNetwork("<Turning Forever Network>");
 		
-		AutoState camState = new AutoState("<Move Camera>");
-		CameraAction camAct = new CameraAction("<Camera Move>",CameraControl.GEAR_CAM_POS);
-		TimeEvent timer0 = new TimeEvent(0.1);  // timer event
+		AutoState camState = new AutoState("<Camera State>");
+		CameraAction camAct = new CameraAction("<Camera Action>");
+		TimeEvent timer1 = new TimeEvent(0.1);  // timer event
 		camState.addAction(camAct);
-		camState.addEvent(timer0);
+		camState.addEvent(timer1);
 		
 		AutoState turnState0 = new AutoState("<Turn Left State 0>");
 		TurnPIDAction turnPidAction0 = new TurnPIDAction("<Turn Left PID action 0>", -90.0, 0.5, true);
-		TimeEvent timer1 = new TimeEvent(10.0);  // drive forward timer event - allow PID time to settle
+		TimeEvent timer2 = new TimeEvent(10.0);  // drive forward timer event - allow PID time to settle
 		turnState0.addAction(turnPidAction0);
-		turnState0.addEvent(timer1);
+		turnState0.addEvent(timer2);
 
 		AutoState turnState1 = new AutoState("<Turn Right State 1>");
 		TurnPIDAction turnPidAction1 = new TurnPIDAction("<Turn right PID action 1>", 90.0, 0.5, true);
-		TimeEvent timer2 = new TimeEvent(10.0);  // drive forward timer event - allow PID time to settle
+		TimeEvent timer3 = new TimeEvent(10.0);  // drive forward timer event - allow PID time to settle
 		turnState1.addAction(turnPidAction1);
-		turnState1.addEvent(timer2);
+		turnState1.addEvent(timer3);
 						
 		AutoState turnState2 = new AutoState("<Turn Left State 2>");
 		TurnPIDAction turnPidAction2 = new TurnPIDAction("<Turn Left PID action 2>", -90.0, 0.5, true);
-		TimeEvent timer3 = new TimeEvent(10.0);  // drive forward timer event - allow PID time to settle
+		TimeEvent timer4 = new TimeEvent(10.0);  // drive forward timer event - allow PID time to settle
 		turnState2.addAction(turnPidAction2);
-		turnState2.addEvent(timer3);
+		turnState2.addEvent(timer4);
 
 		AutoState turnState3 = new AutoState("<Turn Right State 3>");
 		TurnPIDAction turnPidAction3 = new TurnPIDAction("<Turn right PID action 3>", 90.0, 0.5, true);
-		TimeEvent timer4 = new TimeEvent(10.0);  // drive forward timer event - allow PID time to settle
+		TimeEvent timer5 = new TimeEvent(10.0);  // drive forward timer event - allow PID time to settle
 		turnState3.addAction(turnPidAction3);
-		turnState3.addEvent(timer4);
+		turnState3.addEvent(timer5);
 		
 		AutoState turnState4 = new AutoState("<Turn Left State 4>");
 		TurnPIDAction turnPidAction4 = new TurnPIDAction("<Turn left PID action 4>", -90.0, 0.5, true);
-		TimeEvent timer5 = new TimeEvent(10.0);  // drive forward timer event - allow PID time to settle
+		TimeEvent timer6 = new TimeEvent(10.0);  // drive forward timer event - allow PID time to settle
 		turnState4.addAction(turnPidAction4);
-		turnState4.addEvent(timer5);
+		turnState4.addEvent(timer6);
 		
 		AutoState turnState5 = new AutoState("<Turn Right State 5>");
 		TurnPIDAction turnPidAction5 = new TurnPIDAction("<Turn right PID action 5>", 90.0, 0.5, true);
-		TimeEvent timer6 = new TimeEvent(10.0);  // drive forward timer event - allow PID time to settle
+		TimeEvent timer7 = new TimeEvent(10.0);  // drive forward timer event - allow PID time to settle
 		turnState5.addAction(turnPidAction5);
-		turnState5.addEvent(timer6);
+		turnState5.addEvent(timer7);
 		
 		AutoState turnState6 = new AutoState("<Turn Left State 6>");
 		TurnPIDAction turnPidAction6 = new TurnPIDAction("<Turn left PID action 6>", -90.0, 0.5, true);
-		TimeEvent timer7 = new TimeEvent(10.0);  // drive forward timer event - allow PID time to settle
+		TimeEvent timer8 = new TimeEvent(10.0);  // drive forward timer event - allow PID time to settle
 		turnState6.addAction(turnPidAction6);
-		turnState6.addEvent(timer7);
+		turnState6.addEvent(timer8);
 
 		AutoState turnState7 = new AutoState("<Turn Right State 7>");
 		TurnPIDAction turnPidAction7 = new TurnPIDAction("<Turn Right PID action 7>", 90.0, 0.5, true);
-		TimeEvent timer8 = new TimeEvent(10.0);  // drive forward timer event - allow PID time to settle
+		TimeEvent timer9 = new TimeEvent(10.0);  // drive forward timer event - allow PID time to settle
 		turnState7.addAction(turnPidAction7);
-		turnState7.addEvent(timer8);
+		turnState7.addEvent(timer9);
 
 		AutoState turnState8 = new AutoState("<Turn Left State 8>");
 		TurnPIDAction turnPidAction8 = new TurnPIDAction("<Turn left PID action 8>", -90.0, 0.5, true);
-		TimeEvent timer9 = new TimeEvent(10.0);  // drive forward timer event - allow PID time to settle
+		TimeEvent timer10 = new TimeEvent(10.0);  // drive forward timer event - allow PID time to settle
 		turnState4.addAction(turnPidAction8);
-		turnState4.addEvent(timer9);
+		turnState4.addEvent(timer10);
 		
 		// connect each event with a state to move to
 		camState.associateNextState(turnState0);

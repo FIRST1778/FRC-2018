@@ -5,9 +5,7 @@ import NetworkComm.InputOutputComm;
 import NetworkComm.RPIComm;
 import StateMachine.AutoStateMachine;
 import Systems.AutoDriveAssembly;
-import Systems.BallManagement;
 import Systems.CameraControl;
-import Systems.ClimberAssembly;
 import Systems.NavXSensor;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -43,8 +41,6 @@ public class Robot extends IterativeRobot {
 
 		FreezyDriveTrain.initialize();
 		CameraControl.initialize();
-		BallManagement.initialize();
-		ClimberAssembly.initialize();
 		
 		NavXSensor.initialize();
 
@@ -77,7 +73,6 @@ public class Robot extends IterativeRobot {
     	InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"MainLog","autonomous mode...");
     	
     	CameraControl.autoInit();
-    	BallManagement.autoInit();
     	 	
     	AutoDriveAssembly.autoInit(true, 0.0, false);
     	autoSM.start();
@@ -103,9 +98,7 @@ public class Robot extends IterativeRobot {
     	RPIComm.teleopInit();
     	
     	FreezyDriveTrain.teleopInit();	
-		BallManagement.teleopInit();  	
     	CameraControl.teleopInit();
-    	ClimberAssembly.teleopInit();
 		
 	}
 	
@@ -117,9 +110,7 @@ public class Robot extends IterativeRobot {
     	RPIComm.updateValues();  
 		
         FreezyDriveTrain.teleopPeriodic();   
-        BallManagement.teleopPeriodic();	
         CameraControl.teleopPeriodic();
-        ClimberAssembly.teleopPeriodic();
 	}
 	
     /**
@@ -146,7 +137,6 @@ public class Robot extends IterativeRobot {
     public void disabledInit() {
     	RPIComm.disabledInit();
 
-    	BallManagement.resetMotors();
     	AutoDriveAssembly.disabledInit();
 
     }
