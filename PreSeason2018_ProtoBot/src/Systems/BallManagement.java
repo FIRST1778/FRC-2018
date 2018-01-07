@@ -1,8 +1,8 @@
 package Systems;
 
-import com.ctre.phoenix.MotorControl.CAN.TalonSRX;
-import com.ctre.phoenix.MotorControl.ControlMode;
-import com.ctre.phoenix.MotorControl.FeedbackDevice;
+import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 
 /* deprecated 2018
 import com.ctre.phoenix.MotorControl.SmartMotorController.FeedbackDevice;
@@ -85,7 +85,7 @@ public class BallManagement {
 		//shooterMotor.reverseSensor(false);    // deprecated 2018
 		//shooterMotor.setFeedbackDevice(FeedbackDevice.QuadEncoder);   // deprecated 2018
 		shooterMotor.setSensorPhase(true);
-		shooterMotor.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, TIMEOUT_MS);
+		shooterMotor.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, 0, TIMEOUT_MS);
 
 		// FOR REFERENCE ONLY:
 		//shooterMotor.configEncoderCodesPerRev(12);   // use this ONLY if you are NOT reading Native units
@@ -99,7 +99,7 @@ public class BallManagement {
 		shooterMotor.config_kI(PROFILE_SLOT, I_COEFF, TIMEOUT_MS);
 		shooterMotor.config_kD(PROFILE_SLOT, D_COEFF, TIMEOUT_MS);
 		shooterMotor.config_kF(PROFILE_SLOT, F_COEFF, TIMEOUT_MS);
-		shooterMotor.selectProfileSlot(PROFILE_SLOT);
+		shooterMotor.selectProfileSlot(PROFILE_SLOT, 0);
 		
 		// set PID(F) for shooter motor (one profile only)
 		/*  deprecated 2018
@@ -343,7 +343,7 @@ public class BallManagement {
 		checkShooterControls();
 		
 		// DEBUG - report on shooter motor native values	
-		double speed_rpm = shooterMotor.getSelectedSensorVelocity() * NATIVE_TO_RPM_FACTOR;
+		double speed_rpm = shooterMotor.getSelectedSensorVelocity(0) * NATIVE_TO_RPM_FACTOR;
 		//double speed_rpm = shooterMotor.getSpeed() * NATIVE_TO_RPM_FACTOR;  // deprecated 2018
 		InputOutputComm.putDouble(InputOutputComm.LogTable.kMainLog,"BallMgmt/ShooterRpm_Actual", speed_rpm);
 						
@@ -351,7 +351,7 @@ public class BallManagement {
 		//double motorOutput = shooterMotor.getOutputVoltage()/shooterMotor.getBusVoltage();  // deprecated 2018
 		InputOutputComm.putDouble(InputOutputComm.LogTable.kMainLog,"BallMgmt/motorOutput", motorOutput);
 
-		double closedLoopError = shooterMotor.getClosedLoopError();
+		double closedLoopError = shooterMotor.getClosedLoopError(0);
 		InputOutputComm.putDouble(InputOutputComm.LogTable.kMainLog,"BallMgmt/closedLoopError", closedLoopError);
 		
 		double agitatorFb = agitatorServo.getPosition();

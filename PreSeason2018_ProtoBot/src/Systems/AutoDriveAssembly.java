@@ -1,9 +1,9 @@
 package Systems;
 
-import com.ctre.phoenix.MotorControl.CAN.TalonSRX;
-import com.ctre.phoenix.MotorControl.ControlMode;
-import com.ctre.phoenix.MotorControl.FeedbackDevice;
-import com.ctre.phoenix.MotorControl.NeutralMode;
+import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.FeedbackDevice;
+import com.ctre.phoenix.motorcontrol.NeutralMode;
 
 import NetworkComm.InputOutputComm;
 import Utility.HardwareIDs;
@@ -42,7 +42,7 @@ public class AutoDriveAssembly {
         
         // configure left front motor encoder and PID
         //mFrontLeft.setFeedbackDevice(FeedbackDevice.QuadEncoder); // deprecated 2018
-        mFrontLeft.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, TIMEOUT_MS);
+        mFrontLeft.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, 0, TIMEOUT_MS);
         
         //mFrontLeft.configEncoderCodesPerRev(ENCODER_PULSES_PER_REV);    // deprecated 2018
         //mFrontLeft.reverseSensor(LEFT_REVERSE_SENSOR);       // deprecated 2018
@@ -61,13 +61,13 @@ public class AutoDriveAssembly {
         mFrontLeft.config_kI(PROFILE_SLOT, I_COEFF, TIMEOUT_MS);
         mFrontLeft.config_kD(PROFILE_SLOT, D_COEFF, TIMEOUT_MS);
         mFrontLeft.config_kF(PROFILE_SLOT, F_COEFF, TIMEOUT_MS);
-        mFrontLeft.selectProfileSlot(PROFILE_SLOT);
+        mFrontLeft.selectProfileSlot(PROFILE_SLOT, 0);
         mFrontLeft.configMotionCruiseVelocity(0, TIMEOUT_MS);
         mFrontLeft.configMotionAcceleration(0, TIMEOUT_MS);
         
         // configure right front motor encoder and PID
         //mFrontRight.setFeedbackDevice(FeedbackDevice.QuadEncoder);  // deprecated 2018
-        mFrontRight.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, 100);
+        mFrontRight.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, 0, 100);
         
        //mFrontRight.configEncoderCodesPerRev(ENCODER_PULSES_PER_REV);    // deprecated 2018
         //mFrontRight.reverseSensor(RIGHT_REVERSE_SENSOR);   // deprecated 2018
@@ -86,7 +86,7 @@ public class AutoDriveAssembly {
         mFrontRight.config_kI(PROFILE_SLOT, I_COEFF, TIMEOUT_MS);
         mFrontRight.config_kD(PROFILE_SLOT, D_COEFF, TIMEOUT_MS);
         mFrontRight.config_kF(PROFILE_SLOT, F_COEFF, TIMEOUT_MS);
-        mFrontRight.selectProfileSlot(PROFILE_SLOT);
+        mFrontRight.selectProfileSlot(PROFILE_SLOT, 0);
         mFrontRight.configMotionCruiseVelocity(0, TIMEOUT_MS);
         mFrontRight.configMotionAcceleration(0, TIMEOUT_MS);
         
@@ -252,8 +252,8 @@ public class AutoDriveAssembly {
 		//double leftPos = mFrontLeft.getPosition() * INCHES_PER_REV;
 		
 		// Encoders now read only raw encoder values - convert raw to inches directly
-		double rightPos = mFrontRight.getSelectedSensorPosition()*INCHES_PER_ENCODER_PULSE;
-		double leftPos = mFrontLeft.getSelectedSensorPosition()*INCHES_PER_ENCODER_PULSE;
+		double rightPos = mFrontRight.getSelectedSensorPosition(0)*INCHES_PER_ENCODER_PULSE;
+		double leftPos = mFrontLeft.getSelectedSensorPosition(0)*INCHES_PER_ENCODER_PULSE;
 		//double rightPos = mFrontRight.getPosition()*INCHES_PER_ENCODER_PULSE;   // deprecated 2018
 		//double leftPos = mFrontLeft.getPosition()*INCHES_PER_ENCODER_PULSE;		// deprecated 2018
 				

@@ -1,7 +1,7 @@
 package Systems;
 
-import com.ctre.phoenix.MotorControl.ControlMode;
-import com.ctre.phoenix.MotorControl.CAN.TalonSRX;
+import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
 import NetworkComm.InputOutputComm;
 import Utility.HardwareIDs;
