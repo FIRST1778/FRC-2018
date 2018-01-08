@@ -103,9 +103,14 @@ public class AutoStateMachine {
 			// auto state machine operation disabled
 			autoNetworkEnable = false;
 		}
-		else
+		else if (action == AutoChooser.DRIVE_FORWARD)
 		{
-			// Non-zero network - auto mode selected!
+			// override simple drive forward network
+			autoNetworkEnable = true;
+			netIndex = AutoNetworkBuilder.DRIVE_FORWARD;
+		}
+		else  // CUBE OPS, depends on field config and position
+		{
 			autoNetworkEnable = true;
 			
 			switch (position) {
@@ -142,13 +147,9 @@ public class AutoStateMachine {
 			// second priority - turn on scale
 			netIndex = AutoNetworkBuilder.DEPOSIT_CUBE_SCALE_LEFT;
 		}
-		else if (fieldAllianceColors[OPP_SWITCH] == LEFT) {
-			// third priority - turn off opp switch
-			netIndex = AutoNetworkBuilder.DEPOSIT_CUBE_OPP_SWITCH_LEFT;
-		}
 		else {
-			// if no colors on our side, just drive forward
-			netIndex = AutoNetworkBuilder.DRIVE_FORWARD;
+			// third priority - move into position for other side of scale
+			netIndex = AutoNetworkBuilder.MOVE_TO_SCALE_RIGHT_FROM_LEFT;
 		}
 		
 		return netIndex;
@@ -186,13 +187,9 @@ public class AutoStateMachine {
 			// second priority - turn on scale
 			netIndex = AutoNetworkBuilder.DEPOSIT_CUBE_SCALE_RIGHT;
 		}
-		else if (fieldAllianceColors[OPP_SWITCH] == RIGHT) {
-			// third priority - turn off opp switch
-			netIndex = AutoNetworkBuilder.DEPOSIT_CUBE_OPP_SWITCH_RIGHT;
-		}
 		else {
-			// if no colors on our side, just drive forward
-			netIndex = AutoNetworkBuilder.DRIVE_FORWARD;
+			// third priority - move into position for other side of scale
+			netIndex = AutoNetworkBuilder.MOVE_TO_SCALE_LEFT_FROM_RIGHT;
 		}
 
 		return netIndex;
