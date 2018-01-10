@@ -1,7 +1,6 @@
 package StateMachine;
 
 import java.util.ArrayList;
-import Systems.CameraControl;
 
 public class AutoNetworkBuilder {
 		
@@ -67,20 +66,10 @@ public class AutoNetworkBuilder {
 		
 		AutoNetwork autoNet = new AutoNetwork("<Do Nothing Network>");
 		
-		AutoState camState = new AutoState("<Camera State>");
-		CameraAction camAct = new CameraAction("<Camera Action>");
-		TimeEvent timer1 = new TimeEvent(0.1);  // timer event
-		camState.addAction(camAct);
-		camState.addEvent(timer1);
-
 		AutoState idleState = new AutoState("<Idle State>");
 		IdleAction deadEnd = new IdleAction("<Dead End Action>");
 		idleState.addAction(deadEnd);
 
-		// connect each event with a state to move to
-		camState.associateNextState(idleState);
-
-		autoNet.addState(camState);	
 		autoNet.addState(idleState);	
 		
 		return autoNet;
@@ -93,13 +82,7 @@ public class AutoNetworkBuilder {
 	private static AutoNetwork createDriveForward() {
 		
 		AutoNetwork autoNet = new AutoNetwork("<Drive Forward Network>");
-		
-		AutoState camState = new AutoState("<Camera State>");
-		CameraAction camAct = new CameraAction("<Camera Action>");
-		TimeEvent timer1 = new TimeEvent(0.1);  // timer event
-		camState.addAction(camAct);
-		camState.addEvent(timer1);
-		
+				
 		/*
 		AutoState driveState = new AutoState("<Drive State 1>");
 		DriveForwardAction driveForward = new DriveForwardAction("<Drive Forward Action>", 0.3, true, 0.0);
@@ -119,10 +102,8 @@ public class AutoNetworkBuilder {
 		idleState2.addAction(deadEnd);
 				
 		// connect each event with a state to move to
-		camState.associateNextState(driveState);
 		driveState.associateNextState(idleState2);
 						
-		autoNet.addState(camState);
 		autoNet.addState(driveState);
 		autoNet.addState(idleState2);
 				
@@ -140,12 +121,6 @@ public class AutoNetworkBuilder {
 		
 		AutoNetwork autoNet = new AutoNetwork("<Deposit Cube Switch (left side) Network>");
 		
-		AutoState camState = new AutoState("<Camera State>");
-		CameraAction camAct = new CameraAction("<Camera Action>");
-		TimeEvent timer1 = new TimeEvent(0.1);  // timer event
-		camState.addAction(camAct);
-		camState.addEvent(timer1);
-
 		/*
 		AutoState driveState = new AutoState("<Drive State 1>");
 		DriveForwardAction driveForward = new DriveForwardAction("<Drive Forward Action>", 0.3, true, 0.0);
@@ -197,12 +172,10 @@ public class AutoNetworkBuilder {
 		idleState2.addAction(deadEnd);
 				
 		// connect each event with a state to move to
-		camState.associateNextState(driveState);
 		driveState.associateNextState(turnRightState);
 		turnRightState.associateNextState(driveState2);
 		driveState2.associateNextState(idleState2);
 						
-		autoNet.addState(camState);
 		autoNet.addState(driveState);
 		autoNet.addState(turnRightState);
 		autoNet.addState(driveState2);
@@ -222,12 +195,6 @@ public class AutoNetworkBuilder {
 		
 		AutoNetwork autoNet = new AutoNetwork("<Deposit Cube Scale (left side) Network>");
 		
-		AutoState camState = new AutoState("<Camera State>");
-		CameraAction camAct = new CameraAction("<Camera Action>");
-		TimeEvent timer1 = new TimeEvent(0.1);  // timer event
-		camState.addAction(camAct);
-		camState.addEvent(timer1);
-
 		/*
 		AutoState driveState = new AutoState("<Drive State 1>");
 		DriveForwardAction driveForward = new DriveForwardAction("<Drive Forward Action>", 0.3, true, 0.0);
@@ -279,12 +246,10 @@ public class AutoNetworkBuilder {
 		idleState2.addAction(deadEnd);
 				
 		// connect each event with a state to move to
-		camState.associateNextState(driveState);
 		driveState.associateNextState(turnRightState);
 		turnRightState.associateNextState(driveState2);
 		driveState2.associateNextState(idleState2);
 						
-		autoNet.addState(camState);
 		autoNet.addState(driveState);
 		autoNet.addState(turnRightState);
 		autoNet.addState(driveState2);
@@ -303,12 +268,6 @@ public class AutoNetworkBuilder {
 		
 		AutoNetwork autoNet = new AutoNetwork("<Move to Scale Right (left side) Network>");
 		
-		AutoState camState = new AutoState("<Camera State>");
-		CameraAction camAct = new CameraAction("<Camera Action>");
-		TimeEvent timer1 = new TimeEvent(0.1);  // timer event
-		camState.addAction(camAct);
-		camState.addEvent(timer1);
-
 		/*
 		AutoState driveState = new AutoState("<Drive State 1>");
 		DriveForwardAction driveForward = new DriveForwardAction("<Drive Forward Action>", 0.3, true, 0.0);
@@ -356,12 +315,10 @@ public class AutoNetworkBuilder {
 		idleState2.addAction(deadEnd);
 				
 		// connect each event with a state to move to
-		camState.associateNextState(driveState);
 		driveState.associateNextState(turnRightState);
 		turnRightState.associateNextState(driveState2);
 		driveState2.associateNextState(idleState2);
 						
-		autoNet.addState(camState);
 		autoNet.addState(driveState);
 		autoNet.addState(turnRightState);
 		autoNet.addState(driveState2);
@@ -383,12 +340,6 @@ public class AutoNetworkBuilder {
 		
 		AutoNetwork autoNet = new AutoNetwork("<Deposit Cube Switch (center left) Network>");
 		
-		AutoState camState = new AutoState("<Camera State>");
-		CameraAction camAct = new CameraAction("<Camera Action>");
-		TimeEvent timer1 = new TimeEvent(0.1);  // timer event
-		camState.addAction(camAct);
-		camState.addEvent(timer1);
-
 		/*
 		AutoState driveState = new AutoState("<Drive State 1>");
 		DriveForwardAction driveForward = new DriveForwardAction("<Drive Forward Action>", 0.3, true, 0.0);
@@ -456,14 +407,12 @@ public class AutoNetworkBuilder {
 		idleState2.addAction(deadEnd);
 				
 		// connect each event with a state to move to
-		camState.associateNextState(driveState);
 		driveState.associateNextState(turnLeftState);
 		turnLeftState.associateNextState(driveState2);
 		driveState2.associateNextState(turnRightState);
 		turnRightState.associateNextState(driveState3);
 		driveState3.associateNextState(idleState2);
 						
-		autoNet.addState(camState);
 		autoNet.addState(driveState);
 		autoNet.addState(turnLeftState);
 		autoNet.addState(driveState2);
@@ -487,12 +436,6 @@ public class AutoNetworkBuilder {
 		
 		AutoNetwork autoNet = new AutoNetwork("<Deposit Cube Switch (center right) Network>");
 		
-		AutoState camState = new AutoState("<Camera State>");
-		CameraAction camAct = new CameraAction("<Camera Action>");
-		TimeEvent timer1 = new TimeEvent(0.1);  // timer event
-		camState.addAction(camAct);
-		camState.addEvent(timer1);
-
 		AutoState driveState = new AutoState("<Drive State 1>");
 		DriveForwardMagicAction driveForwardMagic = new DriveForwardMagicAction("<Drive Forward Magic Action>", 61.5, 300, 150, true, 0.0);
 		//TimeEvent timer2 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
@@ -544,14 +487,12 @@ public class AutoNetworkBuilder {
 		idleState2.addAction(deadEnd);
 				
 		// connect each event with a state to move to
-		camState.associateNextState(driveState);
 		driveState.associateNextState(turnRightState);
 		turnRightState.associateNextState(driveState2);
 		driveState2.associateNextState(turnLeftState);
 		turnLeftState.associateNextState(driveState3);
 		driveState3.associateNextState(idleState2);
 						
-		autoNet.addState(camState);
 		autoNet.addState(driveState);
 		autoNet.addState(turnRightState);
 		autoNet.addState(driveState2);
@@ -575,12 +516,6 @@ public class AutoNetworkBuilder {
 		
 		AutoNetwork autoNet = new AutoNetwork("<Deposit Cube Switch (Right Side) Network>");
 				
-		AutoState camState = new AutoState("<Camera State>");
-		CameraAction camAct = new CameraAction("<Camera Action>");
-		TimeEvent timer1 = new TimeEvent(0.1);  // timer event
-		camState.addAction(camAct);
-		camState.addEvent(timer1);
-
 		AutoState driveState = new AutoState("<Drive State 1>");
 		DriveForwardMagicAction driveForwardMagic = new DriveForwardMagicAction("<Drive Forward Magic Action>", 79.0, 300, 150, true, 0.0);
 		//TimeEvent timer2 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
@@ -616,12 +551,10 @@ public class AutoNetworkBuilder {
 		idleState2.addAction(driveForward4);
 				
 		// connect each event with a state to move to
-		camState.associateNextState(driveState);
 		driveState.associateNextState(turnLeftState);
 		turnLeftState.associateNextState(driveState2);
 		driveState2.associateNextState(idleState2);
 						
-		autoNet.addState(camState);
 		autoNet.addState(driveState);
 		autoNet.addState(turnLeftState);
 		autoNet.addState(driveState2);
@@ -641,13 +574,7 @@ public class AutoNetworkBuilder {
 	private static AutoNetwork createDepositCubeScaleRight() {
 		
 		AutoNetwork autoNet = new AutoNetwork("<Deposit Cube Scale (Right Side) Network>");
-				
-		AutoState camState = new AutoState("<Camera State>");
-		CameraAction camAct = new CameraAction("<Camera Action>");
-		TimeEvent timer1 = new TimeEvent(0.1);  // timer event
-		camState.addAction(camAct);
-		camState.addEvent(timer1);
-		
+						
 		AutoState driveState = new AutoState("<Drive State 1>");
 		DriveForwardMagicAction driveForwardMagic = new DriveForwardMagicAction("<Drive Forward Magic Action>", 79.0, 300, 150, true, 0.0);
 		//TimeEvent timer2 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
@@ -683,12 +610,10 @@ public class AutoNetworkBuilder {
 		idleState2.addAction(driveForward4);
 				
 		// connect each event with a state to move to
-		camState.associateNextState(driveState);
 		driveState.associateNextState(turnLeftState);
 		turnLeftState.associateNextState(driveState2);
 		driveState2.associateNextState(idleState2);
 						
-		autoNet.addState(camState);
 		autoNet.addState(driveState);
 		autoNet.addState(turnLeftState);
 		autoNet.addState(driveState2);
@@ -706,13 +631,7 @@ public class AutoNetworkBuilder {
 	private static AutoNetwork createMoveToScaleLeftFromRight() {
 		
 		AutoNetwork autoNet = new AutoNetwork("<Move to Scale Left (Right Side) Network>");
-				
-		AutoState camState = new AutoState("<Camera State>");
-		CameraAction camAct = new CameraAction("<Camera Action>");
-		TimeEvent timer1 = new TimeEvent(0.1);  // timer event
-		camState.addAction(camAct);
-		camState.addEvent(timer1);
-		
+						
 		AutoState driveState = new AutoState("<Drive State 1>");
 		DriveForwardMagicAction driveForwardMagic = new DriveForwardMagicAction("<Drive Forward Magic Action>", 79.0, 300, 150, true, 0.0);
 		//TimeEvent timer2 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
@@ -744,12 +663,10 @@ public class AutoNetworkBuilder {
 		idleState2.addAction(driveForward4);
 				
 		// connect each event with a state to move to
-		camState.associateNextState(driveState);
 		driveState.associateNextState(turnLeftState);
 		turnLeftState.associateNextState(driveState2);
 		driveState2.associateNextState(idleState2);
 						
-		autoNet.addState(camState);
 		autoNet.addState(driveState);
 		autoNet.addState(turnLeftState);
 		autoNet.addState(driveState2);
@@ -766,12 +683,6 @@ public class AutoNetworkBuilder {
 	private static AutoNetwork createTurningForeverNetwork() {
 		
 		AutoNetwork autoNet = new AutoNetwork("<Turning Forever Network>");
-		
-		AutoState camState = new AutoState("<Camera State>");
-		CameraAction camAct = new CameraAction("<Camera Action>");
-		TimeEvent timer1 = new TimeEvent(0.1);  // timer event
-		camState.addAction(camAct);
-		camState.addEvent(timer1);
 		
 		AutoState turnState0 = new AutoState("<Turn Left State 0>");
 		TurnPIDAction turnPidAction0 = new TurnPIDAction("<Turn Left PID action 0>", -90.0, 0.5, true);
@@ -828,7 +739,6 @@ public class AutoNetworkBuilder {
 		turnState4.addEvent(timer10);
 		
 		// connect each event with a state to move to
-		camState.associateNextState(turnState0);
 		turnState0.associateNextState(turnState1);
 		turnState1.associateNextState(turnState2);
 		turnState2.associateNextState(turnState3);
@@ -839,7 +749,6 @@ public class AutoNetworkBuilder {
 		turnState7.associateNextState(turnState8);
 		turnState8.associateNextState(turnState0);   // go back to right turning
 						
-		autoNet.addState(camState);
 		autoNet.addState(turnState0);
 		autoNet.addState(turnState1);
 		autoNet.addState(turnState2);

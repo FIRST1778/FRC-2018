@@ -2,14 +2,10 @@ package org.usfirst.frc.team1778.robot;
 
 import FreezyDrive.FreezyDriveTrain;
 import NetworkComm.InputOutputComm;
-import NetworkComm.RPIComm;
 import StateMachine.AutoStateMachine;
 import Systems.AutoDriveAssembly;
-import Systems.CameraControl;
 import Systems.NavXSensor;
 import edu.wpi.first.wpilibj.IterativeRobot;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -19,10 +15,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * project.
  */
 public class Robot extends IterativeRobot {
-	final String defaultAuto = "Default";
-	final String customAuto = "My Auto";
-	String autoSelected;
-	SendableChooser<String> chooser = new SendableChooser<>();
 
 	protected AutoStateMachine autoSM;
 
@@ -32,16 +24,10 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void robotInit() {
-		chooser.addDefault("Default Auto", defaultAuto);
-		chooser.addObject("My Auto", customAuto);
-		SmartDashboard.putData("Auto choices", chooser);
 		
-		RPIComm.initialize();
 		InputOutputComm.initialize();
 
-		FreezyDriveTrain.initialize();
-		CameraControl.initialize();
-		
+		FreezyDriveTrain.initialize();		
 		NavXSensor.initialize();
 
 		autoSM = new AutoStateMachine();
@@ -64,16 +50,8 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void autonomousInit() {
-		autoSelected = chooser.getSelected();
-		// autoSelected = SmartDashboard.getString("Auto Selector",
-		// defaultAuto);
-		System.out.println("Auto selected: " + autoSelected);
-
-    	RPIComm.autoInit();
     	InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"MainLog","autonomous mode...");
-    	
-    	CameraControl.autoInit();
-    	 	
+    	    	 	
     	AutoDriveAssembly.autoInit(true, 0.0, false);
     	autoSM.start();
 	}
@@ -83,7 +61,6 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void autonomousPeriodic() {
-    	RPIComm.updateValues();
     	
     	autoSM.process();
  
@@ -95,10 +72,8 @@ public class Robot extends IterativeRobot {
 
 	public void teleopInit() {
     	InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"MainLog","teleop mode...");
-    	RPIComm.teleopInit();
     	
     	FreezyDriveTrain.teleopInit();	
-    	CameraControl.teleopInit();
 		
 	}
 	
@@ -107,10 +82,8 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void teleopPeriodic() {
-    	RPIComm.updateValues();  
 		
         FreezyDriveTrain.teleopPeriodic();   
-        CameraControl.teleopPeriodic();
 	}
 	
     /**
@@ -135,7 +108,6 @@ public class Robot extends IterativeRobot {
 	}
 	
     public void disabledInit() {
-    	RPIComm.disabledInit();
 
     	AutoDriveAssembly.disabledInit();
 

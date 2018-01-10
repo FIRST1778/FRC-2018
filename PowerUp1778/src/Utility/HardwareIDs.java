@@ -9,7 +9,6 @@ public class HardwareIDs {
 	public static final int RIGHT_REAR_TALON_ID = 4;
 
 	// Relays
-	public static final int CAMERA_LED_RELAY_CHANNEL = 0;
 	
 	// PWM devices	
 
@@ -24,9 +23,6 @@ public class HardwareIDs {
 	// input control IDs
 	public static final int DRIVER_CONTROL_ID = 0;
 	public static final int GAMEPAD_ID = 1;
-
-	// driver (interlink) controls
-	public static final int CAMERA_LED_STROBE_BUTTON = 5;
 	
 	// copilot (gamepad) controls
 	public static final int COLLECTOR_OUT_AXIS = 2;
