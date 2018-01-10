@@ -33,10 +33,10 @@ public class AutoChooser {
 
 		// position chooser setup
 		chooser_position = new SendableChooser<ModeSelection>();	
-		chooser_position.addDefault("DO_NOTHING", new ModeSelection(POS_UNDEFINED));
-		chooser_position.addObject("DRIVE_FORWARD", new ModeSelection(LEFT_POSITION));
-		chooser_position.addObject("DEPOSIT_CUBE_SWITCH", new ModeSelection(CENTER_POSITION));
-		chooser_position.addObject("DEPOSIT_CUBE_SCALE", new ModeSelection(RIGHT_POSITION));
+		chooser_position.addDefault("POS_UNDEFINED", new ModeSelection(POS_UNDEFINED));
+		chooser_position.addObject("LEFT_POSITION", new ModeSelection(LEFT_POSITION));
+		chooser_position.addObject("CENTER_POSITION", new ModeSelection(CENTER_POSITION));
+		chooser_position.addObject("RIGHT_POSITION", new ModeSelection(RIGHT_POSITION));
 		SmartDashboard.putData("AutoChooser_Position", chooser_position);
 
 		// action chooser setup

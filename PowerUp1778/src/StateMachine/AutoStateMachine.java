@@ -208,6 +208,8 @@ public class AutoStateMachine {
 			else
 				fieldAllianceColors[i] = RIGHT;
 		}
+		InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"Auto/FieldConfig", gameData);
+
 	}
 	
 }

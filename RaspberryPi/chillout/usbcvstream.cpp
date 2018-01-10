@@ -32,19 +32,19 @@ const int maxFps = 20;
 
 // Target 1
 const cv::Point highCenter(160,80);
-const cv::Point highSize(80,30);
+const cv::Point highSize(80,80);
 const cv::Point highUL(highCenter.x - (highSize.x/2), highCenter.y - (highSize.y/2));
 const cv::Point highLR(highCenter.x + (highSize.x/2), highCenter.y + (highSize.y/2));
 
 // Target 2
 const cv::Point middleCenter(160,120);
-const cv::Point middleSize(80,30);
+const cv::Point middleSize(80,80);
 const cv::Point middleUL(middleCenter.x - (middleSize.x/2), middleCenter.y - (middleSize.y/2));
 const cv::Point middleLR(middleCenter.x + (middleSize.x/2), middleCenter.y + (middleSize.y/2));
 
 // Target 3
-const cv::Point lowCenter(160,160);
-const cv::Point lowSize(80,30);
+const cv::Point lowCenter(160,195);
+const cv::Point lowSize(80,80);
 const cv::Point lowUL(middleCenter.x - (lowSize.x/2), lowCenter.y - (lowSize.y/2));
 const cv::Point lowLR(middleCenter.x + (lowSize.x/2), lowCenter.y + (lowSize.y/2));
 
@@ -107,9 +107,9 @@ void draw_overlay(cv::Mat& inImg)
 	//cv::line(inImg,gearLineLowerCenter,gearLineLowerBottom,cv::Scalar(0,255,255), 1, 8);
 	
 	// draw boxes for boiler
-	cv::rectangle(inImg, highUL, highLR, cv::Scalar(255, 0, 0), 2, 8, 0);					
-	cv::rectangle(inImg,middleUL,middleLR, cv::Scalar(0, 255, 0), 2, 8, 0);					
-	cv::rectangle(inImg,lowUL, lowLR, cv::Scalar(0, 0, 255), 2, 8, 0);					
+	//cv::rectangle(inImg, highUL, highLR, cv::Scalar(0, 255, 0), 2, 8, 0);					
+	//cv::rectangle(inImg,middleUL,middleLR, cv::Scalar(0, 255, 0), 2, 8, 0);					
+	cv::rectangle(inImg,lowUL, lowLR, cv::Scalar(0, 255, 0), 2, 8, 0);					
 
 }
 
@@ -506,6 +506,7 @@ int main() {
 	// get webpage control values
 	get_values();                 
 	 
+	/*
     if (checkAutoState())   // autonomous state check
     {
 		processAuto(inputImg, cvsource);
@@ -514,5 +515,9 @@ int main() {
 	{
 		processTeleop(inputImg, cvsource);		
 	}
+	*/
+	
+	// only do teleop camera (no auto)
+	processTeleop(inputImg, cvsource);
   }
 }
