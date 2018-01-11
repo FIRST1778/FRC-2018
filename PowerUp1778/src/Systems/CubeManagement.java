@@ -26,6 +26,9 @@ public class CubeManagement {
 		
 	private static final double COLLECTOR_IN_LEVEL = -0.75;
 	private static final double COLLECTOR_OUT_LEVEL = 0.75;
+
+	private static final double LIFT_UP_LEVEL = -0.75;
+	private static final double LIFT_DOWN_LEVEL = 0.75;
 	
 	private static final double DEAD_ZONE_THRESHOLD = 0.05;
 		    
@@ -78,11 +81,11 @@ public class CubeManagement {
 	private static void checkCollectorControls() {
 						
 		// collector control
-		double collectorLevel = gamepad.getRawAxis(HardwareIDs.COLLECTOR_OUT_AXIS);
+		double collectorLevel = gamepad.getRawAxis(HardwareIDs.COLLECTOR_IN_AXIS);
 		if (Math.abs(collectorLevel) > DEAD_ZONE_THRESHOLD)
-			collectorLevel = COLLECTOR_OUT_LEVEL;
-		else if (gamepad.getRawButton(HardwareIDs.COLLECTOR_IN_BUTTON))
 			collectorLevel = COLLECTOR_IN_LEVEL;
+		else if (gamepad.getRawButton(HardwareIDs.COLLECTOR_OUT_BUTTON))
+			collectorLevel = COLLECTOR_OUT_LEVEL;
 		else
 			collectorLevel = 0.0;
 		InputOutputComm.putDouble(InputOutputComm.LogTable.kMainLog,"CubeMgmt/CollectorLevel", collectorLevel);
@@ -92,7 +95,16 @@ public class CubeManagement {
 	}
 	
 	private static void checkLiftControls() {
-		// TODO - write lift motor code
+		// cube lift control
+		double liftLevel = gamepad.getRawAxis(HardwareIDs.LIFT_DOWN_AXIS);
+		if (Math.abs(liftLevel) > DEAD_ZONE_THRESHOLD)
+			liftLevel = LIFT_DOWN_LEVEL;
+		else if (gamepad.getRawButton(HardwareIDs.LIFT_UP_BUTTON))
+			liftLevel = LIFT_UP_LEVEL;
+		else
+			liftLevel = 0.0;
+		InputOutputComm.putDouble(InputOutputComm.LogTable.kMainLog,"CubeMgmt/LiftLevel", liftLevel);
+		liftMotor.set(ControlMode.PercentOutput, liftLevel);
 	}
 	
 	public static void autoInit() {
