@@ -64,11 +64,11 @@ public class CalibrateTargetAction extends Action {
 			double leftVal = RPIComm.getLeftDriveValue();
 			double rightVal = RPIComm.getRightDriveValue();
 			
-			AutoDriveAssembly.drive(leftVal, rightVal, 0);
+			AutoDriveAssembly.drive(leftVal, rightVal);
 		}
 		else {
 			// no target - stop motors
-			AutoDriveAssembly.drive(0, 0, 0);
+			AutoDriveAssembly.drive(0, 0);
 		}
 		
 		super.process();
@@ -77,7 +77,7 @@ public class CalibrateTargetAction extends Action {
 	// state cleanup and exit
 	public void cleanup() {
 		// do some calibrate cleanup
-		AutoDriveAssembly.drive(0, 0, 0);
+		AutoDriveAssembly.drive(0, 0);
 					
 		// cleanup base class
 		super.cleanup();

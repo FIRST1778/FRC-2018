@@ -98,7 +98,7 @@ public class AutoStateMachine {
 		
 		int netIndex = AutoNetworkBuilder.DO_NOTHING;
 		
-		if (action == AutoChooser.DO_NOTHING)
+		if ((action == AutoChooser.DO_NOTHING) || (position == AutoChooser.POS_UNDEFINED))
 		{
 			// auto state machine operation disabled
 			autoNetworkEnable = false;

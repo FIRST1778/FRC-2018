@@ -27,7 +27,7 @@ public class FreezyDriveTrain {
 		motorFrontR = new TalonSRX(RIGHT_FRONT_TALON_ID);
 		motorRearL = new TalonSRX(LEFT_REAR_TALON_ID);
 		motorRearR = new TalonSRX(RIGHT_REAR_TALON_ID);
-		
+				
 		driveControl = new DriveControl();
 		
 		Controller.initialize();

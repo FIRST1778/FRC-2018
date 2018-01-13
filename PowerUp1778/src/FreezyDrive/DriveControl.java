@@ -123,10 +123,12 @@ public class DriveControl {
         
 		
 		// sends final values to drive train
-		FreezyDriveTrain.ChangeSpeed(-leftPower,rightPower);
+		//FreezyDriveTrain.ChangeSpeed(-leftPower,rightPower);
+		FreezyDriveTrain.ChangeSpeed(-leftPower,-rightPower);
 		
 		InputOutputComm.putDouble(InputOutputComm.LogTable.kDriveLog,"Teleop/leftPower", -leftPower);		
-		InputOutputComm.putDouble(InputOutputComm.LogTable.kDriveLog,"Teleop/rightPower", rightPower);
+		//InputOutputComm.putDouble(InputOutputComm.LogTable.kDriveLog,"Teleop/rightPower", rightPower);
+		InputOutputComm.putDouble(InputOutputComm.LogTable.kDriveLog,"Teleop/rightPower", -rightPower);
 
 	}
 	

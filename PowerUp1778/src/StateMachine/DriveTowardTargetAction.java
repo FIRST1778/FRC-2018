@@ -104,7 +104,7 @@ public class DriveTowardTargetAction extends Action {
 		}
 		
 		// send drive speeds to motors
-		AutoDriveAssembly.drive(leftSpeed, rightSpeed, 0);
+		AutoDriveAssembly.drive(leftSpeed, rightSpeed);
 						
 		super.process();
 	}
