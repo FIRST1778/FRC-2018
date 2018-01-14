@@ -3,6 +3,7 @@ package Systems;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
+import com.ctre.phoenix.motorcontrol.NeutralMode;
 
 /* deprecated 2018
 import com.ctre.phoenix.MotorControl.SmartMotorController.FeedbackDevice;
@@ -12,6 +13,8 @@ import com.ctre.phoenix.MotorControl.SmartMotorController.TalonControlMode;
 
 import NetworkComm.InputOutputComm;
 import Utility.HardwareIDs;
+import edu.wpi.first.wpilibj.Compressor;
+import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Relay;
 import edu.wpi.first.wpilibj.RobotController;
@@ -21,6 +24,9 @@ import edu.wpi.first.wpilibj.Spark;
 public class CubeManagement {
 	
 	private static boolean initialized = false;
+	private static final int TIMEOUT_MS = 0;  // set to zero if skipping confirmation
+	private static final int PIDLOOP_IDX = 0;  // set to zero if primary loop
+	private static final int PROFILE_SLOT = 0;
 	
 	private static boolean feeding = false;
 		
@@ -42,15 +48,27 @@ public class CubeManagement {
 		// reset trigger init time
 		initTriggerTime = RobotController.getFPGATime();
 
-        // create and reset collector relay
-		//collectorSolenoid = new Spark(HardwareIDs.COLLECTOR_SOLENOID_PWM_ID);
-                
-		// create motors & servos
+        // create pneumatics objects
+		compress = new Compressor(HardwareIDs.PCM_ID);
+		flipperSolenoid = new DoubleSolenoid(HardwareIDs.PCM_ID, HardwareIDs.FLIPPER_UP_SOLENOID, HardwareIDs.FLIPPER_DOWN_SOLENOID);
+            
+		
+		// create motors
 		leftCollectorMotor = new TalonSRX(HardwareIDs.LEFT_COLLECTOR_TALON_ID);
 		rightCollectorMotor = new TalonSRX(HardwareIDs.RIGHT_COLLECTOR_TALON_ID);
+
+		leftCollectorMotor.setNeutralMode(NeutralMode.Brake);
+		rightCollectorMotor.setNeutralMode(NeutralMode.Brake);
 		
-		liftMotor = new TalonSRX(HardwareIDs.LIFT_TALON_ID);
-		
+		leftLowerLiftMotor = new TalonSRX(HardwareIDs.LEFT_LOWER_LIFT_TALON_ID);
+		rightLowerLiftMotor = new TalonSRX(HardwareIDs.LEFT_LOWER_LIFT_TALON_ID);
+		leftUpperLiftMotor = new TalonSRX(HardwareIDs.RIGHT_UPPER_LIFT_TALON_ID);
+		rightUpperLiftMotor = new TalonSRX(HardwareIDs.RIGHT_UPPER_LIFT_TALON_ID);
+
+		leftLowerLiftMotor.setNeutralMode(NeutralMode.Brake);
+		rightLowerLiftMotor.setNeutralMode(NeutralMode.Brake);
+		leftUpperLiftMotor.setNeutralMode(NeutralMode.Brake);
+		rightUpperLiftMotor.setNeutralMode(NeutralMode.Brake);
 		
 		// make sure all motors are off
 		resetMotors();
@@ -60,10 +78,17 @@ public class CubeManagement {
 		initialized = true;
 	}
 						
-	// shooter and support motors
+	// collector intake motors
 	private static TalonSRX leftCollectorMotor, rightCollectorMotor; 
-	private static TalonSRX liftMotor;
+	
+	// lift motors
+	private static TalonSRX leftUpperLiftMotor, rightUpperLiftMotor;
+	private static TalonSRX leftLowerLiftMotor, rightLowerLiftMotor;
 		
+	// pneumatics objects
+	private static Compressor compress;
+	private static DoubleSolenoid flipperSolenoid;
+	
 	private static Joystick gamepad;
 		
 	// wait 0.25 s between button pushes on shooter
@@ -74,9 +99,23 @@ public class CubeManagement {
 	{		
 		leftCollectorMotor.set(ControlMode.PercentOutput, 0);
 		rightCollectorMotor.set(ControlMode.PercentOutput, 0);	
-		liftMotor.set(ControlMode.PercentOutput, 0);
+		
+		leftLowerLiftMotor.set(ControlMode.PercentOutput, 0);
+		leftUpperLiftMotor.set(ControlMode.PercentOutput, 0);
+		rightLowerLiftMotor.set(ControlMode.PercentOutput, 0);
+		rightUpperLiftMotor.set(ControlMode.PercentOutput, 0);
+		
 	}
 	
+	public static void flipperUp()
+	{
+		flipperSolenoid.set(DoubleSolenoid.Value.kForward);		
+	}
+	
+	public static void flipperDown()
+	{
+		flipperSolenoid.set(DoubleSolenoid.Value.kReverse);		
+	}
 		
 	private static void checkCollectorControls() {
 						
@@ -104,12 +143,27 @@ public class CubeManagement {
 		else
 			liftLevel = 0.0;
 		InputOutputComm.putDouble(InputOutputComm.LogTable.kMainLog,"CubeMgmt/LiftLevel", liftLevel);
-		liftMotor.set(ControlMode.PercentOutput, liftLevel);
+		leftLowerLiftMotor.set(ControlMode.PercentOutput, liftLevel);
+		rightLowerLiftMotor.set(ControlMode.PercentOutput, liftLevel);
+		leftUpperLiftMotor.set(ControlMode.PercentOutput, liftLevel);
+		rightUpperLiftMotor.set(ControlMode.PercentOutput, liftLevel);
+	}
+	
+	private static void checkFlipperControls() {
+		if (gamepad.getRawButton(HardwareIDs.FLIPPER_UP_BUTTON))
+		{
+			flipperUp();
+		}
+		else if (gamepad.getRawButton(HardwareIDs.FLIPPER_DOWN_BUTTON))
+		{
+			flipperDown();	
+		}
 	}
 	
 	public static void autoInit() {
 				
 		resetMotors();
+		flipperUp();
 		
         initTriggerTime = RobotController.getFPGATime();
 	}
@@ -117,21 +171,8 @@ public class CubeManagement {
 	public static void teleopInit() {
 				
 		resetMotors();
-		
-		// spawn a wait thread to turn relays back off after a number of seconds
-		/*
-		new Thread() {
-			public void run() {
-				try {
-					Thread.sleep(3000);  // wait a number of sec before starting to feed
-					gearTrayOff();	 	 // turn relays off
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		}.start();
-		*/
-		
+		flipperUp();
+				
         initTriggerTime = RobotController.getFPGATime();
         
 	}
@@ -140,7 +181,6 @@ public class CubeManagement {
 		
 		checkCollectorControls();
 		checkLiftControls();
-
+		checkFlipperControls();
 	}
-	
 }
