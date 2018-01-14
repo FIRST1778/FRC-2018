@@ -6,8 +6,6 @@ import Systems.AutoDriveAssembly;
 public class DistanceEvent extends Event {
 	private String name;
 	private double desiredDistanceInches;
-	private AutoDriveAssembly autoDrive;
-	private InputOutputComm ioComm;
 	
 	public DistanceEvent()
 	{	
@@ -40,7 +38,7 @@ public class DistanceEvent extends Event {
 	
 	public double getDistance() {
 		
-		double currentDistanceInches = autoDrive.getDistanceInches();
+		double currentDistanceInches = AutoDriveAssembly.getDistanceInches();
 		
 		String distStr = String.format("%.2f", currentDistanceInches);
 	    String myString = new String("currentDistanceInches = " + distStr);

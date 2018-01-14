@@ -80,10 +80,11 @@ public class AutoDriveAssembly {
 	//private static final int ENCODER_PULSES_PER_REV = 250;  // E4P-250  - on the proto bot front motors
 	//private static final double INCHES_PER_REV = (6 * 3.14159);   // 6-in diameter wheel
 
-	// grayhill encoder variables
-	public static final boolean RIGHT_REVERSE_MOTOR = true;     // comp-bot PID motor polarity - right
-	public static final boolean LEFT_REVERSE_MOTOR = false;		// comp-bot PID motor polarity - left
+	// motor polarity
+	public static final boolean RIGHT_REVERSE_MOTOR = true;     // comp-bot motor polarity - right
+	public static final boolean LEFT_REVERSE_MOTOR = false;		// comp-bot motor polarity - left
 		
+	// grayhill encoder polarity
 	public static final boolean ALIGNED_RIGHT_SENSOR = true;	// encoder polarity - right
 	public static final boolean ALIGNED_LEFT_SENSOR = true;    // encoder polarity - left
 	

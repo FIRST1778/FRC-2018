@@ -109,7 +109,7 @@ public class AutoStateMachine {
 			autoNetworkEnable = true;
 			netIndex = AutoNetworkBuilder.DRIVE_FORWARD;
 		}
-		else  // CUBE OPS, depends on field config and position
+		else if (action == AutoChooser.CUBE_OPS)  // CUBE OPS, depends on field config and position
 		{
 			autoNetworkEnable = true;
 			
@@ -127,6 +127,15 @@ public class AutoStateMachine {
 				// no position defined - do nothing
 				autoNetworkEnable = false;
 			}
+		}
+		else if (action == AutoChooser.LIFT_FOREVER)
+		{
+			// debug network
+			autoNetworkEnable = true;
+			netIndex = AutoNetworkBuilder.LIFT_FOREVER;
+		}
+		else {
+			autoNetworkEnable = false;
 		}
 		
 		// return index value for network selected

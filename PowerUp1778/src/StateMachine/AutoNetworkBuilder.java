@@ -2,6 +2,8 @@ package StateMachine;
 
 import java.util.ArrayList;
 
+import Systems.CubeManagement;
+
 public class AutoNetworkBuilder {
 		
 	public final static int DO_NOTHING = 0;
@@ -20,7 +22,10 @@ public class AutoNetworkBuilder {
 	public final static int DEPOSIT_CUBE_SWITCH_RIGHT = 7;
 	public final static int DEPOSIT_CUBE_SCALE_RIGHT = 8;
 	public final static int MOVE_TO_SCALE_LEFT_FROM_RIGHT = 9;
-				
+
+	// debug networks
+	public final static int LIFT_FOREVER = 10;
+
 	private static ArrayList<AutoNetwork> autoNets;
 	
 	private static boolean initialized = false;
@@ -57,7 +62,9 @@ public class AutoNetworkBuilder {
 		autoNets.add(DEPOSIT_CUBE_SWITCH_RIGHT, createDepositCubeSwitchRight());	
 		autoNets.add(DEPOSIT_CUBE_SCALE_RIGHT, createDepositCubeScaleRight());	
 		autoNets.add(MOVE_TO_SCALE_LEFT_FROM_RIGHT, createMoveToScaleLeftFromRight());	
-			
+
+		autoNets.add(LIFT_FOREVER, createLiftingForeverNetwork());	
+
 		return autoNets;
 	}
 			
@@ -113,10 +120,11 @@ public class AutoNetworkBuilder {
 	// **** DEPOSIT CUBE SWITCH LEFT SIDE Network ***** 
 	// 1) drive forward for a number of sec
 	// 2) Turn RIGHT a number of degrees
-	// 3) raise cube
-	// 4) drive forward
-	// 5) drop cube
-	// 6) go back to idle and stay there 
+	// 3) flipper down
+	// 4) raise lift
+	// 5) drive forward
+	// 6) deposit cube
+	// 7) go back to idle and stay there 
 	private static AutoNetwork createDepositCubeSwitchLeft() {
 		
 		AutoNetwork autoNet = new AutoNetwork("<Deposit Cube Switch (left side) Network>");
@@ -153,17 +161,31 @@ public class AutoNetworkBuilder {
 		//turnRightState.addEvent(timer3);
 		turnRightState.addEvent(angle1);
 		
-		// TODO - Raise cube
-				
+		AutoState flipperState = new AutoState("<Flipper State 1>");
+		FlipperAction flipperAction = new FlipperAction("<Flipper Down Action>", false);
+		TimeEvent timer4 = new TimeEvent(0.1);  // flipper timer event
+		flipperState.addAction(flipperAction);
+		flipperState.addEvent(timer4);
+
+		AutoState liftState = new AutoState("<Lift State 1>");
+		LiftAction liftAction = new LiftAction("<Lift Action>", CubeManagement.SWITCH_LEVEL);
+		TimeEvent timer5 = new TimeEvent(4.0);  // lift timer event
+		liftState.addAction(liftAction);
+		liftState.addEvent(timer5);
+			
 		AutoState driveState2 = new AutoState("<Drive State 2>");
 		DriveForwardMagicAction driveForwardMagic2 = new DriveForwardMagicAction("<Drive Forward Magic Action 2>", 61.5, 300, 150, true, 0.0);
-		//TimeEvent timer4 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
+		//TimeEvent timer6 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
 		ClosedLoopPositionEvent pos2 = new ClosedLoopPositionEvent(11.0, 0.5, 1.0);
 		driveState2.addAction(driveForwardMagic2);
-		//driveState2.addEvent(timer4);
+		//driveState2.addEvent(timer6);
 		driveState2.addEvent(pos2);
 
-		// TODO - Drop cube
+		AutoState depositCubeState = new AutoState("<Deposit Cube State 1>");
+		DepositCubeAction deposit1 = new DepositCubeAction("<Deposit Cube Action>");
+		TimeEvent timer7 = new TimeEvent(3.0);  // deposit cube timer event
+		depositCubeState.addAction(deposit1);
+		depositCubeState.addEvent(timer7);
 		
 		AutoState idleState2 = new AutoState("<Idle State 2>");
 		DriveForwardAction driveForward4 = new DriveForwardAction("<Drive Forward Action 4 -reset>", 0.0, true, 0.0);  // reset gyro
@@ -173,12 +195,18 @@ public class AutoNetworkBuilder {
 				
 		// connect each event with a state to move to
 		driveState.associateNextState(turnRightState);
-		turnRightState.associateNextState(driveState2);
-		driveState2.associateNextState(idleState2);
+		turnRightState.associateNextState(flipperState);
+		flipperState.associateNextState(liftState);
+		liftState.associateNextState(driveState2);
+		driveState2.associateNextState(depositCubeState);
+		depositCubeState.associateNextState(idleState2);
 						
 		autoNet.addState(driveState);
 		autoNet.addState(turnRightState);
+		autoNet.addState(flipperState);
+		autoNet.addState(liftState);
 		autoNet.addState(driveState2);
+		autoNet.addState(depositCubeState);
 		autoNet.addState(idleState2);
 				
 		return autoNet;
@@ -187,10 +215,11 @@ public class AutoNetworkBuilder {
 	// **** DEPOSIT CUBE SCALE LEFT SIDE Network ***** 
 	// 1) drive forward for a number of sec
 	// 2) Turn RIGHT a number of degrees
-	// 3) raise cube
-	// 4) drive forward
-	// 5) drop cube
-	// 6) go back to idle and stay there 
+	// 3) flipper down
+	// 4) raise lift
+	// 5) drive forward
+	// 6) deposit cube
+	// 7) go back to idle and stay there 
 	private static AutoNetwork createDepositCubeScaleLeft() {
 		
 		AutoNetwork autoNet = new AutoNetwork("<Deposit Cube Scale (left side) Network>");
@@ -227,7 +256,17 @@ public class AutoNetworkBuilder {
 		//turnRightState.addEvent(timer3);
 		turnRightState.addEvent(angle1);
 		
-		// TODO - raise cube
+		AutoState flipperState = new AutoState("<Flipper State 1>");
+		FlipperAction flipperAction = new FlipperAction("<Flipper Down Action>", false);
+		TimeEvent timer4 = new TimeEvent(0.1);  // flipper timer event
+		flipperState.addAction(flipperAction);
+		flipperState.addEvent(timer4);
+
+		AutoState liftState = new AutoState("<Lift State 1>");
+		LiftAction liftAction = new LiftAction("<Lift Action>", CubeManagement.SCALE_LEVEL);
+		TimeEvent timer5 = new TimeEvent(4.0);  // lift timer event
+		liftState.addAction(liftAction);
+		liftState.addEvent(timer5);
 				
 		AutoState driveState2 = new AutoState("<Drive State 2>");
 		DriveForwardMagicAction driveForwardMagic2 = new DriveForwardMagicAction("<Drive Forward Magic Action 2>", 61.5, 300, 150, true, 0.0);
@@ -237,7 +276,11 @@ public class AutoNetworkBuilder {
 		//driveState2.addEvent(timer4);
 		driveState2.addEvent(pos2);
 
-		// TODO - drop cube
+		AutoState depositCubeState = new AutoState("<Deposit Cube State 1>");
+		DepositCubeAction deposit1 = new DepositCubeAction("<Deposit Cube Action>");
+		TimeEvent timer7 = new TimeEvent(3.0);  // deposit cube timer event
+		depositCubeState.addAction(deposit1);
+		depositCubeState.addEvent(timer7);
 		
 		AutoState idleState2 = new AutoState("<Idle State 2>");
 		DriveForwardAction driveForward4 = new DriveForwardAction("<Drive Forward Action 4 -reset>", 0.0, true, 0.0);  // reset gyro
@@ -247,23 +290,30 @@ public class AutoNetworkBuilder {
 				
 		// connect each event with a state to move to
 		driveState.associateNextState(turnRightState);
-		turnRightState.associateNextState(driveState2);
-		driveState2.associateNextState(idleState2);
+		turnRightState.associateNextState(flipperState);
+		flipperState.associateNextState(liftState);
+		liftState.associateNextState(driveState2);
+		driveState2.associateNextState(depositCubeState);
+		depositCubeState.associateNextState(idleState2);
 						
 		autoNet.addState(driveState);
 		autoNet.addState(turnRightState);
+		autoNet.addState(flipperState);
+		autoNet.addState(liftState);
 		autoNet.addState(driveState2);
+		autoNet.addState(depositCubeState);
 		autoNet.addState(idleState2);
 				
 		return autoNet;
 	}
 
 	// **** MOVE TO SCALE RIGHT FROM LEFT SIDE Network ***** 
-	// 1) operate camera
-	// 2) drive forward for a number of sec
-	// 3) Turn RIGHT a number of degrees
-	// 4) drive forward
-	// 5) go back to idle and stay there 
+	// 1) drive forward for a number of sec
+	// 2) Turn RIGHT a number of degrees
+	// 3) drive forward
+	// 4) flipper down
+	// 5) raise lift
+	// 6) go back to idle and stay there 
 	private static AutoNetwork createMoveToScaleRightFromLeft() {
 		
 		AutoNetwork autoNet = new AutoNetwork("<Move to Scale Right (left side) Network>");
@@ -308,6 +358,18 @@ public class AutoNetworkBuilder {
 		//driveState2.addEvent(timer4);
 		driveState2.addEvent(pos2);
 
+		AutoState flipperState = new AutoState("<Flipper State 1>");
+		FlipperAction flipperAction = new FlipperAction("<Flipper Down Action>", false);
+		TimeEvent timer5 = new TimeEvent(0.1);  // flipper timer event
+		flipperState.addAction(flipperAction);
+		flipperState.addEvent(timer5);
+
+		AutoState liftState = new AutoState("<Lift State 1>");
+		LiftAction liftAction = new LiftAction("<Lift Action>", CubeManagement.SCALE_LEVEL);
+		TimeEvent timer6 = new TimeEvent(4.0);  // lift timer event
+		liftState.addAction(liftAction);
+		liftState.addEvent(timer6);
+
 		AutoState idleState2 = new AutoState("<Idle State 2>");
 		DriveForwardAction driveForward4 = new DriveForwardAction("<Drive Forward Action 4 -reset>", 0.0, true, 0.0);  // reset gyro
 		IdleAction deadEnd = new IdleAction("<Dead End Action>");
@@ -317,11 +379,15 @@ public class AutoNetworkBuilder {
 		// connect each event with a state to move to
 		driveState.associateNextState(turnRightState);
 		turnRightState.associateNextState(driveState2);
-		driveState2.associateNextState(idleState2);
+		driveState2.associateNextState(flipperState);
+		flipperState.associateNextState(liftState);
+		liftState.associateNextState(idleState2);
 						
 		autoNet.addState(driveState);
 		autoNet.addState(turnRightState);
 		autoNet.addState(driveState2);
+		autoNet.addState(flipperState);
+		autoNet.addState(liftState);
 		autoNet.addState(idleState2);
 				
 		return autoNet;
@@ -332,10 +398,11 @@ public class AutoNetworkBuilder {
 	// 2) Turn LEFT a number of degrees
 	// 3) drive forward
 	// 4) Turn RIGHT a number of degrees
-	// 5) raise cube
-	// 6) drive forward
-	// 7) drop cube
-	// 8) go back to idle and stay there 
+	// 5) flipper down
+	// 6) raise lift
+	// 7) drive forward
+	// 8) deposit cube
+	// 9) go back to idle and stay there 
 	private static AutoNetwork createDepositCubeSwitchCenterLeft() {
 		
 		AutoNetwork autoNet = new AutoNetwork("<Deposit Cube Switch (center left) Network>");
@@ -388,17 +455,31 @@ public class AutoNetworkBuilder {
 		//turnRightState.addEvent(timer5);
 		turnRightState.addEvent(angle2);
 		
-		// TODO - Raise cube
+		AutoState flipperState = new AutoState("<Flipper State 1>");
+		FlipperAction flipperAction = new FlipperAction("<Flipper Down Action>", false);
+		TimeEvent timer6 = new TimeEvent(0.1);  // flipper timer event
+		flipperState.addAction(flipperAction);
+		flipperState.addEvent(timer6);
+
+		AutoState liftState = new AutoState("<Lift State 1>");
+		LiftAction liftAction = new LiftAction("<Lift Action>", CubeManagement.SWITCH_LEVEL);
+		TimeEvent timer7 = new TimeEvent(4.0);  // lift timer event
+		liftState.addAction(liftAction);
+		liftState.addEvent(timer7);
 		
 		AutoState driveState3 = new AutoState("<Drive State 3>");
 		DriveForwardMagicAction driveForwardMagic3 = new DriveForwardMagicAction("<Drive Forward Magic Action 3>", 61.5, 300, 150, true, 0.0);
-		//TimeEvent timer6 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
+		//TimeEvent timer8 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
 		ClosedLoopPositionEvent pos3 = new ClosedLoopPositionEvent(22.0, 0.5, 1.0);
 		driveState3.addAction(driveForwardMagic3);
-		//driveState3.addEvent(timer6);
+		//driveState3.addEvent(timer8);
 		driveState3.addEvent(pos3);
 
-		// TODO - drop cube
+		AutoState depositCubeState = new AutoState("<Deposit Cube State 1>");
+		DepositCubeAction deposit1 = new DepositCubeAction("<Deposit Cube Action>");
+		TimeEvent timer9 = new TimeEvent(3.0);  // deposit cube timer event
+		depositCubeState.addAction(deposit1);
+		depositCubeState.addEvent(timer9);
 		
 		AutoState idleState2 = new AutoState("<Idle State 2>");
 		DriveForwardAction driveForward4 = new DriveForwardAction("<Drive Forward Action 4 -reset>", 0.0, true, 0.0);  // reset gyro
@@ -410,14 +491,20 @@ public class AutoNetworkBuilder {
 		driveState.associateNextState(turnLeftState);
 		turnLeftState.associateNextState(driveState2);
 		driveState2.associateNextState(turnRightState);
-		turnRightState.associateNextState(driveState3);
-		driveState3.associateNextState(idleState2);
+		turnRightState.associateNextState(flipperState);
+		flipperState.associateNextState(liftState);
+		liftState.associateNextState(driveState3);
+		driveState3.associateNextState(depositCubeState);
+		depositCubeState.associateNextState(idleState2);
 						
 		autoNet.addState(driveState);
 		autoNet.addState(turnLeftState);
 		autoNet.addState(driveState2);
 		autoNet.addState(turnRightState);
+		autoNet.addState(flipperState);
+		autoNet.addState(liftState);
 		autoNet.addState(driveState3);
+		autoNet.addState(depositCubeState);
 		autoNet.addState(idleState2);
 				
 		return autoNet;
@@ -428,10 +515,11 @@ public class AutoNetworkBuilder {
 	// 2) Turn RIGHT a number of degrees
 	// 3) drive forward
 	// 4) Turn LEFT a number of degrees
-	// 5) raise cube
-	// 6) drive forward
-	// 7) drop cube
-	// 8) go back to idle and stay there 
+	// 5) flipper down
+	// 6) raise lift
+	// 7) drive forward
+	// 8) deposit cube
+	// 9) go back to idle and stay there 
 	private static AutoNetwork createDepositCubeSwitchCenterRight() {
 		
 		AutoNetwork autoNet = new AutoNetwork("<Deposit Cube Switch (center right) Network>");
@@ -468,17 +556,31 @@ public class AutoNetworkBuilder {
 		//turnLeftState.addEvent(timer5);
 		turnLeftState.addEvent(angle2);
 	
-		// TODO - Raise cube
+		AutoState flipperState = new AutoState("<Flipper State 1>");
+		FlipperAction flipperAction = new FlipperAction("<Flipper Down Action>", false);
+		TimeEvent timer6 = new TimeEvent(0.1);  // flipper timer event
+		flipperState.addAction(flipperAction);
+		flipperState.addEvent(timer6);
+
+		AutoState liftState = new AutoState("<Lift State 1>");
+		LiftAction liftAction = new LiftAction("<Lift Action>", CubeManagement.SWITCH_LEVEL);
+		TimeEvent timer7 = new TimeEvent(4.0);  // lift timer event
+		liftState.addAction(liftAction);
+		liftState.addEvent(timer7);
 
 		AutoState driveState3 = new AutoState("<Drive State 3>");
 		DriveForwardMagicAction driveForwardMagic3 = new DriveForwardMagicAction("<Drive Forward Magic Action 3>", 61.5, 300, 150, true, 0.0);
-		//TimeEvent timer6 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
+		//TimeEvent timer8 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
 		ClosedLoopPositionEvent pos3 = new ClosedLoopPositionEvent(22.0, 0.5, 1.0);
 		driveState3.addAction(driveForwardMagic3);
-		//driveState3.addEvent(timer6);
+		//driveState3.addEvent(timer8);
 		driveState3.addEvent(pos3);
 
-		// TODO - drop cube
+		AutoState depositCubeState = new AutoState("<Deposit Cube State 1>");
+		DepositCubeAction deposit1 = new DepositCubeAction("<Deposit Cube Action>");
+		TimeEvent timer9 = new TimeEvent(3.0);  // deposit cube timer event
+		depositCubeState.addAction(deposit1);
+		depositCubeState.addEvent(timer9);
 		
 		AutoState idleState2 = new AutoState("<Idle State 2>");
 		DriveForwardAction driveForward4 = new DriveForwardAction("<Drive Forward Action 4 -reset>", 0.0, true, 0.0);  // reset gyro
@@ -490,14 +592,20 @@ public class AutoNetworkBuilder {
 		driveState.associateNextState(turnRightState);
 		turnRightState.associateNextState(driveState2);
 		driveState2.associateNextState(turnLeftState);
-		turnLeftState.associateNextState(driveState3);
-		driveState3.associateNextState(idleState2);
+		turnLeftState.associateNextState(flipperState);
+		flipperState.associateNextState(liftState);
+		liftState.associateNextState(driveState3);
+		driveState3.associateNextState(depositCubeState);
+		depositCubeState.associateNextState(idleState2);
 						
 		autoNet.addState(driveState);
 		autoNet.addState(turnRightState);
 		autoNet.addState(driveState2);
 		autoNet.addState(turnLeftState);
+		autoNet.addState(flipperState);
+		autoNet.addState(liftState);
 		autoNet.addState(driveState3);
+		autoNet.addState(depositCubeState);
 		autoNet.addState(idleState2);
 				
 		return autoNet;
@@ -505,12 +613,12 @@ public class AutoNetworkBuilder {
 
 	
 	// **** DEPOSIT CUBE SWITCH RIGHT SIDE Network ***** 
-	// 1) Move camera
-	// 2) drive forward for a number of sec
-	// 3) Turn LEFT a number of degrees
-	// 4) Raise cube
+	// 1) drive forward for a number of sec
+	// 2) Turn RIGHT a number of degrees
+	// 3) flipper down
+	// 4) raise lift
 	// 5) drive forward
-	// 6) Drop cube
+	// 6) deposit cube
 	// 7) go back to idle and stay there 
 	private static AutoNetwork createDepositCubeSwitchRight() {
 		
@@ -532,17 +640,31 @@ public class AutoNetworkBuilder {
 		//turnLeftState.addEvent(timer3);
 		turnLeftState.addEvent(angle1);
 		
-		// TODO - raise cube
+		AutoState flipperState = new AutoState("<Flipper State 1>");
+		FlipperAction flipperAction = new FlipperAction("<Flipper Down Action>", false);
+		TimeEvent timer4 = new TimeEvent(0.1);  // flipper timer event
+		flipperState.addAction(flipperAction);
+		flipperState.addEvent(timer4);
+
+		AutoState liftState = new AutoState("<Lift State 1>");
+		LiftAction liftAction = new LiftAction("<Lift Action>", CubeManagement.SWITCH_LEVEL);
+		TimeEvent timer5 = new TimeEvent(4.0);  // lift timer event
+		liftState.addAction(liftAction);
+		liftState.addEvent(timer5);
 		
 		AutoState driveState2 = new AutoState("<Drive State 2>");
 		DriveForwardMagicAction driveForwardMagic2 = new DriveForwardMagicAction("<Drive Forward Magic Action 2>", 61.5, 300, 150, true, 0.0);
-		//TimeEvent timer4 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
+		//TimeEvent timer6 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
 		ClosedLoopPositionEvent pos2 = new ClosedLoopPositionEvent(22.0, 0.5, 1.0);
 		driveState2.addAction(driveForwardMagic2);
-		//driveState2.addEvent(timer4);
+		//driveState2.addEvent(timer6);
 		driveState2.addEvent(pos2);
 		
-		// TODO - drop cube
+		AutoState depositCubeState = new AutoState("<Deposit Cube State 1>");
+		DepositCubeAction deposit1 = new DepositCubeAction("<Deposit Cube Action>");
+		TimeEvent timer7 = new TimeEvent(3.0);  // deposit cube timer event
+		depositCubeState.addAction(deposit1);
+		depositCubeState.addEvent(timer7);
 		
 		AutoState idleState2 = new AutoState("<Idle State 2>");
 		IdleAction deadEnd = new IdleAction("<Dead End Action>");
@@ -552,24 +674,30 @@ public class AutoNetworkBuilder {
 				
 		// connect each event with a state to move to
 		driveState.associateNextState(turnLeftState);
-		turnLeftState.associateNextState(driveState2);
-		driveState2.associateNextState(idleState2);
+		turnLeftState.associateNextState(flipperState);
+		flipperState.associateNextState(liftState);
+		liftState.associateNextState(driveState2);
+		driveState2.associateNextState(depositCubeState);
+		depositCubeState.associateNextState(idleState2);
 						
 		autoNet.addState(driveState);
 		autoNet.addState(turnLeftState);
+		autoNet.addState(flipperState);
+		autoNet.addState(liftState);
 		autoNet.addState(driveState2);
+		autoNet.addState(depositCubeState);
 		autoNet.addState(idleState2);
 		
 		return autoNet;
 	}
 
 	// **** DEPOSIT CUBE SCALE RIGHT SIDE Network ***** 
-	// 1) Move camera
-	// 2) drive forward for a number of sec
-	// 3) Turn LEFT a number of degrees
-	// 4) Raise cube
+	// 1) drive forward for a number of sec
+	// 2) Turn LEFT a number of degrees
+	// 3) flipper down
+	// 4) Raise lift
 	// 5) drive forward
-	// 6) Drop cube
+	// 6) Deposit cube
 	// 7) go back to idle and stay there 
 	private static AutoNetwork createDepositCubeScaleRight() {
 		
@@ -591,17 +719,31 @@ public class AutoNetworkBuilder {
 		//turnLeftState.addEvent(timer3);
 		turnLeftState.addEvent(angle1);
 		
-		// TODO - Raise cube
+		AutoState flipperState = new AutoState("<Flipper State 1>");
+		FlipperAction flipperAction = new FlipperAction("<Flipper Down Action>", false);
+		TimeEvent timer4 = new TimeEvent(0.1);  // flipper timer event
+		flipperState.addAction(flipperAction);
+		flipperState.addEvent(timer4);
+
+		AutoState liftState = new AutoState("<Lift State 1>");
+		LiftAction liftAction = new LiftAction("<Lift Action>", CubeManagement.SCALE_LEVEL);
+		TimeEvent timer5 = new TimeEvent(4.0);  // lift timer event
+		liftState.addAction(liftAction);
+		liftState.addEvent(timer5);
 		
 		AutoState driveState2 = new AutoState("<Drive State 2>");
 		DriveForwardMagicAction driveForwardMagic2 = new DriveForwardMagicAction("<Drive Forward Magic Action 2>", 61.5, 300, 150, true, 0.0);
-		//TimeEvent timer4 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
+		//TimeEvent timer6 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
 		ClosedLoopPositionEvent pos2 = new ClosedLoopPositionEvent(11.0, 0.5, 1.0);
 		driveState2.addAction(driveForwardMagic2);
-		//driveState2.addEvent(timer4);
+		//driveState2.addEvent(timer6);
 		driveState2.addEvent(pos2);
 		
-		// TODO - drop cube
+		AutoState depositCubeState = new AutoState("<Deposit Cube State 1>");
+		DepositCubeAction deposit1 = new DepositCubeAction("<Deposit Cube Action>");
+		TimeEvent timer7 = new TimeEvent(3.0);  // deposit cube timer event
+		depositCubeState.addAction(deposit1);
+		depositCubeState.addEvent(timer7);
 		
 		AutoState idleState2 = new AutoState("<Idle State 2>");
 		IdleAction deadEnd = new IdleAction("<Dead End Action>");
@@ -611,23 +753,30 @@ public class AutoNetworkBuilder {
 				
 		// connect each event with a state to move to
 		driveState.associateNextState(turnLeftState);
-		turnLeftState.associateNextState(driveState2);
-		driveState2.associateNextState(idleState2);
+		turnLeftState.associateNextState(flipperState);
+		flipperState.associateNextState(liftState);
+		liftState.associateNextState(driveState2);
+		driveState2.associateNextState(depositCubeState);
+		depositCubeState.associateNextState(idleState2);
 						
 		autoNet.addState(driveState);
 		autoNet.addState(turnLeftState);
+		autoNet.addState(flipperState);
+		autoNet.addState(liftState);
 		autoNet.addState(driveState2);
+		autoNet.addState(depositCubeState);
 		autoNet.addState(idleState2);
 		
 		return autoNet;
 	}
 
 	// **** MOVE TO SCALE LEFT FROM RIGHT SIDE Network ***** 
-	// 1) Move camera
-	// 2) drive forward for a number of sec
-	// 3) Turn LEFT a number of degrees
-	// 4) drive forward
-	// 5) go back to idle and stay there 
+	// 1) drive forward for a number of sec
+	// 2) Turn LEFT a number of degrees
+	// 3) drive forward
+	// 4) flipper down
+	// 5) lift up
+	// 6) go back to idle and stay there 
 	private static AutoNetwork createMoveToScaleLeftFromRight() {
 		
 		AutoNetwork autoNet = new AutoNetwork("<Move to Scale Left (Right Side) Network>");
@@ -655,7 +804,19 @@ public class AutoNetworkBuilder {
 		driveState2.addAction(driveForwardMagic2);
 		//driveState2.addEvent(timer4);
 		driveState2.addEvent(pos2);
-				
+
+		AutoState flipperState = new AutoState("<Flipper State 1>");
+		FlipperAction flipperAction = new FlipperAction("<Flipper Down Action>", false);
+		TimeEvent timer5 = new TimeEvent(0.1);  // flipper timer event
+		flipperState.addAction(flipperAction);
+		flipperState.addEvent(timer5);
+
+		AutoState liftState = new AutoState("<Lift State 1>");
+		LiftAction liftAction = new LiftAction("<Lift Action>", CubeManagement.SCALE_LEVEL);
+		TimeEvent timer6 = new TimeEvent(4.0);  // lift timer event
+		liftState.addAction(liftAction);
+		liftState.addEvent(timer6);
+
 		AutoState idleState2 = new AutoState("<Idle State 2>");
 		IdleAction deadEnd = new IdleAction("<Dead End Action>");
 		DriveForwardAction driveForward4 = new DriveForwardAction("<Drive Forward Action 4 -reset>", 0.0, true, 0.0);  // reset gyro 
@@ -665,11 +826,15 @@ public class AutoNetworkBuilder {
 		// connect each event with a state to move to
 		driveState.associateNextState(turnLeftState);
 		turnLeftState.associateNextState(driveState2);
-		driveState2.associateNextState(idleState2);
+		driveState2.associateNextState(flipperState);
+		flipperState.associateNextState(liftState);
+		liftState.associateNextState(idleState2);
 						
 		autoNet.addState(driveState);
 		autoNet.addState(turnLeftState);
 		autoNet.addState(driveState2);
+		autoNet.addState(flipperState);
+		autoNet.addState(liftState);
 		autoNet.addState(idleState2);
 		
 		return autoNet;
@@ -877,43 +1042,66 @@ public class AutoNetworkBuilder {
 	/*****************************************************************************************************/
 	/**** DEBUG NETWORKS **** Networks below this are used only for debug - disable during competition ***/
 	/*****************************************************************************************************/	
-	
-	// ****  [FOLLOW TARGET] Network - mainly for autotargeting testing - does not shoot ***** 
+
+	// **** Lifting Forever Network - Lift up to different levels forever ***** 
+	//
 	// 1) be idle for a number of sec
-	// 2) calibrate shooter continuously!  Never stop following target!  NEVER!
-	private static AutoNetwork createTargetFollowerNetwork() {
-
-		AutoNetwork autoNet = new AutoNetwork("<Target Follower Network>");
-
-		// create states
+	// 2) lift to SWITCH level for a number of sec
+	// 3) lift to SCALE level for a number of sec
+	// 4) return to SWITCH level for a number of sec
+	// 5) return to BASE level for a number of sec
+	// 6) Go back to state 2
+	private static AutoNetwork createLiftingForeverNetwork() {
+		
+		AutoNetwork autoNet = new AutoNetwork("<Lifting Forever Network>");
+		
 		AutoState idleState = new AutoState("<Idle State 1>");
-		IdleAction idleStart = new IdleAction("<Idle Action 1>");
-		IdleAction doSomething2 = new IdleAction("<Placeholder Action 2>");
-		IdleAction doSomething3 = new IdleAction("<Placeholder Action 3>");
-		TimeEvent timer1 = new TimeEvent(0.5);  // timer event
-		idleState.addAction(idleStart);
-		idleState.addAction(doSomething2);
-		idleState.addAction(doSomething3);
+		IdleAction startIdle = new IdleAction("<Start Idle Action 1>");
+		TimeEvent timer1 = new TimeEvent(0.1);  // timer event
+		idleState.addAction(startIdle);
 		idleState.addEvent(timer1);
 		
-		// high threshold y should only go lateral, no driving forward or backward
-		// (160, 120) is center of (320,240) image
-		AutoState targetCalState = new AutoState("<Cal Target FOREVER State 1>");
-		CalibrateTargetAction calTarget = new CalibrateTargetAction("<Cal Target Action 1>",160, 120, 25, 100, 0.25, 0.25);
-		IdleAction doSomething4 = new IdleAction("<Placeholder Action 4>");
-		IdleAction doSomething5 = new IdleAction("<Placeholder Action 5>");
-		targetCalState.addAction(calTarget);
-		targetCalState.addAction(doSomething4);
-		targetCalState.addAction(doSomething5);
+		AutoState liftState1 = new AutoState("<Lift to SWITCH State 1>");
+		LiftAction lift1 = new LiftAction("<Lift to SWITCH Action>", CubeManagement.SWITCH_LEVEL);
+		TimeEvent timer2 = new TimeEvent(5.0);  // lift timer event
+		liftState1.addAction(lift1);
+		liftState1.addEvent(timer2);
 		
-		// connect each state with a state to move to
-		idleState.associateNextState(targetCalState);
+		AutoState liftState2 = new AutoState("<Lift to SCALE State 2>");
+		LiftAction lift2 = new LiftAction("<Lift to SCALE Action>", CubeManagement.SCALE_LEVEL);
+		TimeEvent timer3 = new TimeEvent(5.0);  // lift timer event
+		liftState2.addAction(lift2);
+		liftState2.addEvent(timer3);
+						
+		AutoState liftState3 = new AutoState("<Lift to SWITCH State 3>");
+		LiftAction lift3 = new LiftAction("<Lift to SWITCH Action>", CubeManagement.SWITCH_LEVEL);
+		TimeEvent timer4 = new TimeEvent(5.0);  // lift timer event
+		liftState3.addAction(lift3);
+		liftState3.addEvent(timer4);
+
+		AutoState liftState4 = new AutoState("<Lift to BASE State 4>");
+		LiftAction lift4 = new LiftAction("<Lift to BASE Action>", CubeManagement.BASE_LEVEL);
+		TimeEvent timer5 = new TimeEvent(5.0);  // lift timer event
+		liftState4.addAction(lift4);
+		liftState4.addEvent(timer5);
+
+		// connect each event with a state to move to
+		// last state loops back!
+		idleState.associateNextState(liftState1);
+		liftState1.associateNextState(liftState2);
+		liftState2.associateNextState(liftState3);
+		liftState3.associateNextState(liftState4);
+		liftState4.associateNextState(liftState1);
 						
 		autoNet.addState(idleState);
-		autoNet.addState(targetCalState);
-		
+		autoNet.addState(liftState1);
+		autoNet.addState(liftState2);
+		autoNet.addState(liftState3);
+		autoNet.addState(liftState4);
+				
 		return autoNet;
 	}
+	
 
 	// **** MOVE FORWARD Network - slow and steady ***** 
 	// 1) be idle for a number of sec

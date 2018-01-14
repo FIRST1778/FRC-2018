@@ -4,6 +4,8 @@ import FreezyDrive.FreezyDriveTrain;
 import NetworkComm.InputOutputComm;
 import StateMachine.AutoStateMachine;
 import Systems.AutoDriveAssembly;
+import Systems.ClimberAssembly;
+import Systems.CubeManagement;
 import Systems.NavXSensor;
 import edu.wpi.first.wpilibj.IterativeRobot;
 
@@ -27,7 +29,9 @@ public class Robot extends IterativeRobot {
 		
 		InputOutputComm.initialize();
 
-		FreezyDriveTrain.initialize();		
+		FreezyDriveTrain.initialize();	
+		CubeManagement.initialize();
+		ClimberAssembly.initialize();
 		NavXSensor.initialize();
 
 		autoSM = new AutoStateMachine();
@@ -64,9 +68,10 @@ public class Robot extends IterativeRobot {
     	
     	autoSM.process();
  
-    	// debug only
+    	// debug only (read position sensors)
     	AutoDriveAssembly.getDistanceInches();
     	getGyroAngle();
+    	CubeManagement.getLiftPos(true);
    	
 	}
 
@@ -74,6 +79,8 @@ public class Robot extends IterativeRobot {
     	InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"MainLog","teleop mode...");
     	
     	FreezyDriveTrain.teleopInit();	
+    	CubeManagement.teleopInit();
+    	ClimberAssembly.teleopInit();
 		
 	}
 	
@@ -84,6 +91,8 @@ public class Robot extends IterativeRobot {
 	public void teleopPeriodic() {
 		
         FreezyDriveTrain.teleopPeriodic();   
+        CubeManagement.teleopPeriodic();
+        ClimberAssembly.teleopPeriodic();
 	}
 	
     /**
