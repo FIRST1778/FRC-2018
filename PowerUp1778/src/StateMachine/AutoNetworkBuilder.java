@@ -26,6 +26,11 @@ public class AutoNetworkBuilder {
 	// debug networks
 	public final static int LIFT_FOREVER = 10;
 
+	// closed-loop position cruise velocity and acceleration (used for all closed-loop position control)
+	// units are RPM
+	private final static int CLOSED_LOOP_VELOCITY = 900;
+	private final static int CLOSED_LOOP_ACCEL = 450;
+	
 	private static ArrayList<AutoNetwork> autoNets;
 	
 	private static boolean initialized = false;
@@ -138,7 +143,7 @@ public class AutoNetworkBuilder {
 		*/
 		
 		AutoState driveState = new AutoState("<Drive State 1>");
-		DriveForwardMagicAction driveForwardMagic = new DriveForwardMagicAction("<Drive Forward Magic Action>", 61.5, 300, 150, true, 0.0);
+		DriveForwardMagicAction driveForwardMagic = new DriveForwardMagicAction("<Drive Forward Magic Action>", 66.0, CLOSED_LOOP_VELOCITY, CLOSED_LOOP_ACCEL, true, 0.0);
 		//TimeEvent timer2 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
 		ClosedLoopPositionEvent pos1 = new ClosedLoopPositionEvent(66.0, 0.5, 1.0);
 		driveState.addAction(driveForwardMagic);
@@ -174,7 +179,7 @@ public class AutoNetworkBuilder {
 		liftState.addEvent(timer5);
 			
 		AutoState driveState2 = new AutoState("<Drive State 2>");
-		DriveForwardMagicAction driveForwardMagic2 = new DriveForwardMagicAction("<Drive Forward Magic Action 2>", 61.5, 300, 150, true, 0.0);
+		DriveForwardMagicAction driveForwardMagic2 = new DriveForwardMagicAction("<Drive Forward Magic Action 2>", 11.0, CLOSED_LOOP_VELOCITY, CLOSED_LOOP_ACCEL, true, 0.0);
 		//TimeEvent timer6 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
 		ClosedLoopPositionEvent pos2 = new ClosedLoopPositionEvent(11.0, 0.5, 1.0);
 		driveState2.addAction(driveForwardMagic2);
@@ -233,7 +238,7 @@ public class AutoNetworkBuilder {
 		*/
 		
 		AutoState driveState = new AutoState("<Drive State 1>");
-		DriveForwardMagicAction driveForwardMagic = new DriveForwardMagicAction("<Drive Forward Magic Action>", 61.5, 300, 150, true, 0.0);
+		DriveForwardMagicAction driveForwardMagic = new DriveForwardMagicAction("<Drive Forward Magic Action>", 88.0, CLOSED_LOOP_VELOCITY, CLOSED_LOOP_ACCEL, true, 0.0);
 		//TimeEvent timer2 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
 		ClosedLoopPositionEvent pos1 = new ClosedLoopPositionEvent(88.0, 0.5, 1.0);
 		driveState.addAction(driveForwardMagic);
@@ -269,7 +274,7 @@ public class AutoNetworkBuilder {
 		liftState.addEvent(timer5);
 				
 		AutoState driveState2 = new AutoState("<Drive State 2>");
-		DriveForwardMagicAction driveForwardMagic2 = new DriveForwardMagicAction("<Drive Forward Magic Action 2>", 61.5, 300, 150, true, 0.0);
+		DriveForwardMagicAction driveForwardMagic2 = new DriveForwardMagicAction("<Drive Forward Magic Action 2>", 11.0, CLOSED_LOOP_VELOCITY, CLOSED_LOOP_ACCEL, true, 0.0);
 		//TimeEvent timer4 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
 		ClosedLoopPositionEvent pos2 = new ClosedLoopPositionEvent(11.0, 0.5, 1.0);
 		driveState2.addAction(driveForwardMagic2);
@@ -327,7 +332,7 @@ public class AutoNetworkBuilder {
 		*/
 		
 		AutoState driveState = new AutoState("<Drive State 1>");
-		DriveForwardMagicAction driveForwardMagic = new DriveForwardMagicAction("<Drive Forward Magic Action>", 61.5, 300, 150, true, 0.0);
+		DriveForwardMagicAction driveForwardMagic = new DriveForwardMagicAction("<Drive Forward Magic Action>", 77.0, CLOSED_LOOP_VELOCITY, CLOSED_LOOP_ACCEL, true, 0.0);
 		//TimeEvent timer2 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
 		ClosedLoopPositionEvent pos1 = new ClosedLoopPositionEvent(77.0, 0.5, 1.0);
 		driveState.addAction(driveForwardMagic);
@@ -351,7 +356,7 @@ public class AutoNetworkBuilder {
 		turnRightState.addEvent(angle1);
 				
 		AutoState driveState2 = new AutoState("<Drive State 2>");
-		DriveForwardMagicAction driveForwardMagic2 = new DriveForwardMagicAction("<Drive Forward Magic Action 2>", 61.5, 300, 150, true, 0.0);
+		DriveForwardMagicAction driveForwardMagic2 = new DriveForwardMagicAction("<Drive Forward Magic Action 2>", 177.0, CLOSED_LOOP_VELOCITY, CLOSED_LOOP_ACCEL, true, 0.0);
 		//TimeEvent timer4 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
 		ClosedLoopPositionEvent pos2 = new ClosedLoopPositionEvent(177.0, 0.5, 1.0);
 		driveState2.addAction(driveForwardMagic2);
@@ -416,7 +421,7 @@ public class AutoNetworkBuilder {
 		*/
 		
 		AutoState driveState = new AutoState("<Drive State 1>");
-		DriveForwardMagicAction driveForwardMagic = new DriveForwardMagicAction("<Drive Forward Magic Action>", 61.5, 300, 150, true, 0.0);
+		DriveForwardMagicAction driveForwardMagic = new DriveForwardMagicAction("<Drive Forward Magic Action>", 66.0, CLOSED_LOOP_VELOCITY, CLOSED_LOOP_ACCEL, true, 0.0);
 		//TimeEvent timer2 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
 		ClosedLoopPositionEvent pos1 = new ClosedLoopPositionEvent(66.0, 0.5, 1.0);
 		driveState.addAction(driveForwardMagic);
@@ -440,7 +445,7 @@ public class AutoNetworkBuilder {
 		turnLeftState.addEvent(angle1);
 				
 		AutoState driveState2 = new AutoState("<Drive State 2>");
-		DriveForwardMagicAction driveForwardMagic2 = new DriveForwardMagicAction("<Drive Forward Magic Action 2>", 61.5, 300, 150, true, 0.0);
+		DriveForwardMagicAction driveForwardMagic2 = new DriveForwardMagicAction("<Drive Forward Magic Action 2>", 22.0, CLOSED_LOOP_VELOCITY, CLOSED_LOOP_ACCEL, true, 0.0);
 		//TimeEvent timer4 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
 		ClosedLoopPositionEvent pos2 = new ClosedLoopPositionEvent(22.0, 0.5, 1.0);
 		driveState2.addAction(driveForwardMagic2);
@@ -468,9 +473,9 @@ public class AutoNetworkBuilder {
 		liftState.addEvent(timer7);
 		
 		AutoState driveState3 = new AutoState("<Drive State 3>");
-		DriveForwardMagicAction driveForwardMagic3 = new DriveForwardMagicAction("<Drive Forward Magic Action 3>", 61.5, 300, 150, true, 0.0);
+		DriveForwardMagicAction driveForwardMagic3 = new DriveForwardMagicAction("<Drive Forward Magic Action 3>", 11.0, CLOSED_LOOP_VELOCITY, CLOSED_LOOP_ACCEL, true, 0.0);
 		//TimeEvent timer8 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
-		ClosedLoopPositionEvent pos3 = new ClosedLoopPositionEvent(22.0, 0.5, 1.0);
+		ClosedLoopPositionEvent pos3 = new ClosedLoopPositionEvent(11.0, 0.5, 1.0);
 		driveState3.addAction(driveForwardMagic3);
 		//driveState3.addEvent(timer8);
 		driveState3.addEvent(pos3);
@@ -525,9 +530,9 @@ public class AutoNetworkBuilder {
 		AutoNetwork autoNet = new AutoNetwork("<Deposit Cube Switch (center right) Network>");
 		
 		AutoState driveState = new AutoState("<Drive State 1>");
-		DriveForwardMagicAction driveForwardMagic = new DriveForwardMagicAction("<Drive Forward Magic Action>", 61.5, 300, 150, true, 0.0);
+		DriveForwardMagicAction driveForwardMagic = new DriveForwardMagicAction("<Drive Forward Magic Action>", 66.0, CLOSED_LOOP_VELOCITY, CLOSED_LOOP_ACCEL, true, 0.0);
 		//TimeEvent timer2 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
-		ClosedLoopPositionEvent pos1 = new ClosedLoopPositionEvent(61.5, 0.5, 1.0);
+		ClosedLoopPositionEvent pos1 = new ClosedLoopPositionEvent(66.0, 0.5, 1.0);
 		driveState.addAction(driveForwardMagic);
 		//driveState.addEvent(timer2);
 		driveState.addEvent(pos1);
@@ -541,7 +546,7 @@ public class AutoNetworkBuilder {
 		turnRightState.addEvent(angle1);
 		
 		AutoState driveState2 = new AutoState("<Drive State 2>");
-		DriveForwardMagicAction driveForwardMagic2 = new DriveForwardMagicAction("<Drive Forward Magic Action 2>", 61.5, 300, 150, true, 0.0);
+		DriveForwardMagicAction driveForwardMagic2 = new DriveForwardMagicAction("<Drive Forward Magic Action 2>", 22.0, CLOSED_LOOP_VELOCITY, CLOSED_LOOP_ACCEL, true, 0.0);
 		//TimeEvent timer4 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
 		ClosedLoopPositionEvent pos2 = new ClosedLoopPositionEvent(22.0, 0.5, 1.0);
 		driveState2.addAction(driveForwardMagic2);
@@ -569,9 +574,9 @@ public class AutoNetworkBuilder {
 		liftState.addEvent(timer7);
 
 		AutoState driveState3 = new AutoState("<Drive State 3>");
-		DriveForwardMagicAction driveForwardMagic3 = new DriveForwardMagicAction("<Drive Forward Magic Action 3>", 61.5, 300, 150, true, 0.0);
+		DriveForwardMagicAction driveForwardMagic3 = new DriveForwardMagicAction("<Drive Forward Magic Action 3>", 11.0, CLOSED_LOOP_VELOCITY, CLOSED_LOOP_ACCEL, true, 0.0);
 		//TimeEvent timer8 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
-		ClosedLoopPositionEvent pos3 = new ClosedLoopPositionEvent(22.0, 0.5, 1.0);
+		ClosedLoopPositionEvent pos3 = new ClosedLoopPositionEvent(11.0, 0.5, 1.0);
 		driveState3.addAction(driveForwardMagic3);
 		//driveState3.addEvent(timer8);
 		driveState3.addEvent(pos3);
@@ -625,9 +630,9 @@ public class AutoNetworkBuilder {
 		AutoNetwork autoNet = new AutoNetwork("<Deposit Cube Switch (Right Side) Network>");
 				
 		AutoState driveState = new AutoState("<Drive State 1>");
-		DriveForwardMagicAction driveForwardMagic = new DriveForwardMagicAction("<Drive Forward Magic Action>", 79.0, 300, 150, true, 0.0);
+		DriveForwardMagicAction driveForwardMagic = new DriveForwardMagicAction("<Drive Forward Magic Action>", 88.0, CLOSED_LOOP_VELOCITY, CLOSED_LOOP_ACCEL, true, 0.0);
 		//TimeEvent timer2 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
-		ClosedLoopPositionEvent pos1 = new ClosedLoopPositionEvent(79.0, 0.5, 1.0);
+		ClosedLoopPositionEvent pos1 = new ClosedLoopPositionEvent(88.0, 0.5, 1.0);
 		driveState.addAction(driveForwardMagic);
 		//driveState.addEvent(timer2);
 		driveState.addEvent(pos1);
@@ -653,7 +658,7 @@ public class AutoNetworkBuilder {
 		liftState.addEvent(timer5);
 		
 		AutoState driveState2 = new AutoState("<Drive State 2>");
-		DriveForwardMagicAction driveForwardMagic2 = new DriveForwardMagicAction("<Drive Forward Magic Action 2>", 61.5, 300, 150, true, 0.0);
+		DriveForwardMagicAction driveForwardMagic2 = new DriveForwardMagicAction("<Drive Forward Magic Action 2>", 22.0, CLOSED_LOOP_VELOCITY, CLOSED_LOOP_ACCEL, true, 0.0);
 		//TimeEvent timer6 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
 		ClosedLoopPositionEvent pos2 = new ClosedLoopPositionEvent(22.0, 0.5, 1.0);
 		driveState2.addAction(driveForwardMagic2);
@@ -704,7 +709,7 @@ public class AutoNetworkBuilder {
 		AutoNetwork autoNet = new AutoNetwork("<Deposit Cube Scale (Right Side) Network>");
 						
 		AutoState driveState = new AutoState("<Drive State 1>");
-		DriveForwardMagicAction driveForwardMagic = new DriveForwardMagicAction("<Drive Forward Magic Action>", 79.0, 300, 150, true, 0.0);
+		DriveForwardMagicAction driveForwardMagic = new DriveForwardMagicAction("<Drive Forward Magic Action>", 88.0, CLOSED_LOOP_VELOCITY, CLOSED_LOOP_ACCEL, true, 0.0);
 		//TimeEvent timer2 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
 		ClosedLoopPositionEvent pos1 = new ClosedLoopPositionEvent(88.0, 0.5, 1.0);
 		driveState.addAction(driveForwardMagic);
@@ -732,7 +737,7 @@ public class AutoNetworkBuilder {
 		liftState.addEvent(timer5);
 		
 		AutoState driveState2 = new AutoState("<Drive State 2>");
-		DriveForwardMagicAction driveForwardMagic2 = new DriveForwardMagicAction("<Drive Forward Magic Action 2>", 61.5, 300, 150, true, 0.0);
+		DriveForwardMagicAction driveForwardMagic2 = new DriveForwardMagicAction("<Drive Forward Magic Action 2>", 11.0, CLOSED_LOOP_VELOCITY, CLOSED_LOOP_ACCEL, true, 0.0);
 		//TimeEvent timer6 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
 		ClosedLoopPositionEvent pos2 = new ClosedLoopPositionEvent(11.0, 0.5, 1.0);
 		driveState2.addAction(driveForwardMagic2);
@@ -782,7 +787,7 @@ public class AutoNetworkBuilder {
 		AutoNetwork autoNet = new AutoNetwork("<Move to Scale Left (Right Side) Network>");
 						
 		AutoState driveState = new AutoState("<Drive State 1>");
-		DriveForwardMagicAction driveForwardMagic = new DriveForwardMagicAction("<Drive Forward Magic Action>", 79.0, 300, 150, true, 0.0);
+		DriveForwardMagicAction driveForwardMagic = new DriveForwardMagicAction("<Drive Forward Magic Action>", 77.0, CLOSED_LOOP_VELOCITY, CLOSED_LOOP_ACCEL, true, 0.0);
 		//TimeEvent timer2 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
 		ClosedLoopPositionEvent pos1 = new ClosedLoopPositionEvent(77.0, 0.5, 1.0);
 		driveState.addAction(driveForwardMagic);
@@ -798,7 +803,7 @@ public class AutoNetworkBuilder {
 		turnLeftState.addEvent(angle1);
 		
 		AutoState driveState2 = new AutoState("<Drive State 2>");
-		DriveForwardMagicAction driveForwardMagic2 = new DriveForwardMagicAction("<Drive Forward Magic Action 2>", 61.5, 300, 150, true, 0.0);
+		DriveForwardMagicAction driveForwardMagic2 = new DriveForwardMagicAction("<Drive Forward Magic Action 2>", 177.0, CLOSED_LOOP_VELOCITY, CLOSED_LOOP_ACCEL, true, 0.0);
 		//TimeEvent timer4 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
 		ClosedLoopPositionEvent pos2 = new ClosedLoopPositionEvent(177.0, 0.5, 1.0);
 		driveState2.addAction(driveForwardMagic2);

@@ -16,7 +16,31 @@ public class AutoDriveAssembly {
 	private static final int TIMEOUT_MS = 0;  // set to zero if skipping confirmation
 	private static final int PIDLOOP_IDX = 0;  // set to zero if primary loop
 	private static final int PROFILE_SLOT = 0;
+						
+	private static final double AUTO_DRIVE_ANGLE_CORRECT_COEFF = 0.02;
+	private static final double GYRO_CORRECT_COEFF = 0.03;
+			
+	// smart controllers (motion profiling)
+	private static TalonSRX mFrontLeft, mFrontRight;
+	private static TalonSRX mBackLeft, mBackRight;
+		
+	// used as angle baseline (if we don't reset gyro)
+	private static double initialAngle = 0.0;
 	
+	// motor polarity
+	public static final boolean RIGHT_REVERSE_MOTOR = true;     // comp-bot motor polarity - right
+	public static final boolean LEFT_REVERSE_MOTOR = false;		// comp-bot motor polarity - left
+		
+	// grayhill encoder polarity
+	public static final boolean ALIGNED_RIGHT_SENSOR = true;	// encoder polarity - right
+	public static final boolean ALIGNED_LEFT_SENSOR = true;    // encoder polarity - left
+		
+	// PIDF values - proto.bot - initial 
+	private static final double kP = 7.0;
+	private static final double kI = 0.0;  // Integral not needed for closed loop position control
+	private static final double kD = 0.0;
+	private static final double kF = 0.0;  // Feedforward not used for closed loop position control
+
 	public static void initialize() {
 		
 		if (initialized)
@@ -26,148 +50,80 @@ public class AutoDriveAssembly {
 		NavXSensor.initialize();
 		TurnController.initialize();
 		
-		// instantiate motion profile motor control objects
-        mFrontLeft = new TalonSRX(HardwareIDs.LEFT_FRONT_TALON_ID);
-        mFrontLeft.setInverted(LEFT_REVERSE_MOTOR);  // left motor PID polarity (magic motion mode only)
+		// instantiate motion profile motor control objects        
+		mFrontLeft = configureMotor(HardwareIDs.LEFT_FRONT_TALON_ID, LEFT_REVERSE_MOTOR, ALIGNED_LEFT_SENSOR, kP, kI, kD, kF);
+		mFrontRight = configureMotor(HardwareIDs.RIGHT_FRONT_TALON_ID, RIGHT_REVERSE_MOTOR, ALIGNED_RIGHT_SENSOR, kP, kI, kD, kF);
+		mBackLeft = configureMotor(HardwareIDs.LEFT_REAR_TALON_ID, LEFT_REVERSE_MOTOR, HardwareIDs.LEFT_FRONT_TALON_ID);
+		mBackRight = configureMotor(HardwareIDs.RIGHT_REAR_TALON_ID, RIGHT_REVERSE_MOTOR, HardwareIDs.RIGHT_FRONT_TALON_ID);
         
-        //mBackLeft = new TalonSRX(HardwareIDs.LEFT_REAR_TALON_ID);
-
-		mFrontRight = new TalonSRX(HardwareIDs.RIGHT_FRONT_TALON_ID);
-		mFrontRight.setInverted(RIGHT_REVERSE_MOTOR);  // right motor PID polarity (magic motion mode only)
-
-		//mBackRight = new TalonSRX(HardwareIDs.RIGHT_REAR_TALON_ID);
-        
-        // configure left front motor encoder and PID
-        mFrontLeft.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, PIDLOOP_IDX, TIMEOUT_MS);
-        mFrontLeft.setSensorPhase(ALIGNED_LEFT_SENSOR);   // left motor encoder polarity
-        		
-        mFrontLeft.selectProfileSlot(PROFILE_SLOT, PIDLOOP_IDX);
-        mFrontLeft.config_kP(PROFILE_SLOT, P_COEFF, TIMEOUT_MS);
-        mFrontLeft.config_kI(PROFILE_SLOT, I_COEFF, TIMEOUT_MS);
-        mFrontLeft.config_kD(PROFILE_SLOT, D_COEFF, TIMEOUT_MS);
-        mFrontLeft.config_kF(PROFILE_SLOT, F_COEFF, TIMEOUT_MS);
-        mFrontLeft.configMotionCruiseVelocity(0, TIMEOUT_MS);
-        mFrontLeft.configMotionAcceleration(0, TIMEOUT_MS);
-        mFrontLeft.setSelectedSensorPosition(0, PIDLOOP_IDX, TIMEOUT_MS);
-        
-        // configure right front motor encoder and PID
-        mFrontRight.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, PIDLOOP_IDX, TIMEOUT_MS);
-        mFrontRight.setSensorPhase(ALIGNED_RIGHT_SENSOR);   // right motor encoder polarity
- 
-        mFrontRight.selectProfileSlot(PROFILE_SLOT, PIDLOOP_IDX);
-        mFrontRight.config_kP(PROFILE_SLOT, P_COEFF, TIMEOUT_MS);
-        mFrontRight.config_kI(PROFILE_SLOT, I_COEFF, TIMEOUT_MS);
-        mFrontRight.config_kD(PROFILE_SLOT, D_COEFF, TIMEOUT_MS);
-        mFrontRight.config_kF(PROFILE_SLOT, F_COEFF, TIMEOUT_MS);
-        mFrontRight.configMotionCruiseVelocity(0, TIMEOUT_MS);
-        mFrontRight.configMotionAcceleration(0, TIMEOUT_MS);
-        mFrontRight.setSelectedSensorPosition(0, PIDLOOP_IDX, TIMEOUT_MS);
-        
+		resetMotors();
+		
+		resetPos();
+		
         initialized = true;
 	}
-					
-	private static final double AUTO_DRIVE_ANGLE_CORRECT_COEFF = 0.02;
-	private static final double GYRO_CORRECT_COEFF = 0.03;
-			
-	// smart controllers (motion profiling)
-	private static TalonSRX mFrontLeft, mFrontRight;
-	//private static TalonSRX mBackLeft, mBackRight;
-		
-	// used as angle baseline (if we don't reset gyro)
-	private static double initialAngle = 0.0;
-	
-	// original encoder variables
-	//private static final int ENCODER_PULSES_PER_REV = 250;  // E4P-250  - on the proto bot front motors
-	//private static final double INCHES_PER_REV = (6 * 3.14159);   // 6-in diameter wheel
 
-	// motor polarity
-	public static final boolean RIGHT_REVERSE_MOTOR = true;     // comp-bot motor polarity - right
-	public static final boolean LEFT_REVERSE_MOTOR = false;		// comp-bot motor polarity - left
-		
-	// grayhill encoder polarity
-	public static final boolean ALIGNED_RIGHT_SENSOR = true;	// encoder polarity - right
-	public static final boolean ALIGNED_LEFT_SENSOR = true;    // encoder polarity - left
-	
-	//public static final int ENCODER_PULSES_PER_REV = 256;  // 63R  - on the competition bot front motors
-	public static final int ENCODER_PULSES_PER_REV = 256*4;  // 63R  - on the competition bot front motors
-
-	//public static final double INCHES_PER_REV = (6 * 3.14159);   // 6-in diameter wheel (theoretical)
-	public static final double INCHES_PER_REV = (5.9 * 3.14159);   // 5.9-in diameter wheel (worn)
-			
-	public static final double INCHES_PER_ENCODER_PULSE = INCHES_PER_REV/ENCODER_PULSES_PER_REV;
-	public static final double RPM_TO_UNIT_PER_100MS = ENCODER_PULSES_PER_REV/(60*10);
-	
-	// PIDF values - proto.bot - initial 
-	private static final double P_COEFF = 7.0;
-	private static final double I_COEFF = 0.0;  // Integral not needed for closed loop position control
-	private static final double D_COEFF = 0.0;
-	private static final double F_COEFF = 0.0;  // Feedforward not used for closed loop position control
-		
-	private static void resetMotors()
-	{
-		// disable brake mode (all motors on coast)
-		mFrontLeft.setNeutralMode(NeutralMode.Coast);
-		mFrontRight.setNeutralMode(NeutralMode.Coast);
-		//mBackLeft.setNeutralMode(NeutralMode.Coast);
-		//mBackRight.setNeutralMode(NeutralMode.Coast);
-		
-		//ioComm.putBoolean(InputOutputComm.LogTable.kMainLog,"Auto/BrakeMode", false);
-		
+	public static void resetMotors()
+	{		
 		// turn all motors to zero power
 		mFrontLeft.set(ControlMode.PercentOutput,0.0);
 		mFrontRight.set(ControlMode.PercentOutput,0.0);		
 		//mBackLeft.set(ControlMode.PercentOutput,0.0);
-		//mBackRight.set(ControlMode.PercentOutput,0.0);
-		
+		//mBackRight.set(ControlMode.PercentOutput,0.0);	
 	}
-		
-	private static void configureMotorsVbus() 
-	{		
-		// for auto - brake mode enabled
-		mFrontLeft.setNeutralMode(NeutralMode.Brake);
-		mFrontRight.setNeutralMode(NeutralMode.Brake);
-		//mBackLeft.setNeutralMode(NeutralMode.Brake);
-		//mBackRight.setNeutralMode(NeutralMode.Brake);
-		
-		//ioComm.putBoolean(InputOutputComm.LogTable.kMainLog,"Auto/BrakeMode", true);
-		
-		// turn all motors to zero power		
-		mFrontLeft.set(ControlMode.PercentOutput,0);
-		mFrontRight.set(ControlMode.PercentOutput,0);		
-		//mBackLeft.set(ControlMode.PercentOutput,0);
-		//mBackRight.set(ControlMode.PercentOutput,0);
-			
-	}
-
-	private static void configureMotorsMagic() 
-	{		
-		// for auto - brake mode NOT enabled
-		mFrontLeft.setNeutralMode(NeutralMode.Coast);
-		mFrontRight.setNeutralMode(NeutralMode.Coast);
-		//mBackLeft.setNeutralMode(NeutralMode.Coast);
-		//mBackRight.setNeutralMode(NeutralMode.Coast);
-		
-		//ioComm.putBoolean(InputOutputComm.LogTable.kMainLog,"Auto/BrakeMode", false);
-		
-        // configure left and right front motors for magic motion (closed-loop position control)
-		mFrontRight.set(ControlMode.MotionMagic, 0);
-		mFrontLeft.set(ControlMode.MotionMagic, 0);
-        //mBackRight.follow(mFrontRight);
-        //mBackLeft.follow(mFrontLeft);		
-	}
-
+	
 	public static void resetPos()
 	{		
 		// reset front left and right encoder pulses to zero
 		mFrontLeft.setSelectedSensorPosition(0, PIDLOOP_IDX, TIMEOUT_MS);
 		mFrontRight.setSelectedSensorPosition(0, PIDLOOP_IDX, TIMEOUT_MS);
 	}	 	        
+		
+    // closed-loop motor configuration
+    private static TalonSRX configureMotor(int talonID, boolean revMotor, boolean alignSensor,
+    									double pCoeff, double iCoeff, double dCoeff, double fCoeff)
+    {
+    	TalonSRX _talon;
+    	_talon = new TalonSRX(talonID);
+    	_talon.setInverted(revMotor);
+    	
+    	_talon.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, PIDLOOP_IDX, TIMEOUT_MS);
+    	_talon.setSensorPhase(alignSensor); 
+    	
+    	_talon.selectProfileSlot(PROFILE_SLOT, PIDLOOP_IDX);
+    	_talon.config_kP(PROFILE_SLOT, pCoeff, TIMEOUT_MS);
+    	_talon.config_kI(PROFILE_SLOT, iCoeff, TIMEOUT_MS);
+    	_talon.config_kD(PROFILE_SLOT, dCoeff, TIMEOUT_MS);
+    	_talon.config_kF(PROFILE_SLOT, fCoeff, TIMEOUT_MS);
+    	_talon.configMotionCruiseVelocity(0, TIMEOUT_MS);
+    	_talon.configMotionAcceleration(0, TIMEOUT_MS);
+    	_talon.setSelectedSensorPosition(0, PIDLOOP_IDX, TIMEOUT_MS);
+    	
+    	_talon.setNeutralMode(NeutralMode.Brake);
+ 
+    	return _talon;
+    }
+    
+    // open-loop motor configuration (and possibly follower)
+    private static TalonSRX configureMotor(int talonID, boolean revMotor, int talonIDToFollow)
+    {
+    	TalonSRX _talon;
+    	_talon = new TalonSRX(talonID);
+    	_talon.setInverted(revMotor);
+    	
+    	if (talonIDToFollow > 0)
+    		_talon.set(ControlMode.Follower, (double)talonIDToFollow);
+    	
+    	_talon.setNeutralMode(NeutralMode.Brake);
+   	
+    	return _talon;
+    }
 
 	public static double getDistanceInches() {
 				
 		// Encoders now read only raw encoder values - convert raw to inches directly
-		double rightPos = mFrontRight.getSelectedSensorPosition(0)*INCHES_PER_ENCODER_PULSE;
-		double leftPos = mFrontLeft.getSelectedSensorPosition(0)*INCHES_PER_ENCODER_PULSE;
+		double rightPos = mFrontRight.getSelectedSensorPosition(0)*HardwareIDs.INCHES_PER_ENCODER_PULSE;
+		double leftPos = mFrontLeft.getSelectedSensorPosition(0)*HardwareIDs.INCHES_PER_ENCODER_PULSE;
 				
 		String posStr = String.format("%.2f", rightPos);
 		InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"Auto/EncoderRight", posStr);
@@ -186,13 +142,6 @@ public class AutoDriveAssembly {
 		else
 			//initialAngle = NavXSensor.getAngle();
 			initialAngle = headingDeg;				// target heading if not resetting gyro
-
-		if (magicMotion)
-			// configure motors for magic motion
-			configureMotorsMagic();
-		else
-			// configure motors for normal VBus control
-			configureMotorsVbus();
 		
 		// set current position to zero
 		resetPos();
@@ -218,36 +167,36 @@ public class AutoDriveAssembly {
 	
 	public static void autoMagicStraight(double targetPosInches, int speedRpm, int accelRpm) {
 		
-		int nativeUnitsPer100ms = (int) ((double)speedRpm * RPM_TO_UNIT_PER_100MS);
-		int accelNativeUnits = (int) ((double)accelRpm * RPM_TO_UNIT_PER_100MS);
+		int nativeUnitsPer100ms = (int) ((double)speedRpm * HardwareIDs.RPM_TO_UNIT_PER_100MS);
+		int accelNativeUnits = (int) ((double)accelRpm * HardwareIDs.RPM_TO_UNIT_PER_100MS);
 
         // left front drive straight - uses motion magic
 		mFrontLeft.configMotionCruiseVelocity(nativeUnitsPer100ms, TIMEOUT_MS);
 		mFrontLeft.configMotionAcceleration(accelNativeUnits, TIMEOUT_MS);
-		mFrontLeft.set(ControlMode.MotionMagic, targetPosInches/INCHES_PER_ENCODER_PULSE);
+		mFrontLeft.set(ControlMode.MotionMagic, targetPosInches/HardwareIDs.INCHES_PER_ENCODER_PULSE);
 		
         // right front drive straight - uses motion magic
         mFrontRight.configMotionCruiseVelocity(nativeUnitsPer100ms, TIMEOUT_MS);
         mFrontRight.configMotionAcceleration(accelNativeUnits, TIMEOUT_MS);
-        mFrontRight.set(ControlMode.MotionMagic, targetPosInches/INCHES_PER_ENCODER_PULSE);
+        mFrontRight.set(ControlMode.MotionMagic, targetPosInches/HardwareIDs.INCHES_PER_ENCODER_PULSE);
 		
 		// left and right back motors are following front motors
 	}
 	
 	public static void autoMagicTurn(double targetPosInchesLeft, double targetPosInchesRight, int speedRpm, int accelRpm) {
 
-		int nativeUnitsPer100ms = (int) ((double)speedRpm * RPM_TO_UNIT_PER_100MS);
-		int accelNativeUnits = (int) ((double)accelRpm * RPM_TO_UNIT_PER_100MS);
+		int nativeUnitsPer100ms = (int) ((double)speedRpm * HardwareIDs.RPM_TO_UNIT_PER_100MS);
+		int accelNativeUnits = (int) ((double)accelRpm * HardwareIDs.RPM_TO_UNIT_PER_100MS);
 		
         // left front drive straight - uses motion magic
 		mFrontLeft.configMotionCruiseVelocity(nativeUnitsPer100ms, TIMEOUT_MS);
 		mFrontLeft.configMotionAcceleration(accelNativeUnits, TIMEOUT_MS);
-		mFrontLeft.set(ControlMode.MotionMagic, targetPosInchesLeft/INCHES_PER_ENCODER_PULSE);
+		mFrontLeft.set(ControlMode.MotionMagic, targetPosInchesLeft/HardwareIDs.INCHES_PER_ENCODER_PULSE);
 		
         // right front drive straight - uses motion magic
         mFrontRight.configMotionCruiseVelocity(nativeUnitsPer100ms, TIMEOUT_MS);
         mFrontRight.configMotionAcceleration(accelNativeUnits, TIMEOUT_MS);
-        mFrontRight.set(ControlMode.MotionMagic, targetPosInchesRight/INCHES_PER_ENCODER_PULSE);
+        mFrontRight.set(ControlMode.MotionMagic, targetPosInchesRight/HardwareIDs.INCHES_PER_ENCODER_PULSE);
 				
 		// left and right back motors are following front motors
 	}

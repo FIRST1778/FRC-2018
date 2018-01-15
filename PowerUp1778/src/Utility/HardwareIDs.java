@@ -44,6 +44,20 @@ public class HardwareIDs {
 	public static final int TRIGGER_CHANNEL_ID = 0;
 	public static final int ECHO_CHANNEL_ID = 1;	
 	
+	// Encoder Constants
+	
+	// original encoder variables
+	//private static final int ENCODER_PULSES_PER_REV = 250;  // E4P-250  - on the proto bot front motors
+	//private static final double INCHES_PER_REV = (6 * 3.14159);   // 6-in diameter wheel
+	
+	//public static final int ENCODER_PULSES_PER_REV = 256;  // 63R  - on the competition bot motors
+	public static final int ENCODER_PULSES_PER_REV = 256*4;  // 63R  - on the competition bot motors
+
+	//public static final double INCHES_PER_REV = (6 * 3.14159);   // 6-in diameter wheel (theoretical)
+	public static final double INCHES_PER_REV = (5.9 * 3.14159);   // 5.9-in diameter wheel (worn)
+			
+	public static final double INCHES_PER_ENCODER_PULSE = INCHES_PER_REV/ENCODER_PULSES_PER_REV;
+	public static final double RPM_TO_UNIT_PER_100MS = ENCODER_PULSES_PER_REV/(60*10);
 
 	
 }

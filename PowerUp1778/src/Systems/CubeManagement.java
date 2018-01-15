@@ -25,8 +25,8 @@ public class CubeManagement {
 	public static final int SCALE_LEVEL = 2;
 	
 	private static final int liftLevelPulses[][] = {{0,0}, {100, 100}, {200, 200}};  // number of upper and lower encoder pulses for each level  {upper, lower}
-	private static final int liftMotorVelocity = 900;  // native units per 100ms
-	private static final int liftMotorAccel = 450;  // native units per 100ms ^2
+	private static final int speedRpm = 900;
+	private static final int accelRpm = 450;
 	
 	// motor polarity
 	public static final boolean RIGHT_COLLECTOR_REVERSE_MOTOR = false; 
@@ -42,7 +42,8 @@ public class CubeManagement {
 	public static final boolean ALIGNED_RIGHT_LOWER_SENSOR = true;
 	public static final boolean ALIGNED_LEFT_UPPER_SENSOR = true; 
 	public static final boolean ALIGNED_LEFT_LOWER_SENSOR = true; 
-	
+
+
 	// PID coeffs
 	private static final double kP = 1.0;
 	private static final double kI = 0.0;
@@ -59,6 +60,24 @@ public class CubeManagement {
 	
 	private static final double DEAD_ZONE_THRESHOLD = 0.05;
 		    
+						
+	// collector intake motors
+	private static TalonSRX leftCollectorMotor, rightCollectorMotor; 
+	
+	// lift motors
+	private static TalonSRX leftUpperLiftMotor, rightUpperLiftMotor;
+	private static TalonSRX leftLowerLiftMotor, rightLowerLiftMotor;
+		
+	// pneumatics objects
+	private static Compressor compress;
+	private static DoubleSolenoid flipperSolenoid;
+	
+	private static Joystick gamepad;
+		
+	// wait 0.25 s between button pushes on shooter
+    private static final int TRIGGER_CYCLE_WAIT_US = 250000;
+    private static double initTriggerTime;
+
 	public static void initialize() {
 		
 		if (initialized)
@@ -93,24 +112,29 @@ public class CubeManagement {
 		
 		initialized = true;
 	}
-						
-	// collector intake motors
-	private static TalonSRX leftCollectorMotor, rightCollectorMotor; 
 	
-	// lift motors
-	private static TalonSRX leftUpperLiftMotor, rightUpperLiftMotor;
-	private static TalonSRX leftLowerLiftMotor, rightLowerLiftMotor;
+	public static void resetMotors()
+	{		
+		leftCollectorMotor.set(ControlMode.PercentOutput, 0);
+		rightCollectorMotor.set(ControlMode.PercentOutput, 0);	
 		
-	// pneumatics objects
-	private static Compressor compress;
-	private static DoubleSolenoid flipperSolenoid;
+		leftLowerLiftMotor.set(ControlMode.PercentOutput, 0);
+		leftUpperLiftMotor.set(ControlMode.PercentOutput, 0);
+		rightLowerLiftMotor.set(ControlMode.PercentOutput, 0);
+		rightUpperLiftMotor.set(ControlMode.PercentOutput, 0);	
+	}
 	
-	private static Joystick gamepad;
-		
-	// wait 0.25 s between button pushes on shooter
-    private static final int TRIGGER_CYCLE_WAIT_US = 250000;
-    private static double initTriggerTime;
-    	
+	// resets the position encoders on lift motors
+	// should be called once only, during power up  (when lift is in base state)
+	public static void resetPos()
+	{		
+		// reset left and right lift motor encoder pulses to zero
+		leftLowerLiftMotor.setSelectedSensorPosition(0, PIDLOOP_IDX, TIMEOUT_MS);
+		leftUpperLiftMotor.setSelectedSensorPosition(0, PIDLOOP_IDX, TIMEOUT_MS);
+		rightLowerLiftMotor.setSelectedSensorPosition(0, PIDLOOP_IDX, TIMEOUT_MS);
+		rightUpperLiftMotor.setSelectedSensorPosition(0, PIDLOOP_IDX, TIMEOUT_MS);
+	}	 	
+
     // open-loop motor configuration
     private static TalonSRX configureMotor(int talonID, boolean revMotor)
     {
@@ -148,28 +172,6 @@ public class CubeManagement {
     	return _talon;
     }
     
-	public static void resetMotors()
-	{		
-		leftCollectorMotor.set(ControlMode.PercentOutput, 0);
-		rightCollectorMotor.set(ControlMode.PercentOutput, 0);	
-		
-		leftLowerLiftMotor.set(ControlMode.PercentOutput, 0);
-		leftUpperLiftMotor.set(ControlMode.PercentOutput, 0);
-		rightLowerLiftMotor.set(ControlMode.PercentOutput, 0);
-		rightUpperLiftMotor.set(ControlMode.PercentOutput, 0);
-		
-	}
-	
-	// resets the position encoders on lift motors
-	// should be called once only, during power up  (when lift is in base state)
-	public static void resetPos()
-	{		
-		// reset left and right lift motor encoder pulses to zero
-		leftLowerLiftMotor.setSelectedSensorPosition(0, PIDLOOP_IDX, TIMEOUT_MS);
-		leftUpperLiftMotor.setSelectedSensorPosition(0, PIDLOOP_IDX, TIMEOUT_MS);
-		rightLowerLiftMotor.setSelectedSensorPosition(0, PIDLOOP_IDX, TIMEOUT_MS);
-		rightUpperLiftMotor.setSelectedSensorPosition(0, PIDLOOP_IDX, TIMEOUT_MS);
-	}	 	
 	
 	/************************* flipper & collector control functions **********************************/
 	
@@ -214,8 +216,11 @@ public class CubeManagement {
 	
 	private static void configureMotionMagic(TalonSRX _talon, int targetPulses)
 	{
-		_talon.configMotionCruiseVelocity(liftMotorVelocity, TIMEOUT_MS);
-		_talon.configMotionAcceleration(liftMotorAccel, TIMEOUT_MS);
+		int nativeUnitsPer100ms = (int) ((double)speedRpm * HardwareIDs.RPM_TO_UNIT_PER_100MS);
+		int accelNativeUnits = (int) ((double)accelRpm * HardwareIDs.RPM_TO_UNIT_PER_100MS);
+
+		_talon.configMotionCruiseVelocity(nativeUnitsPer100ms, TIMEOUT_MS);
+		_talon.configMotionAcceleration(accelNativeUnits, TIMEOUT_MS);
 		_talon.set(ControlMode.MotionMagic, targetPulses);
 	}
 	
