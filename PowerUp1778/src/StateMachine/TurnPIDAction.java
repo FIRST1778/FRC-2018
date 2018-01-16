@@ -2,7 +2,7 @@ package StateMachine;
 
 import java.util.prefs.Preferences;
 
-import Systems.AutoDriveAssembly;
+import Systems.DriveAssembly;
 import Systems.NavXSensor;
 
 public class TurnPIDAction extends Action {
@@ -18,7 +18,7 @@ public class TurnPIDAction extends Action {
 		this.speedToTurn = speed;
 		this.resetGyro = resetGyro;
 				
-		AutoDriveAssembly.initialize();
+		DriveAssembly.initialize();
 		NavXSensor.initialize();
 	}
 	
@@ -29,7 +29,7 @@ public class TurnPIDAction extends Action {
 		this.speedToTurn = speed;
 		this.resetGyro = resetGyro;
 		
-		AutoDriveAssembly.initialize();
+		DriveAssembly.initialize();
 		NavXSensor.initialize();
 	}
 	
@@ -41,7 +41,7 @@ public class TurnPIDAction extends Action {
 			NavXSensor.reset();
 		
 		// initialize motor assembly for auto
-		AutoDriveAssembly.autoPidTurnStart(angleToTurn, speedToTurn);
+		DriveAssembly.autoPidTurnStart(angleToTurn, speedToTurn);
 		
 		super.initialize();
 	}
@@ -49,7 +49,7 @@ public class TurnPIDAction extends Action {
 	// called periodically
 	public void process()  {
 		
-		AutoDriveAssembly.autoPidTurnProcess();
+		DriveAssembly.autoPidTurnProcess();
 		
 		super.process();
 	}
@@ -58,7 +58,7 @@ public class TurnPIDAction extends Action {
 	public void cleanup() {
 		// do some drivey cleanup
 					
-		AutoDriveAssembly.autoPidTurnStop();
+		DriveAssembly.autoPidTurnStop();
 		
 		// cleanup base class
 		super.cleanup();

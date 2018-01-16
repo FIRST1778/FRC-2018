@@ -1,7 +1,7 @@
 package StateMachine;
 
 import NetworkComm.InputOutputComm;
-import Systems.AutoDriveAssembly;
+import Systems.DriveAssembly;
 
 public class DistanceEvent extends Event {
 	private String name;
@@ -11,7 +11,7 @@ public class DistanceEvent extends Event {
 	{	
 		this.name = "<Distance Event>";
 		this.desiredDistanceInches = 0.0;
-		AutoDriveAssembly.initialize();
+		DriveAssembly.initialize();
 		InputOutputComm.initialize();
 	}
 	
@@ -19,7 +19,7 @@ public class DistanceEvent extends Event {
 	{
 		this.name = "<Distance Event>";
 		this.desiredDistanceInches = distanceInches;
-		AutoDriveAssembly.initialize();
+		DriveAssembly.initialize();
 		InputOutputComm.initialize();
 	}
 	
@@ -38,7 +38,7 @@ public class DistanceEvent extends Event {
 	
 	public double getDistance() {
 		
-		double currentDistanceInches = AutoDriveAssembly.getDistanceInches();
+		double currentDistanceInches = DriveAssembly.getDistanceInches();
 		
 		String distStr = String.format("%.2f", currentDistanceInches);
 	    String myString = new String("currentDistanceInches = " + distStr);

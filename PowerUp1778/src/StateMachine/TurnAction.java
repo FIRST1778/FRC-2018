@@ -2,7 +2,7 @@ package StateMachine;
 
 import java.util.prefs.Preferences;
 
-import Systems.AutoDriveAssembly;
+import Systems.DriveAssembly;
 import Systems.NavXSensor;
 
 public class TurnAction extends Action {
@@ -20,7 +20,7 @@ public class TurnAction extends Action {
 		this.speedToTurn = speed;
 		this.resetGyro = resetGyro;
 				
-		AutoDriveAssembly.initialize();
+		DriveAssembly.initialize();
 		NavXSensor.initialize();
 	}
 	
@@ -31,7 +31,7 @@ public class TurnAction extends Action {
 		this.speedToTurn = speed;
 		this.resetGyro = resetGyro;
 		
-		AutoDriveAssembly.initialize();
+		DriveAssembly.initialize();
 		NavXSensor.initialize();
 	}
 	
@@ -47,7 +47,7 @@ public class TurnAction extends Action {
 			initialAngle = NavXSensor.getAngle();
 		
 		// initialize motor assembly for auto
-		AutoDriveAssembly.autoInit(resetGyro, initialAngle, false);
+		DriveAssembly.autoInit(resetGyro, initialAngle, false);
 		
 		super.initialize();
 	}
@@ -60,9 +60,9 @@ public class TurnAction extends Action {
 			
 		// rotate to close the gap
 		if (angleDiff > 0.0)
-			AutoDriveAssembly.rotateRight(speedToTurn);
+			DriveAssembly.rotateRight(speedToTurn);
 		else
-			AutoDriveAssembly.rotateLeft(speedToTurn);
+			DriveAssembly.rotateLeft(speedToTurn);
 		
 		super.process();
 	}
@@ -73,7 +73,7 @@ public class TurnAction extends Action {
 			
 		// PWMDriveAssembly not supported
 		
-		AutoDriveAssembly.autoStop();
+		DriveAssembly.autoStop();
 		
 		// cleanup base class
 		super.cleanup();

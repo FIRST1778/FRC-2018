@@ -4,7 +4,7 @@ import java.util.prefs.Preferences;
 
 import NetworkComm.InputOutputComm;
 import NetworkComm.RPIComm;
-import Systems.AutoDriveAssembly;
+import Systems.DriveAssembly;
 
 public class DriveTowardTargetAction extends Action {
 	private final double AUTO_DRIVE_TARGET_CORRECT_COEFF = 0.75;
@@ -20,7 +20,7 @@ public class DriveTowardTargetAction extends Action {
 	private final double CORRECTION_THRESH_PIX = 5.0;
 	private final double TURN_SPEED = 0.2;
 	
-	private AutoDriveAssembly autoDrive;
+	private DriveAssembly autoDrive;
 	private RPIComm rpiComm;
 	private InputOutputComm ioComm;
 	
@@ -34,7 +34,7 @@ public class DriveTowardTargetAction extends Action {
 		this.speedX = speedX;
 		this.speedY = speedY;
 
-		AutoDriveAssembly.initialize();
+		DriveAssembly.initialize();
 		RPIComm.initialize();
 		InputOutputComm.initialize();
 		
@@ -52,7 +52,7 @@ public class DriveTowardTargetAction extends Action {
 		this.speedX = speedX;
 		this.speedY = speedY;
 				
-		AutoDriveAssembly.initialize();
+		DriveAssembly.initialize();
 		RPIComm.initialize();
 		InputOutputComm.initialize();
 	}
@@ -104,7 +104,7 @@ public class DriveTowardTargetAction extends Action {
 		}
 		
 		// send drive speeds to motors
-		AutoDriveAssembly.drive(leftSpeed, rightSpeed);
+		DriveAssembly.drive(leftSpeed, rightSpeed);
 						
 		super.process();
 	}
@@ -113,7 +113,7 @@ public class DriveTowardTargetAction extends Action {
 	public void cleanup() {
 		// do some drivey cleanup
 					
-		AutoDriveAssembly.autoStop();
+		DriveAssembly.autoStop();
 		
 		// cleanup base class
 		super.cleanup();

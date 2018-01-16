@@ -8,9 +8,9 @@ import com.ctre.phoenix.motorcontrol.NeutralMode;
 import NetworkComm.InputOutputComm;
 import Utility.HardwareIDs;
 
-//Chill Out 1778 class for controlling the drivetrain during auto
+//Chill Out 1778 class for controlling the drivetrain
 
-public class AutoDriveAssembly {
+public class DriveAssembly {
 		
 	private static boolean initialized = false;
 	private static final int TIMEOUT_MS = 0;  // set to zero if skipping confirmation
@@ -28,12 +28,12 @@ public class AutoDriveAssembly {
 	private static double initialAngle = 0.0;
 	
 	// motor polarity
-	public static final boolean RIGHT_REVERSE_MOTOR = true;     // comp-bot motor polarity - right
+	public static final boolean RIGHT_REVERSE_MOTOR = false;    // comp-bot motor polarity - right
 	public static final boolean LEFT_REVERSE_MOTOR = false;		// comp-bot motor polarity - left
 		
-	// grayhill encoder polarity
-	public static final boolean ALIGNED_RIGHT_SENSOR = true;	// encoder polarity - right
-	public static final boolean ALIGNED_LEFT_SENSOR = true;    // encoder polarity - left
+	// grayhill encoder polarity (front motors only)
+	public static final boolean ALIGNED_RIGHT_SENSOR = true;	// encoder polarity - front right
+	public static final boolean ALIGNED_LEFT_SENSOR = true;    // encoder polarity - front left
 		
 	// PIDF values - proto.bot - initial 
 	private static final double kP = 7.0;
@@ -99,7 +99,7 @@ public class AutoDriveAssembly {
     	_talon.configMotionAcceleration(0, TIMEOUT_MS);
     	_talon.setSelectedSensorPosition(0, PIDLOOP_IDX, TIMEOUT_MS);
     	
-    	_talon.setNeutralMode(NeutralMode.Brake);
+    	//_talon.setNeutralMode(NeutralMode.Brake);
  
     	return _talon;
     }
@@ -114,7 +114,7 @@ public class AutoDriveAssembly {
     	if (talonIDToFollow > 0)
     		_talon.set(ControlMode.Follower, (double)talonIDToFollow);
     	
-    	_talon.setNeutralMode(NeutralMode.Brake);
+    	//_talon.setNeutralMode(NeutralMode.Brake);
    	
     	return _talon;
     }

@@ -2,7 +2,7 @@ package StateMachine;
 
 import java.util.prefs.Preferences;
 
-import Systems.AutoDriveAssembly;
+import Systems.DriveAssembly;
 import Systems.NavXSensor;
 
 public class TurnMagicAction extends Action {
@@ -23,7 +23,7 @@ public class TurnMagicAction extends Action {
 		this.speedToTurn = speed;
 		this.accelToTurn = accel;
 				
-		AutoDriveAssembly.initialize();
+		DriveAssembly.initialize();
 	}
 	
 	public TurnMagicAction(String name, double leftPosInches, double rightPosInches, int speed, int accel)
@@ -36,15 +36,15 @@ public class TurnMagicAction extends Action {
 		this.speedToTurn = speed;
 		this.accelToTurn = accel;
 		
-		AutoDriveAssembly.initialize();
+		DriveAssembly.initialize();
 	}
 	
 	// action entry
 	public void initialize() {
 				
 		// initialize motor assembly for auto - use motion magic (closed loop control targets)
-		AutoDriveAssembly.autoInit(true, 0.0, true);
-		AutoDriveAssembly.autoMagicTurn(leftPosInches, rightPosInches, speedToTurn, accelToTurn);
+		DriveAssembly.autoInit(true, 0.0, true);
+		DriveAssembly.autoMagicTurn(leftPosInches, rightPosInches, speedToTurn, accelToTurn);
 		
 		super.initialize();
 	}
@@ -60,7 +60,7 @@ public class TurnMagicAction extends Action {
 	public void cleanup() {
 		// do some drivey cleanup
 					
-		AutoDriveAssembly.autoStop();
+		DriveAssembly.autoStop();
 		
 		// cleanup base class
 		super.cleanup();

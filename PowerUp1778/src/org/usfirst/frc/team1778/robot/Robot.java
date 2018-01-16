@@ -1,9 +1,10 @@
 package org.usfirst.frc.team1778.robot;
 
-import FreezyDrive.FreezyDriveTrain;
+import FreezyDrive.Controller;
+import FreezyDrive.DriveControl;
 import NetworkComm.InputOutputComm;
 import StateMachine.AutoStateMachine;
-import Systems.AutoDriveAssembly;
+import Systems.DriveAssembly;
 import Systems.ClimberAssembly;
 import Systems.CubeManagement;
 import Systems.NavXSensor;
@@ -19,6 +20,7 @@ import edu.wpi.first.wpilibj.IterativeRobot;
 public class Robot extends IterativeRobot {
 
 	protected AutoStateMachine autoSM;
+	protected DriveControl driveControl;
 
 	/**
 	 * This function is run when the robot is first started up and should be
@@ -27,15 +29,18 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void robotInit() {
 		
+		// Initialize robot subsystems
 		InputOutputComm.initialize();
-
-		FreezyDriveTrain.initialize();	
-		CubeManagement.initialize();
-		ClimberAssembly.initialize();
+		//CubeManagement.initialize();
+		//ClimberAssembly.initialize();
 		NavXSensor.initialize();
+		DriveAssembly.initialize();
+		
+		// Create Freezy Drive controller
+		driveControl = new DriveControl();
 
+		// Create Autonomous State Machine
 		autoSM = new AutoStateMachine();
-		AutoDriveAssembly.initialize();
 		
     	InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"MainLog","robot initialized...");        
 
@@ -56,7 +61,9 @@ public class Robot extends IterativeRobot {
 	public void autonomousInit() {
     	InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"MainLog","autonomous mode...");
     	    	 	
-    	AutoDriveAssembly.autoInit(true, 0.0, false);
+    	DriveAssembly.autoInit(true, 0.0, false);
+    	
+    	// start the auto state machine
     	autoSM.start();
 	}
 
@@ -69,18 +76,17 @@ public class Robot extends IterativeRobot {
     	autoSM.process();
  
     	// debug only (read position sensors)
-    	AutoDriveAssembly.getDistanceInches();
+    	DriveAssembly.getDistanceInches();
     	getGyroAngle();
-    	CubeManagement.getLiftPos(true);
+    	//CubeManagement.getLiftPos(true);
    	
 	}
 
 	public void teleopInit() {
     	InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"MainLog","teleop mode...");
-    	
-    	FreezyDriveTrain.teleopInit();	
-    	CubeManagement.teleopInit();
-    	ClimberAssembly.teleopInit();
+    	    	
+    	//CubeManagement.teleopInit();
+    	//ClimberAssembly.teleopInit();
 		
 	}
 	
@@ -90,9 +96,12 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void teleopPeriodic() {
 		
-        FreezyDriveTrain.teleopPeriodic();   
-        CubeManagement.teleopPeriodic();
-        ClimberAssembly.teleopPeriodic();
+    	// Freezy-Drive command for all controllers
+   	 	driveControl.calculateDrive(Controller.Driver_Throttle(), Controller.Driver_Steering(),
+   	 		Controller.Driver_isQuickTurn());
+
+   	 	//CubeManagement.teleopPeriodic();
+        //ClimberAssembly.teleopPeriodic();
 	}
 	
     /**
@@ -118,7 +127,7 @@ public class Robot extends IterativeRobot {
 	
     public void disabledInit() {
 
-    	AutoDriveAssembly.disabledInit();
+    	DriveAssembly.disabledInit();
 
     }
 

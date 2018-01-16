@@ -1,7 +1,7 @@
 package StateMachine;
 
 import java.util.prefs.Preferences;
-import Systems.AutoDriveAssembly;
+import Systems.DriveAssembly;
 
 import edu.wpi.first.wpilibj.Utility;
 
@@ -20,7 +20,7 @@ public class ClosedLoopPositionEvent extends Event {
 		this.durationSec = 0.0;
 		this.errorThresholdInches = 0.0;
 		this.targetPosInches = 0.0;
-		AutoDriveAssembly.initialize();
+		DriveAssembly.initialize();
 	}
 	
 	public ClosedLoopPositionEvent(double targetPosInches, double errorThreshInches, double durationSec)
@@ -29,7 +29,7 @@ public class ClosedLoopPositionEvent extends Event {
 		this.durationSec = durationSec;
 		this.errorThresholdInches = errorThreshInches;
 		this.targetPosInches = targetPosInches;
-		AutoDriveAssembly.initialize();
+		DriveAssembly.initialize();
 	}
 	
 	// overloaded initialize method
@@ -45,7 +45,7 @@ public class ClosedLoopPositionEvent extends Event {
 	public boolean isTriggered()
 	{		
 		// measure current position error
-		double actualPosInches = AutoDriveAssembly.getDistanceInches();
+		double actualPosInches = DriveAssembly.getDistanceInches();
 		double errorPosInches = Math.abs(targetPosInches - actualPosInches);
 		if (errorPosInches > errorThresholdInches)
 		{

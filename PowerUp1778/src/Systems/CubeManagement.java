@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.Spark;
 
 public class CubeManagement {
 	
@@ -37,12 +38,9 @@ public class CubeManagement {
 	public static final boolean LEFT_UPPER_REVERSE_MOTOR = false;
 	public static final boolean LEFT_LOWER_REVERSE_MOTOR = false;
 		
-	// grayhill encoder polarity
-	public static final boolean ALIGNED_RIGHT_UPPER_SENSOR = true;
-	public static final boolean ALIGNED_RIGHT_LOWER_SENSOR = true;
+	// grayhill encoder polarity (left side only)
 	public static final boolean ALIGNED_LEFT_UPPER_SENSOR = true; 
 	public static final boolean ALIGNED_LEFT_LOWER_SENSOR = true; 
-
 
 	// PID coeffs
 	private static final double kP = 1.0;
@@ -59,10 +57,9 @@ public class CubeManagement {
 	private static final double LIFT_DOWN_LEVEL = 0.75;
 	
 	private static final double DEAD_ZONE_THRESHOLD = 0.05;
-		    
-						
+		    					
 	// collector intake motors
-	private static TalonSRX leftCollectorMotor, rightCollectorMotor; 
+	private static Spark leftCollectorMotor, rightCollectorMotor; 
 	
 	// lift motors
 	private static TalonSRX leftUpperLiftMotor, rightUpperLiftMotor;
@@ -93,14 +90,16 @@ public class CubeManagement {
 		flipperSolenoid = new DoubleSolenoid(HardwareIDs.PCM_ID, HardwareIDs.FLIPPER_UP_SOLENOID, HardwareIDs.FLIPPER_DOWN_SOLENOID);
             
 		// create and initialize collector motors (open-loop)
-		leftCollectorMotor = configureMotor(HardwareIDs.LEFT_COLLECTOR_TALON_ID, LEFT_COLLECTOR_REVERSE_MOTOR);
-		rightCollectorMotor = configureMotor(HardwareIDs.RIGHT_COLLECTOR_TALON_ID, RIGHT_COLLECTOR_REVERSE_MOTOR);
+		leftCollectorMotor = new Spark(HardwareIDs.LEFT_COLLECTOR_PWM_ID);
+		rightCollectorMotor = new Spark(HardwareIDs.RIGHT_COLLECTOR_PWM_ID);
 
-		// create and initialize lift motors (closed-loop)
-		leftLowerLiftMotor = configureMotor(HardwareIDs.LEFT_LOWER_LIFT_TALON_ID, LEFT_LOWER_REVERSE_MOTOR, ALIGNED_LEFT_LOWER_SENSOR, kP, kI, kD, kF);
-		rightLowerLiftMotor = configureMotor(HardwareIDs.RIGHT_LOWER_LIFT_TALON_ID, RIGHT_LOWER_REVERSE_MOTOR, ALIGNED_RIGHT_LOWER_SENSOR, kP, kI, kD, kF);
+		// create and initialize left lift motors (closed-loop)
 		leftUpperLiftMotor = configureMotor(HardwareIDs.LEFT_UPPER_LIFT_TALON_ID, LEFT_UPPER_REVERSE_MOTOR, ALIGNED_LEFT_UPPER_SENSOR, kP, kI, kD, kF);
-		rightUpperLiftMotor = configureMotor(HardwareIDs.RIGHT_UPPER_LIFT_TALON_ID, RIGHT_UPPER_REVERSE_MOTOR, ALIGNED_RIGHT_UPPER_SENSOR, kP, kI, kD, kF);
+		leftLowerLiftMotor = configureMotor(HardwareIDs.LEFT_LOWER_LIFT_TALON_ID, LEFT_LOWER_REVERSE_MOTOR, ALIGNED_LEFT_LOWER_SENSOR, kP, kI, kD, kF);
+
+		// create and initialize right lift motors (follows left side)
+		rightUpperLiftMotor = configureMotor(HardwareIDs.RIGHT_UPPER_LIFT_TALON_ID, RIGHT_UPPER_REVERSE_MOTOR, HardwareIDs.LEFT_UPPER_LIFT_TALON_ID);
+		rightLowerLiftMotor = configureMotor(HardwareIDs.RIGHT_LOWER_LIFT_TALON_ID, RIGHT_LOWER_REVERSE_MOTOR, HardwareIDs.LEFT_LOWER_LIFT_TALON_ID);
 				
 		// make sure all motors are off
 		resetMotors();
@@ -115,13 +114,13 @@ public class CubeManagement {
 	
 	public static void resetMotors()
 	{		
-		leftCollectorMotor.set(ControlMode.PercentOutput, 0);
-		rightCollectorMotor.set(ControlMode.PercentOutput, 0);	
+		//leftCollectorMotor.set(ControlMode.PercentOutput, 0);
+		//rightCollectorMotor.set(ControlMode.PercentOutput, 0);	
 		
-		leftLowerLiftMotor.set(ControlMode.PercentOutput, 0);
 		leftUpperLiftMotor.set(ControlMode.PercentOutput, 0);
-		rightLowerLiftMotor.set(ControlMode.PercentOutput, 0);
-		rightUpperLiftMotor.set(ControlMode.PercentOutput, 0);	
+		leftLowerLiftMotor.set(ControlMode.PercentOutput, 0);
+		//rightUpperLiftMotor.set(ControlMode.PercentOutput, 0);	
+		//rightLowerLiftMotor.set(ControlMode.PercentOutput, 0);
 	}
 	
 	// resets the position encoders on lift motors
@@ -129,20 +128,21 @@ public class CubeManagement {
 	public static void resetPos()
 	{		
 		// reset left and right lift motor encoder pulses to zero
-		leftLowerLiftMotor.setSelectedSensorPosition(0, PIDLOOP_IDX, TIMEOUT_MS);
 		leftUpperLiftMotor.setSelectedSensorPosition(0, PIDLOOP_IDX, TIMEOUT_MS);
-		rightLowerLiftMotor.setSelectedSensorPosition(0, PIDLOOP_IDX, TIMEOUT_MS);
-		rightUpperLiftMotor.setSelectedSensorPosition(0, PIDLOOP_IDX, TIMEOUT_MS);
+		leftLowerLiftMotor.setSelectedSensorPosition(0, PIDLOOP_IDX, TIMEOUT_MS);
 	}	 	
 
-    // open-loop motor configuration
-    private static TalonSRX configureMotor(int talonID, boolean revMotor)
+    // open-loop motor configuration (and possibly follower)
+    private static TalonSRX configureMotor(int talonID, boolean revMotor, int talonIDToFollow)
     {
     	TalonSRX _talon;
     	_talon = new TalonSRX(talonID);
     	_talon.setInverted(revMotor);
     	
-    	_talon.setNeutralMode(NeutralMode.Brake);
+    	if (talonIDToFollow > 0)
+    		_talon.set(ControlMode.Follower, (double)talonIDToFollow);
+    	
+    	//_talon.setNeutralMode(NeutralMode.Brake);
    	
     	return _talon;
     }
@@ -167,7 +167,7 @@ public class CubeManagement {
     	_talon.configMotionAcceleration(0, TIMEOUT_MS);
     	_talon.setSelectedSensorPosition(0, PIDLOOP_IDX, TIMEOUT_MS);
  
-    	_talon.setNeutralMode(NeutralMode.Brake);
+    	//_talon.setNeutralMode(NeutralMode.Brake);
 
     	return _talon;
     }
@@ -188,8 +188,9 @@ public class CubeManagement {
 	public static void depositCube()
 	{
 		InputOutputComm.putDouble(InputOutputComm.LogTable.kMainLog,"CubeMgmt/CollectorLevel", COLLECTOR_OUT_LEVEL);
-		leftCollectorMotor.set(ControlMode.PercentOutput, COLLECTOR_OUT_LEVEL);
-		rightCollectorMotor.set(ControlMode.PercentOutput, COLLECTOR_OUT_LEVEL);		
+		leftCollectorMotor.set(COLLECTOR_OUT_LEVEL);
+		rightCollectorMotor.set(COLLECTOR_OUT_LEVEL);
+			
 	}
 	
 	/************************* lift control functions **********************************/
@@ -226,8 +227,7 @@ public class CubeManagement {
 	
 	/************************* UI input functions **********************************/
 	
-	private static void checkCollectorControls() {
-						
+	private static void checkCollectorControls() {			
 		// collector control
 		double collectorLevel = gamepad.getRawAxis(HardwareIDs.COLLECTOR_IN_AXIS);
 		if (Math.abs(collectorLevel) > DEAD_ZONE_THRESHOLD)
@@ -237,9 +237,8 @@ public class CubeManagement {
 		else
 			collectorLevel = 0.0;
 		InputOutputComm.putDouble(InputOutputComm.LogTable.kMainLog,"CubeMgmt/CollectorLevel", collectorLevel);
-		leftCollectorMotor.set(ControlMode.PercentOutput, collectorLevel);
-		rightCollectorMotor.set(ControlMode.PercentOutput, collectorLevel);
-		
+		leftCollectorMotor.set(collectorLevel);
+		rightCollectorMotor.set(collectorLevel);
 	}
 	
 	private static void checkLiftControls() {
@@ -252,10 +251,10 @@ public class CubeManagement {
 		else
 			liftLevel = 0.0;
 		InputOutputComm.putDouble(InputOutputComm.LogTable.kMainLog,"CubeMgmt/LiftLevel", liftLevel);
-		leftLowerLiftMotor.set(ControlMode.PercentOutput, liftLevel);
-		rightLowerLiftMotor.set(ControlMode.PercentOutput, liftLevel);
 		leftUpperLiftMotor.set(ControlMode.PercentOutput, liftLevel);
-		rightUpperLiftMotor.set(ControlMode.PercentOutput, liftLevel);
+		leftLowerLiftMotor.set(ControlMode.PercentOutput, liftLevel);
+		//rightUpperLiftMotor.set(ControlMode.PercentOutput, liftLevel);
+		//rightLowerLiftMotor.set(ControlMode.PercentOutput, liftLevel);
 	}
 	
 	private static void checkFlipperControls() {
@@ -300,24 +299,18 @@ public class CubeManagement {
 	public static int getLiftPos(boolean upperSelected) {
 		
 		// Encoders now read only raw encoder values - convert raw to inches directly
-		int rightUpperPos = rightUpperLiftMotor.getSelectedSensorPosition(0);
 		int leftUpperPos = leftUpperLiftMotor.getSelectedSensorPosition(0);
-		int rightLowerPos = rightLowerLiftMotor.getSelectedSensorPosition(0);
 		int leftLowerPos = leftLowerLiftMotor.getSelectedSensorPosition(0);
 				
-		String posStr = String.format("%d", rightUpperPos);
-		InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"Auto/LiftUpperRight", posStr);
-		posStr = String.format("%d", leftUpperPos);
-		InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"Auto/LiftUpperLeft", posStr);
-		posStr = String.format("%d", rightLowerPos);
-		InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"Auto/LiftLowerRight", posStr);
+		String posStr = String.format("%d", leftUpperPos);
+		InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"Auto/LiftUpper", posStr);
 		posStr = String.format("%d", leftLowerPos);
-		InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"Auto/LiftLowerLeft", posStr);
+		InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"Auto/LiftLower", posStr);
 		
 		if (upperSelected)
-			return rightUpperPos;
+			return leftUpperPos;
 		else
-			return rightLowerPos;
+			return leftLowerPos;
 	}
 	
 }

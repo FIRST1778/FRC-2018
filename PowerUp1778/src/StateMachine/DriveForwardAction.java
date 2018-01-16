@@ -3,7 +3,7 @@ package StateMachine;
 import java.util.prefs.Preferences;
 
 import NetworkComm.InputOutputComm;
-import Systems.AutoDriveAssembly;
+import Systems.DriveAssembly;
 import Systems.NavXSensor;
 
 public class DriveForwardAction extends Action {
@@ -20,7 +20,7 @@ public class DriveForwardAction extends Action {
 		this.resetGyro = resetGyro;
 		this.headingDeg = headingDeg;   // absolute heading to use if not resetting gyro
 
-		AutoDriveAssembly.initialize();
+		DriveAssembly.initialize();
 		NavXSensor.initialize();
 		InputOutputComm.initialize();
 	}
@@ -32,7 +32,7 @@ public class DriveForwardAction extends Action {
 		this.resetGyro = resetGyro;
 		this.headingDeg = headingDeg;   // absolute heading to use if not resetting gyro
 				
-		AutoDriveAssembly.initialize();
+		DriveAssembly.initialize();
 		NavXSensor.initialize();
 		InputOutputComm.initialize();
 	}
@@ -58,7 +58,7 @@ public class DriveForwardAction extends Action {
 	public void initialize() {
 		// do some drivey initialization
 		
-		AutoDriveAssembly.autoInit(resetGyro, headingDeg, false);
+		DriveAssembly.autoInit(resetGyro, headingDeg, false);
 		
 		super.initialize();
 	}
@@ -68,7 +68,7 @@ public class DriveForwardAction extends Action {
 		
 		// do some drivey stuff
 				
-		AutoDriveAssembly.autoGyroStraight(speed);
+		DriveAssembly.autoGyroStraight(speed);
 
 		// get gyro angle 
 		// (not used for anything else here except reporting to driver)
@@ -81,7 +81,7 @@ public class DriveForwardAction extends Action {
 	public void cleanup() {
 		// do some drivey cleanup
 					
-		AutoDriveAssembly.autoStop();
+		DriveAssembly.autoStop();
 		
 		// cleanup base class
 		super.cleanup();

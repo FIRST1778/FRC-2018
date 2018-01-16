@@ -1,5 +1,6 @@
 package FreezyDrive;
 import NetworkComm.InputOutputComm;
+import Systems.DriveAssembly;
 import Utility.SimpleUtil;
 
 public class DriveControl {
@@ -118,13 +119,12 @@ public class DriveControl {
         } else if (rightPower < -1.0) {
             leftPower += overPower * (-1.0 - rightPower);
             rightPower = -1.0;
-        }	
-        
-        
+        }	       
 		
 		// sends final values to drive train
 		//FreezyDriveTrain.ChangeSpeed(-leftPower,rightPower);
-		FreezyDriveTrain.ChangeSpeed(-leftPower,-rightPower);
+		//FreezyDriveTrain.ChangeSpeed(-leftPower,-rightPower);
+		DriveAssembly.drive(-leftPower, -rightPower);
 		
 		InputOutputComm.putDouble(InputOutputComm.LogTable.kDriveLog,"Teleop/leftPower", -leftPower);		
 		//InputOutputComm.putDouble(InputOutputComm.LogTable.kDriveLog,"Teleop/rightPower", rightPower);

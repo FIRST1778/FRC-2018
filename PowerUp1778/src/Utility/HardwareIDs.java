@@ -10,15 +10,15 @@ public class HardwareIDs {
 	public static final int RIGHT_FRONT_TALON_ID = 8;
 	public static final int RIGHT_REAR_TALON_ID = 4;
 
-	public static final int LEFT_COLLECTOR_TALON_ID = 10;
-	public static final int RIGHT_COLLECTOR_TALON_ID = 9;
-	
 	public static final int LEFT_LOWER_LIFT_TALON_ID = 5;
 	public static final int RIGHT_LOWER_LIFT_TALON_ID = 6;
-	public static final int LEFT_UPPER_LIFT_TALON_ID = 11;
-	public static final int RIGHT_UPPER_LIFT_TALON_ID = 12;
+	public static final int LEFT_UPPER_LIFT_TALON_ID = 9;
+	public static final int RIGHT_UPPER_LIFT_TALON_ID = 10;
 	
-	public static final int CLIMBER_TALON_ID = 13;
+	// Collector and Climber Sparks (PWM)
+	public static final int CLIMBER_PWM_ID = 1;
+	public static final int LEFT_COLLECTOR_PWM_ID = 2;
+	public static final int RIGHT_COLLECTOR_PWM_ID = 3;
 	
 	// Solenoids (pneumatics)
 	public static final int FLIPPER_UP_SOLENOID = 0;

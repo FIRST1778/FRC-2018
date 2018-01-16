@@ -3,7 +3,7 @@ package StateMachine;
 import java.util.prefs.Preferences;
 
 import NetworkComm.InputOutputComm;
-import Systems.AutoDriveAssembly;
+import Systems.DriveAssembly;
 
 public class DriveForwardMagicAction extends Action {
 	
@@ -25,7 +25,7 @@ public class DriveForwardMagicAction extends Action {
 		this.resetGyro = resetGyro;
 		this.headingDeg = headingDeg;
 
-		AutoDriveAssembly.initialize();
+		DriveAssembly.initialize();
 	}
 	
 	public DriveForwardMagicAction(String name, double targetPosInches, int speedRpm, int accelRpm, boolean resetGyro, double headingDeg)
@@ -38,15 +38,15 @@ public class DriveForwardMagicAction extends Action {
 		this.resetGyro = resetGyro;
 		this.headingDeg = headingDeg;
 				
-		AutoDriveAssembly.initialize();
+		DriveAssembly.initialize();
 	}
 		
 	// action entry
 	public void initialize() {
 		// do some drivey initialization
 		
-		AutoDriveAssembly.autoInit(resetGyro, headingDeg, true);
-		AutoDriveAssembly.autoMagicStraight(targetPosInches, speedRpm, accelRpm);
+		DriveAssembly.autoInit(resetGyro, headingDeg, true);
+		DriveAssembly.autoMagicStraight(targetPosInches, speedRpm, accelRpm);
 		
 		super.initialize();
 	}
@@ -63,7 +63,7 @@ public class DriveForwardMagicAction extends Action {
 	public void cleanup() {
 		// do some drivey cleanup
 					
-		AutoDriveAssembly.autoStop();
+		DriveAssembly.autoStop();
 		
 		// cleanup base class
 		super.cleanup();
