@@ -8,6 +8,7 @@ import Systems.DriveAssembly;
 import Systems.ClimberAssembly;
 import Systems.CubeManagement;
 import Systems.NavXSensor;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.IterativeRobot;
 
 /**
@@ -21,6 +22,7 @@ public class Robot extends IterativeRobot {
 
 	protected AutoStateMachine autoSM;
 	protected DriveControl driveControl;
+	protected DriverStation ds;
 
 	/**
 	 * This function is run when the robot is first started up and should be
@@ -41,6 +43,9 @@ public class Robot extends IterativeRobot {
 
 		// Create Autonomous State Machine
 		autoSM = new AutoStateMachine();
+		
+		// retrieve Driver Station instance
+		ds = DriverStation.getInstance();
 		
     	InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"MainLog","robot initialized...");        
 
@@ -101,7 +106,12 @@ public class Robot extends IterativeRobot {
    	 		Controller.Driver_isQuickTurn());
 
    	 	//CubeManagement.teleopPeriodic();
-        //ClimberAssembly.teleopPeriodic();
+   	 	
+   	 	// only allow climber control in endgame (last 30 sec)
+   	 	if (ds.getMatchTime() < 30.0)
+   	 	{
+   	 		//ClimberAssembly.teleopPeriodic();
+   	 	}
 	}
 	
     /**

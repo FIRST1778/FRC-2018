@@ -43,6 +43,7 @@ public class ClimberAssembly {
 	}
 	
 	public static void teleopPeriodic() {
+		
 
 		double newClimbValue = gamepad.getRawAxis(HardwareIDs.CLIMBER_MOTOR_AXIS);
 		
