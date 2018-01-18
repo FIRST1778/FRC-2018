@@ -38,7 +38,8 @@ public class Robot extends IterativeRobot {
 		NavXSensor.initialize();
 		DriveAssembly.initialize();
 		
-		// Create Freezy Drive controller
+		// Initialize Freezy Drive controller classes
+		Controller.initialize();
 		driveControl = new DriveControl();
 
 		// Create Autonomous State Machine
@@ -92,7 +93,6 @@ public class Robot extends IterativeRobot {
     	    	
     	//CubeManagement.teleopInit();
     	//ClimberAssembly.teleopInit();
-		
 	}
 	
 	/**

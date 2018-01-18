@@ -94,20 +94,20 @@ public class AutoNetworkBuilder {
 	private static AutoNetwork createDriveForward() {
 		
 		AutoNetwork autoNet = new AutoNetwork("<Drive Forward Network>");
-				
+			
+		/*
 		AutoState driveState = new AutoState("<Drive State 1>");
 		DriveForwardAction driveForward = new DriveForwardAction("<Drive Forward Action>", 0.3, true, 0.0);
 		TimeEvent timer2 = new TimeEvent(5.0);  // timer event
 		driveState.addAction(driveForward);
 		driveState.addEvent(timer2);
+		*/
 		
-		/*
 		AutoState driveState = new AutoState("<Drive State 1>");
-		DriveForwardMagicAction driveForwardMagic = new DriveForwardMagicAction("<Drive Forward Magic Action>", 120.0, 1500, 750, true, 0.0);
+		DriveForwardMagicAction driveForwardMagic = new DriveForwardMagicAction("<Drive Forward Magic Action>", 120.0, 500, 250, true, 0.0);
 		TimeEvent timer2 = new TimeEvent(20.0);  // drive forward timer event
 		driveState.addAction(driveForwardMagic);
 		driveState.addEvent(timer2);
-		*/
 		
 		AutoState idleState2 = new AutoState("<Idle State 2>");
 		IdleAction deadEnd = new IdleAction("<Dead End Action>");

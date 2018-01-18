@@ -1,12 +1,8 @@
 package Systems;
 
-import com.ctre.phoenix.motorcontrol.ControlMode;
-import com.ctre.phoenix.motorcontrol.can.TalonSRX;
-
 import NetworkComm.InputOutputComm;
 import Utility.HardwareIDs;
 import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.Relay;
 import edu.wpi.first.wpilibj.Spark;
 
 public class ClimberAssembly {

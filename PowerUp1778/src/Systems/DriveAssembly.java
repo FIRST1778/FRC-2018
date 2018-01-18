@@ -28,7 +28,7 @@ public class DriveAssembly {
 	private static double initialAngle = 0.0;
 	
 	// motor polarity
-	public static final boolean RIGHT_REVERSE_MOTOR = false;    // comp-bot motor polarity - right
+	public static final boolean RIGHT_REVERSE_MOTOR = true;    // comp-bot motor polarity - right
 	public static final boolean LEFT_REVERSE_MOTOR = false;		// comp-bot motor polarity - left
 		
 	// grayhill encoder polarity (front motors only)

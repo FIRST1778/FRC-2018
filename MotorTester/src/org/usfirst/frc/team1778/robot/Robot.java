@@ -8,6 +8,8 @@
 package org.usfirst.frc.team1778.robot;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.LimitSwitchNormal;
+import com.ctre.phoenix.motorcontrol.LimitSwitchSource;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
@@ -57,6 +59,10 @@ public class Robot extends IterativeRobot {
 		
 		master = new TalonSRX(MASTER_TALON_ID);
 		master.setInverted(false);
+		
+		//master.configForwardLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen, 0);
+		//master.configReverseLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen, 0);
+
 		slave = new TalonSRX(SLAVE_TALON_ID);
 		slave.setInverted(false);
 		
