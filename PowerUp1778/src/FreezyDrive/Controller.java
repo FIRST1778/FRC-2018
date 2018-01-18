@@ -35,13 +35,11 @@ public class Controller {
     
     // Y-axis joystick polarity (Up-Down) inverted from motor direction (fwd-rev)
     public static double Driver_Throttle (){
-		//return Driver.getRawAxis(InterLinkElite.Axis.LEFT_Y);
 		return -1.0*Driver.getRawAxis(InterLinkElite.Axis.LEFT_Y);
     }
 
     // X-axis joystick polarity (Left-Right) aligned with motor direction (left-right)
     public static double Driver_Steering (){
-    	//return -Driver.getRawAxis(InterLinkElite.Axis.RIGHT_X);
     	return Driver.getRawAxis(InterLinkElite.Axis.RIGHT_X);
     }
     

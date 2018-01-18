@@ -65,11 +65,9 @@ public class DriveAssembly {
 
 	public static void resetMotors()
 	{		
-		// turn all motors to zero power
+		// turn all motors to zero power (rear motors follow front motors)
 		mFrontLeft.set(ControlMode.PercentOutput,0.0);
 		mFrontRight.set(ControlMode.PercentOutput,0.0);		
-		//mBackLeft.set(ControlMode.PercentOutput,0.0);
-		//mBackRight.set(ControlMode.PercentOutput,0.0);	
 	}
 	
 	public static void resetPos()

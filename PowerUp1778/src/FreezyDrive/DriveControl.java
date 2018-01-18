@@ -122,7 +122,6 @@ public class DriveControl {
         }	       
 		
 		// sends final values to drive train
-		//DriveAssembly.drive(-leftPower, -rightPower);
 		DriveAssembly.drive(leftPower, rightPower);
 		
 		InputOutputComm.putDouble(InputOutputComm.LogTable.kDriveLog,"Teleop/leftPower", leftPower);		

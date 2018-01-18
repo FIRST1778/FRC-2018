@@ -169,16 +169,12 @@ public class AutoStateMachine {
 		int netIndex = AutoNetworkBuilder.DO_NOTHING;
 		
 		if (fieldAllianceColors[SWITCH] == LEFT) {
-			// first priority - turn on switch
+			// first priority - turn to left side of switch
 			netIndex = AutoNetworkBuilder.DEPOSIT_CUBE_SWITCH_CENTER_LEFT;
 		}
-		else if (fieldAllianceColors[SWITCH] == RIGHT) {
-			// second priority - turn on scale
-			netIndex = AutoNetworkBuilder.DEPOSIT_CUBE_SWITCH_CENTER_RIGHT;
-		}
 		else {
-			// this should never happen unless field alliance colors are undefined
-			netIndex = AutoNetworkBuilder.DRIVE_FORWARD;
+			// second priority - turn to right side of switch
+			netIndex = AutoNetworkBuilder.DEPOSIT_CUBE_SWITCH_CENTER_RIGHT;
 		}
 
 		return netIndex;

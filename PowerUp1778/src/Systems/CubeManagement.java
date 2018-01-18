@@ -25,7 +25,7 @@ public class CubeManagement {
 	public static final int SWITCH_LEVEL = 1;
 	public static final int SCALE_LEVEL = 2;
 	
-	private static final int liftLevelPulses[][] = {{0,0}, {100, 100}, {200, 200}};  // number of upper and lower encoder pulses for each level  {upper, lower}
+	private static final int liftLevelPulses[] = {0, 100, 200};  // number of encoder pulses for each level  {upper, lower}
 	private static final int speedRpm = 900;
 	private static final int accelRpm = 450;
 	
@@ -33,17 +33,14 @@ public class CubeManagement {
 	public static final boolean RIGHT_COLLECTOR_REVERSE_MOTOR = false; 
 	public static final boolean LEFT_COLLECTOR_REVERSE_MOTOR = false; 
 	
-	public static final boolean RIGHT_UPPER_REVERSE_MOTOR = false; 
-	public static final boolean RIGHT_LOWER_REVERSE_MOTOR = false; 
-	public static final boolean LEFT_UPPER_REVERSE_MOTOR = false;
-	public static final boolean LEFT_LOWER_REVERSE_MOTOR = false;
+	public static final boolean UPPER_REVERSE_MOTOR = false; 
+	public static final boolean LOWER_REVERSE_MOTOR = false; 
 		
-	// grayhill encoder polarity (left side only)
-	public static final boolean ALIGNED_LEFT_UPPER_SENSOR = true; 
-	public static final boolean ALIGNED_LEFT_LOWER_SENSOR = true; 
+	// grayhill encoder polarity
+	public static final boolean ALIGNED_SENSOR = true; 
 
 	// PID coeffs
-	private static final double kP = 1.0;
+	private static final double kP = 7.0;
 	private static final double kI = 0.0;
 	private static final double kD = 0.0;
 	private static final double kF = 0.0;
@@ -62,8 +59,7 @@ public class CubeManagement {
 	private static Spark leftCollectorMotor, rightCollectorMotor; 
 	
 	// lift motors
-	private static TalonSRX leftUpperLiftMotor, rightUpperLiftMotor;
-	private static TalonSRX leftLowerLiftMotor, rightLowerLiftMotor;
+	private static TalonSRX upperLiftMotor, lowerLiftMotor;
 		
 	// pneumatics objects
 	private static Compressor compress;
@@ -85,7 +81,6 @@ public class CubeManagement {
 		// reset trigger init time
 		initTriggerTime = RobotController.getFPGATime();
 
-		/*
         // create pneumatics objects
 		compress = new Compressor(HardwareIDs.PCM_ID);
 		flipperSolenoid = new DoubleSolenoid(HardwareIDs.PCM_ID, HardwareIDs.FLIPPER_UP_SOLENOID, HardwareIDs.FLIPPER_DOWN_SOLENOID);
@@ -94,20 +89,17 @@ public class CubeManagement {
 		leftCollectorMotor = new Spark(HardwareIDs.LEFT_COLLECTOR_PWM_ID);
 		rightCollectorMotor = new Spark(HardwareIDs.RIGHT_COLLECTOR_PWM_ID);
 
-		// create and initialize left lift motors (closed-loop)
-		leftUpperLiftMotor = configureMotor(HardwareIDs.LEFT_UPPER_LIFT_TALON_ID, LEFT_UPPER_REVERSE_MOTOR, ALIGNED_LEFT_UPPER_SENSOR, kP, kI, kD, kF);
-		leftLowerLiftMotor = configureMotor(HardwareIDs.LEFT_LOWER_LIFT_TALON_ID, LEFT_LOWER_REVERSE_MOTOR, ALIGNED_LEFT_LOWER_SENSOR, kP, kI, kD, kF);
+		// create and initialize upper lift motor (closed-loop)
+		upperLiftMotor = configureMotor(HardwareIDs.UPPER_LIFT_TALON_ID, UPPER_REVERSE_MOTOR, ALIGNED_SENSOR, kP, kI, kD, kF);
 
-		// create and initialize right lift motors (follows left side)
-		rightUpperLiftMotor = configureMotor(HardwareIDs.RIGHT_UPPER_LIFT_TALON_ID, RIGHT_UPPER_REVERSE_MOTOR, HardwareIDs.LEFT_UPPER_LIFT_TALON_ID);
-		rightLowerLiftMotor = configureMotor(HardwareIDs.RIGHT_LOWER_LIFT_TALON_ID, RIGHT_LOWER_REVERSE_MOTOR, HardwareIDs.LEFT_LOWER_LIFT_TALON_ID);
+		// create and initialize lower lift motor (follows upper motor)
+		lowerLiftMotor = configureMotor(HardwareIDs.LOWER_LIFT_TALON_ID, LOWER_REVERSE_MOTOR, HardwareIDs.UPPER_LIFT_TALON_ID);
 				
 		// make sure all motors are off
 		resetMotors();
 		
 		// reset position of encoders
 		resetPos();
-		*/
 		
 		gamepad = new Joystick(HardwareIDs.GAMEPAD_ID);
 		
@@ -116,20 +108,19 @@ public class CubeManagement {
 	
 	public static void resetMotors()
 	{		
-		//leftCollectorMotor.set(ControlMode.PercentOutput, 0);
-		//rightCollectorMotor.set(ControlMode.PercentOutput, 0);	
+		leftCollectorMotor.set(0);
+		rightCollectorMotor.set(0);	
 		
-		//leftUpperLiftMotor.set(ControlMode.PercentOutput, 0);
-		//leftLowerLiftMotor.set(ControlMode.PercentOutput, 0);
+		// reset upper lift motor (lower lift follows)
+		upperLiftMotor.set(ControlMode.PercentOutput, 0);
 	}
 	
 	// resets the position encoders on lift motors
 	// should be called once only, during power up  (when lift is in base state)
 	public static void resetPos()
 	{		
-		// reset left and right lift motor encoder pulses to zero
-		//leftUpperLiftMotor.setSelectedSensorPosition(0, PIDLOOP_IDX, TIMEOUT_MS);
-		//leftLowerLiftMotor.setSelectedSensorPosition(0, PIDLOOP_IDX, TIMEOUT_MS);
+		// reset upper lift motor encoder pulses to zero
+		upperLiftMotor.setSelectedSensorPosition(0, PIDLOOP_IDX, TIMEOUT_MS);
 	}	 	
 
     // open-loop motor configuration (and possibly follower)
@@ -177,19 +168,21 @@ public class CubeManagement {
 	
 	public static void flipperUp()
 	{
-		//flipperSolenoid.set(DoubleSolenoid.Value.kForward);		
+		InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"CubeMgmt/Flipper", "Up");
+		flipperSolenoid.set(DoubleSolenoid.Value.kForward);		
 	}
 	
 	public static void flipperDown()
 	{
-		//flipperSolenoid.set(DoubleSolenoid.Value.kReverse);		
+		InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"CubeMgmt/Flipper", "Down");
+		flipperSolenoid.set(DoubleSolenoid.Value.kReverse);		
 	}
 	
 	public static void depositCube()
 	{
-		//InputOutputComm.putDouble(InputOutputComm.LogTable.kMainLog,"CubeMgmt/CollectorLevel", COLLECTOR_OUT_LEVEL);
-		//leftCollectorMotor.set(COLLECTOR_OUT_LEVEL);
-		//rightCollectorMotor.set(COLLECTOR_OUT_LEVEL);
+		InputOutputComm.putDouble(InputOutputComm.LogTable.kMainLog,"CubeMgmt/CollectorLevel", COLLECTOR_OUT_LEVEL);
+		leftCollectorMotor.set(COLLECTOR_OUT_LEVEL);
+		rightCollectorMotor.set(COLLECTOR_OUT_LEVEL);
 			
 	}
 	
@@ -197,35 +190,23 @@ public class CubeManagement {
 		
 	public static void goToHeight(int level)
 	{		
-		int upperTargetPulses = liftLevelPulses[level][0];
-		int lowerTargetPulses = liftLevelPulses[level][1];
+		int targetPulses = liftLevelPulses[level];
 
-		/*
-		String posStr = String.format("%d", upperTargetPulses);
-		InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"Auto/UpperLiftTargetPos", posStr);
-		posStr = String.format("%d", lowerTargetPulses);
-		InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"Auto/LowerLiftTargetPos", posStr);
-
-        // configure lower lift motors
-		configureMotionMagic(leftLowerLiftMotor, lowerTargetPulses);
-		configureMotionMagic(rightLowerLiftMotor, lowerTargetPulses);
+		String posStr = String.format("%d", targetPulses);
+		InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"Auto/liftTargetPulses", posStr);
 		
-        // configure upper lift motors
-		configureMotionMagic(leftUpperLiftMotor, upperTargetPulses);
-		configureMotionMagic(rightUpperLiftMotor, upperTargetPulses);
-		*/
+        // configure upper lift motor (lower lift motor follows)
+		configureMotionMagic(upperLiftMotor, targetPulses);
 	}
 	
 	private static void configureMotionMagic(TalonSRX _talon, int targetPulses)
 	{
-		/*
 		int nativeUnitsPer100ms = (int) ((double)speedRpm * HardwareIDs.RPM_TO_UNIT_PER_100MS);
 		int accelNativeUnits = (int) ((double)accelRpm * HardwareIDs.RPM_TO_UNIT_PER_100MS);
 
 		_talon.configMotionCruiseVelocity(nativeUnitsPer100ms, TIMEOUT_MS);
 		_talon.configMotionAcceleration(accelNativeUnits, TIMEOUT_MS);
 		_talon.set(ControlMode.MotionMagic, targetPulses);
-		*/
 	}
 	
 	/************************* UI input functions **********************************/
@@ -240,8 +221,8 @@ public class CubeManagement {
 		else
 			collectorLevel = 0.0;
 		InputOutputComm.putDouble(InputOutputComm.LogTable.kMainLog,"CubeMgmt/CollectorLevel", collectorLevel);
-		//leftCollectorMotor.set(collectorLevel);
-		//rightCollectorMotor.set(collectorLevel);
+		leftCollectorMotor.set(collectorLevel);
+		rightCollectorMotor.set(collectorLevel);
 	}
 	
 	private static void checkLiftControls() {
@@ -254,8 +235,7 @@ public class CubeManagement {
 		else
 			liftLevel = 0.0;
 		InputOutputComm.putDouble(InputOutputComm.LogTable.kMainLog,"CubeMgmt/LiftLevel", liftLevel);
-		//leftUpperLiftMotor.set(ControlMode.PercentOutput, liftLevel);
-		//leftLowerLiftMotor.set(ControlMode.PercentOutput, liftLevel);
+		upperLiftMotor.set(ControlMode.PercentOutput, liftLevel);
 	}
 	
 	private static void checkFlipperControls() {
@@ -297,21 +277,15 @@ public class CubeManagement {
 		checkFlipperControls();
 	}
 	
-	public static int getLiftPos(boolean upperSelected) {
+	public static int getLiftPos() {
 		
 		// Encoders now read only raw encoder values - convert raw to inches directly
-		int leftUpperPos = leftUpperLiftMotor.getSelectedSensorPosition(0);
-		int leftLowerPos = leftLowerLiftMotor.getSelectedSensorPosition(0);
+		int upperPulses = upperLiftMotor.getSelectedSensorPosition(0);
 				
-		String posStr = String.format("%d", leftUpperPos);
+		String posStr = String.format("%d", upperPulses);
 		InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"Auto/LiftUpper", posStr);
-		posStr = String.format("%d", leftLowerPos);
-		InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"Auto/LiftLower", posStr);
 		
-		if (upperSelected)
-			return leftUpperPos;
-		else
-			return leftLowerPos;
+		return upperPulses;
 	}
 	
 }
