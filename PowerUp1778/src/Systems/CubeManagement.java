@@ -81,6 +81,7 @@ public class CubeManagement {
 		// reset trigger init time
 		initTriggerTime = RobotController.getFPGATime();
 
+		/*
         // create pneumatics objects
 		compress = new Compressor(HardwareIDs.PCM_ID);
 		flipperSolenoid = new DoubleSolenoid(HardwareIDs.PCM_ID, HardwareIDs.FLIPPER_UP_SOLENOID, HardwareIDs.FLIPPER_DOWN_SOLENOID);
@@ -100,6 +101,7 @@ public class CubeManagement {
 		
 		// reset position of encoders
 		resetPos();
+		*/
 		
 		gamepad = new Joystick(HardwareIDs.GAMEPAD_ID);
 		
@@ -108,11 +110,11 @@ public class CubeManagement {
 	
 	public static void resetMotors()
 	{		
-		leftCollectorMotor.set(0);
-		rightCollectorMotor.set(0);	
+		//leftCollectorMotor.set(0);
+		//rightCollectorMotor.set(0);	
 		
 		// reset upper lift motor (lower lift follows)
-		upperLiftMotor.set(ControlMode.PercentOutput, 0);
+		//upperLiftMotor.set(ControlMode.PercentOutput, 0);
 	}
 	
 	// resets the position encoders on lift motors
@@ -120,7 +122,7 @@ public class CubeManagement {
 	public static void resetPos()
 	{		
 		// reset upper lift motor encoder pulses to zero
-		upperLiftMotor.setSelectedSensorPosition(0, PIDLOOP_IDX, TIMEOUT_MS);
+		//upperLiftMotor.setSelectedSensorPosition(0, PIDLOOP_IDX, TIMEOUT_MS);
 	}	 	
 
     // open-loop motor configuration (and possibly follower)
@@ -169,20 +171,20 @@ public class CubeManagement {
 	public static void flipperUp()
 	{
 		InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"CubeMgmt/Flipper", "Up");
-		flipperSolenoid.set(DoubleSolenoid.Value.kForward);		
+		//flipperSolenoid.set(DoubleSolenoid.Value.kForward);		
 	}
 	
 	public static void flipperDown()
 	{
 		InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"CubeMgmt/Flipper", "Down");
-		flipperSolenoid.set(DoubleSolenoid.Value.kReverse);		
+		//flipperSolenoid.set(DoubleSolenoid.Value.kReverse);		
 	}
 	
 	public static void depositCube()
 	{
 		InputOutputComm.putDouble(InputOutputComm.LogTable.kMainLog,"CubeMgmt/CollectorLevel", COLLECTOR_OUT_LEVEL);
-		leftCollectorMotor.set(COLLECTOR_OUT_LEVEL);
-		rightCollectorMotor.set(COLLECTOR_OUT_LEVEL);
+		//leftCollectorMotor.set(COLLECTOR_OUT_LEVEL);
+		//rightCollectorMotor.set(COLLECTOR_OUT_LEVEL);
 			
 	}
 	
@@ -196,7 +198,7 @@ public class CubeManagement {
 		InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"Auto/liftTargetPulses", posStr);
 		
         // configure upper lift motor (lower lift motor follows)
-		configureMotionMagic(upperLiftMotor, targetPulses);
+		//configureMotionMagic(upperLiftMotor, targetPulses);
 	}
 	
 	private static void configureMotionMagic(TalonSRX _talon, int targetPulses)
@@ -221,8 +223,8 @@ public class CubeManagement {
 		else
 			collectorLevel = 0.0;
 		InputOutputComm.putDouble(InputOutputComm.LogTable.kMainLog,"CubeMgmt/CollectorLevel", collectorLevel);
-		leftCollectorMotor.set(collectorLevel);
-		rightCollectorMotor.set(collectorLevel);
+		//leftCollectorMotor.set(collectorLevel);
+		//rightCollectorMotor.set(collectorLevel);
 	}
 	
 	private static void checkLiftControls() {
@@ -235,7 +237,7 @@ public class CubeManagement {
 		else
 			liftLevel = 0.0;
 		InputOutputComm.putDouble(InputOutputComm.LogTable.kMainLog,"CubeMgmt/LiftLevel", liftLevel);
-		upperLiftMotor.set(ControlMode.PercentOutput, liftLevel);
+		//upperLiftMotor.set(ControlMode.PercentOutput, liftLevel);
 	}
 	
 	private static void checkFlipperControls() {
