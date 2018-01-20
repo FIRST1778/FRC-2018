@@ -3,24 +3,24 @@ package StateMachine;
 import NetworkComm.InputOutputComm;
 import Systems.CubeManagement;
 
-public class LiftAction extends Action {
+public class LiftBrakeAction extends Action {
 	
 	private String name;
-	private int targetliftLevel = CubeManagement.BASE_LEVEL;
+	private boolean brakeOn = true;    // assumes brake turn on
 	
-	public LiftAction(int targetLiftLevel)
+	public LiftBrakeAction(boolean brakeOn)
 	{
-		this.name = "<Lift Action>";		
-		this.targetliftLevel = targetLiftLevel;
+		this.name = "<Lift Brake Action>";	
+		this.brakeOn = brakeOn;
 
 		CubeManagement.initialize();
 		InputOutputComm.initialize();
 	}
 	
-	public LiftAction(String name, int targetliftLevel)
+	public LiftBrakeAction(String name, boolean brakeOn)
 	{
-		this.name =  name;
-		this.targetliftLevel = targetliftLevel;
+		this.name = name;
+		this.brakeOn = brakeOn;
 		
 		CubeManagement.initialize();		
 		InputOutputComm.initialize();
@@ -30,7 +30,10 @@ public class LiftAction extends Action {
 	public void initialize() {
 		
 		// do some lift initialization, start the lift
-		CubeManagement.goToHeight(targetliftLevel);
+		if (brakeOn)
+			CubeManagement.liftBrakeOn();
+		else
+			CubeManagement.liftBrakeOff();
 				
 		super.initialize();
 	}
@@ -38,14 +41,14 @@ public class LiftAction extends Action {
 	// called periodically
 	public void process()  {
 		
-		// do some lift stuff
+		// do some stuff - nothing specific required for flipper
 		super.process();
 	}
 	
 	// state cleanup and exit
 	public void cleanup() {
 		// do some cleanup
-					
+		
 		// cleanup base class
 		super.cleanup();
 	}

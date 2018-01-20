@@ -3,6 +3,8 @@ package Systems;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
+import com.ctre.phoenix.motorcontrol.LimitSwitchNormal;
+import com.ctre.phoenix.motorcontrol.LimitSwitchSource;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 
 import NetworkComm.InputOutputComm;
@@ -12,6 +14,7 @@ import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Spark;
+import edu.wpi.first.wpilibj.Timer;
 
 public class CubeManagement {
 	
@@ -46,14 +49,19 @@ public class CubeManagement {
 	private static final double kF = 0.0;
 	
 	// collector strength (%VBus - max is 1.0)
-	private static final double COLLECTOR_IN_LEVEL = -0.75;
-	private static final double COLLECTOR_OUT_LEVEL = 0.75;
+	private static final double COLLECTOR_IN_STRENGTH = -0.25;
+	private static final double COLLECTOR_OUT_STRENGTH = 0.25;
 
 	// teleop lift strength (%VBus - max is 1.0)
-	private static final double LIFT_UP_LEVEL = -0.75;
-	private static final double LIFT_DOWN_LEVEL = 0.75;
+	private static final double LIFT_UP_STRENGTH = -0.25;
+	private static final double LIFT_DOWN_STRENGTH = 0.25;
 	
+	// control dead zone threshold
 	private static final double DEAD_ZONE_THRESHOLD = 0.05;
+	
+	// idle time beyond which lift brake is applied
+	private static final double LIFT_IDLE_BRAKE_SECONDS = 0.25;
+	private static double liftIdleTimerStart = 0;
 		    					
 	// collector intake motors
 	private static Spark leftCollectorMotor, rightCollectorMotor; 
@@ -63,7 +71,12 @@ public class CubeManagement {
 		
 	// pneumatics objects
 	private static Compressor compress;
+	
 	private static DoubleSolenoid flipperSolenoid;
+	private static boolean flipperUp;
+	
+	private static DoubleSolenoid liftBrakeSolenoid;
+	private static boolean liftBrakeOn;
 	
 	private static Joystick gamepad;
 		
@@ -81,10 +94,10 @@ public class CubeManagement {
 		// reset trigger init time
 		initTriggerTime = RobotController.getFPGATime();
 
-		/*
         // create pneumatics objects
 		compress = new Compressor(HardwareIDs.PCM_ID);
 		flipperSolenoid = new DoubleSolenoid(HardwareIDs.PCM_ID, HardwareIDs.FLIPPER_UP_SOLENOID, HardwareIDs.FLIPPER_DOWN_SOLENOID);
+		liftBrakeSolenoid = new DoubleSolenoid(HardwareIDs.PCM_ID, HardwareIDs.BRAKE_ON_SOLENOID, HardwareIDs.BRAKE_OFF_SOLENOID);
             
 		// create and initialize collector motors (open-loop)
 		leftCollectorMotor = new Spark(HardwareIDs.LEFT_COLLECTOR_PWM_ID);
@@ -101,7 +114,12 @@ public class CubeManagement {
 		
 		// reset position of encoders
 		resetPos();
-		*/
+		
+		// lift up flipper
+		flipperUp();
+		
+		// turn on brake
+		liftBrakeOn();
 		
 		gamepad = new Joystick(HardwareIDs.GAMEPAD_ID);
 		
@@ -148,9 +166,15 @@ public class CubeManagement {
     	_talon = new TalonSRX(talonID);
     	_talon.setInverted(revMotor);
     	
+    	// set up sensor
     	_talon.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, PIDLOOP_IDX, TIMEOUT_MS);
     	_talon.setSensorPhase(alignSensor); 
     	
+    	// set up limit switches
+		//_talon.configForwardLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen, 0);
+		//_talon.configReverseLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen, 0);
+   	
+    	// set up closed loop control
     	_talon.selectProfileSlot(PROFILE_SLOT, PIDLOOP_IDX);
     	_talon.config_kP(PROFILE_SLOT, pCoeff, TIMEOUT_MS);
     	_talon.config_kI(PROFILE_SLOT, iCoeff, TIMEOUT_MS);
@@ -160,31 +184,47 @@ public class CubeManagement {
     	_talon.configMotionAcceleration(0, TIMEOUT_MS);
     	_talon.setSelectedSensorPosition(0, PIDLOOP_IDX, TIMEOUT_MS);
  
-    	//_talon.setNeutralMode(NeutralMode.Brake);
+    	_talon.setNeutralMode(NeutralMode.Brake);
 
     	return _talon;
     }
     
 	
-	/************************* flipper & collector control functions **********************************/
+	/************************* flipper, lift brake & collector control functions **********************************/
 	
 	public static void flipperUp()
 	{
-		InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"CubeMgmt/Flipper", "Up");
-		//flipperSolenoid.set(DoubleSolenoid.Value.kForward);		
+		flipperUp = true;
+		//flipperSolenoid.set(DoubleSolenoid.Value.kForward);	
+		InputOutputComm.putBoolean(InputOutputComm.LogTable.kMainLog,"CubeMgmt/Flipper", flipperUp);
 	}
 	
 	public static void flipperDown()
 	{
-		InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"CubeMgmt/Flipper", "Down");
+		flipperUp = false;
 		//flipperSolenoid.set(DoubleSolenoid.Value.kReverse);		
+		InputOutputComm.putBoolean(InputOutputComm.LogTable.kMainLog,"CubeMgmt/Flipper", flipperUp);
 	}
 	
+	public static void liftBrakeOn()
+	{
+		liftBrakeOn = true;
+		//liftBrakeSolenoid.set(DoubleSolenoid.Value.kReverse);		
+		InputOutputComm.putBoolean(InputOutputComm.LogTable.kMainLog,"CubeMgmt/LiftBrake", liftBrakeOn);
+	}
+
+	public static void liftBrakeOff()
+	{
+		liftBrakeOn = false;
+		//liftBrakeSolenoid.set(DoubleSolenoid.Value.kForward);		
+		InputOutputComm.putBoolean(InputOutputComm.LogTable.kMainLog,"CubeMgmt/LiftBrake", liftBrakeOn);
+	}
+
 	public static void depositCube()
 	{
-		InputOutputComm.putDouble(InputOutputComm.LogTable.kMainLog,"CubeMgmt/CollectorLevel", COLLECTOR_OUT_LEVEL);
-		//leftCollectorMotor.set(COLLECTOR_OUT_LEVEL);
-		//rightCollectorMotor.set(COLLECTOR_OUT_LEVEL);
+		InputOutputComm.putDouble(InputOutputComm.LogTable.kMainLog,"CubeMgmt/CollectorLevel", COLLECTOR_OUT_STRENGTH);
+		leftCollectorMotor.set(COLLECTOR_OUT_STRENGTH);
+		rightCollectorMotor.set(COLLECTOR_OUT_STRENGTH);
 			
 	}
 	
@@ -198,7 +238,7 @@ public class CubeManagement {
 		InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"Auto/liftTargetPulses", posStr);
 		
         // configure upper lift motor (lower lift motor follows)
-		//configureMotionMagic(upperLiftMotor, targetPulses);
+		configureMotionMagic(upperLiftMotor, targetPulses);
 	}
 	
 	private static void configureMotionMagic(TalonSRX _talon, int targetPulses)
@@ -215,29 +255,58 @@ public class CubeManagement {
 	
 	private static void checkCollectorControls() {			
 		// collector control
-		double collectorLevel = gamepad.getRawAxis(HardwareIDs.COLLECTOR_IN_AXIS);
-		if (Math.abs(collectorLevel) > DEAD_ZONE_THRESHOLD)
-			collectorLevel = COLLECTOR_IN_LEVEL;
+		double collectorStrength = gamepad.getRawAxis(HardwareIDs.COLLECTOR_IN_AXIS);
+		if (Math.abs(collectorStrength) > DEAD_ZONE_THRESHOLD)
+			collectorStrength = COLLECTOR_IN_STRENGTH;
 		else if (gamepad.getRawButton(HardwareIDs.COLLECTOR_OUT_BUTTON))
-			collectorLevel = COLLECTOR_OUT_LEVEL;
+			collectorStrength = COLLECTOR_OUT_STRENGTH;
 		else
-			collectorLevel = 0.0;
-		InputOutputComm.putDouble(InputOutputComm.LogTable.kMainLog,"CubeMgmt/CollectorLevel", collectorLevel);
+			collectorStrength = 0.0;
+		InputOutputComm.putDouble(InputOutputComm.LogTable.kMainLog,"CubeMgmt/CollectorStrength", collectorStrength);
 		//leftCollectorMotor.set(collectorLevel);
 		//rightCollectorMotor.set(collectorLevel);
 	}
 	
 	private static void checkLiftControls() {
 		// cube lift control
-		double liftLevel = gamepad.getRawAxis(HardwareIDs.LIFT_DOWN_AXIS);
-		if (Math.abs(liftLevel) > DEAD_ZONE_THRESHOLD)
-			liftLevel = LIFT_DOWN_LEVEL;
+		double liftStrength = gamepad.getRawAxis(HardwareIDs.LIFT_DOWN_AXIS);
+		if (Math.abs(liftStrength) > DEAD_ZONE_THRESHOLD)
+			liftStrength = LIFT_DOWN_STRENGTH;
 		else if (gamepad.getRawButton(HardwareIDs.LIFT_UP_BUTTON))
-			liftLevel = LIFT_UP_LEVEL;
+			liftStrength = LIFT_UP_STRENGTH;
 		else
-			liftLevel = 0.0;
-		InputOutputComm.putDouble(InputOutputComm.LogTable.kMainLog,"CubeMgmt/LiftLevel", liftLevel);
-		//upperLiftMotor.set(ControlMode.PercentOutput, liftLevel);
+			liftStrength = 0.0;
+			
+		// if directed lift gain is zero (idle)
+		if (liftStrength == 0)
+		{
+			// if brake is off and (lift idle time > idle threshold)
+			if ((!liftBrakeOn) && (
+					(RobotController.getFPGATime() - liftIdleTimerStart) > LIFT_IDLE_BRAKE_SECONDS)) {
+				// apply brake
+				liftBrakeOn();			
+			}
+		}
+		else {
+			
+			// if brake is on and gain is non-zero (not idle)
+			if (liftBrakeOn)
+			{
+				// turn off brake
+				liftBrakeOff();
+				
+				// wait a brief moment for brake to mechanically deactivate
+				Timer.delay(0.2);
+			}	
+			
+			// reset lift idle timer start
+			liftIdleTimerStart = RobotController.getFPGATime();
+		}
+	
+		// apply lift motor gain value
+		InputOutputComm.putDouble(InputOutputComm.LogTable.kMainLog,"CubeMgmt/LiftStrength", liftStrength);
+		upperLiftMotor.set(ControlMode.PercentOutput, liftStrength);
+		
 	}
 	
 	private static void checkFlipperControls() {
@@ -251,12 +320,10 @@ public class CubeManagement {
 		}
 	}
 	
-	public static void autoInit() {
-				
+	public static void autoInit() {				
 		resetMotors();
 		flipperUp();
-		
-        initTriggerTime = RobotController.getFPGATime();
+		liftBrakeOn();		
 	}
 
 	public static void autoStop() {
@@ -267,9 +334,9 @@ public class CubeManagement {
 				
 		resetMotors();
 		flipperUp();
+		liftBrakeOn();
 				
-        initTriggerTime = RobotController.getFPGATime();
-        
+		liftIdleTimerStart = RobotController.getFPGATime();      
 	}
 	
 	public static void teleopPeriodic() {

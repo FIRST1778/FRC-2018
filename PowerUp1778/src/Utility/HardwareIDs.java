@@ -21,6 +21,9 @@ public class HardwareIDs {
 	// Solenoids (pneumatics)
 	public static final int FLIPPER_UP_SOLENOID = 0;
 	public static final int FLIPPER_DOWN_SOLENOID = 1;
+	
+	public static final int BRAKE_ON_SOLENOID = 4;
+	public static final int BRAKE_OFF_SOLENOID = 5;
 
 	// input control IDs
 	public static final int DRIVER_CONTROL_ID = 0;

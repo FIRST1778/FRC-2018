@@ -47,10 +47,8 @@ public class FlipperAction extends Action {
 	
 	// state cleanup and exit
 	public void cleanup() {
-		// do some drivey cleanup
+		// do some cleanup
 					
-		CubeManagement.autoStop();
-		
 		// cleanup base class
 		super.cleanup();
 	}
