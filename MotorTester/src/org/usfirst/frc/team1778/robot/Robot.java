@@ -68,7 +68,7 @@ public class Robot extends IterativeRobot {
 	private final int nativeUnitVel = 500;
 	private final int nativeUnitAccel = 250;
 	
-	private final int targetPulses = 100;  // arbitrary encoder position to command
+	private final int targetPulses = 256;  // arbitrary encoder position to command - quarter turn
 	
 	/**
 	 * This function is run when the robot is first started up and should be

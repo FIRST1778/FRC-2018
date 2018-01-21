@@ -84,14 +84,14 @@ public class Robot extends IterativeRobot {
     	// debug only (read position sensors)
     	DriveAssembly.getDistanceInches();
     	getGyroAngle();
-    	//CubeManagement.getLiftPos();
+    	CubeManagement.getLiftPos();
    	
 	}
 
 	public void teleopInit() {
     	InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"MainLog","teleop mode...");
     	    	
-    	//CubeManagement.teleopInit();
+    	CubeManagement.teleopInit();
     	//ClimberAssembly.teleopInit();
 	}
 	
@@ -105,7 +105,7 @@ public class Robot extends IterativeRobot {
    	 	driveControl.calculateDrive(Controller.Driver_Throttle(), Controller.Driver_Steering(),
    	 		Controller.Driver_isQuickTurn());
 
-   	 	//CubeManagement.teleopPeriodic();
+   	 	CubeManagement.teleopPeriodic();
    	 	
    	 	// only allow climber control in endgame (last 30 sec)
    	 	if (ds.getMatchTime() < 30.0)

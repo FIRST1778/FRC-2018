@@ -23,15 +23,22 @@ public class Robot extends IterativeRobot {
 
 	private Joystick gamepad;
 	private final int GAMEPAD_ID = 1;
-	private final int PNEUMATIC_BUTTON_1 = 1;
-	private final int PNEUMATIC_BUTTON_2 = 2;
+	private final int PISTON1_PNEUMATIC_BUTTON_1 = 1;
+	private final int PISTON1_PNEUMATIC_BUTTON_2 = 2;
+	
+	private final int PISTON2_PNEUMATIC_BUTTON_1 = 3;
+	private final int PISTON2_PNEUMATIC_BUTTON_2 = 4;
 	
 	private final int PCM_ID = 2;	
-	private final int FORWARD_CHANNEL = 0;
-	private final int REVERSE_CHANNEL = 1;
+	
+	private final int PISTON1_FORWARD_CHANNEL = 0;
+	private final int PISTON1_REVERSE_CHANNEL = 1;
+
+	private final int PISTON2_FORWARD_CHANNEL = 2;
+	private final int PISTON2_REVERSE_CHANNEL = 3;
 	
 	private Compressor compress;
-	private DoubleSolenoid dSol;
+	private DoubleSolenoid dSol1, dSol2;
 	
 	/**
 	 * This function is run when the robot is first started up and should be
@@ -42,8 +49,11 @@ public class Robot extends IterativeRobot {
 		gamepad = new Joystick(GAMEPAD_ID);
 		compress = new Compressor(PCM_ID);	
 		
-		dSol = new DoubleSolenoid(PCM_ID, FORWARD_CHANNEL, REVERSE_CHANNEL);
-		dSol.set(DoubleSolenoid.Value.kOff);	
+		dSol1 = new DoubleSolenoid(PCM_ID, PISTON1_FORWARD_CHANNEL, PISTON1_REVERSE_CHANNEL);
+		dSol1.set(DoubleSolenoid.Value.kOff);	
+		
+		dSol2 = new DoubleSolenoid(PCM_ID, PISTON2_FORWARD_CHANNEL, PISTON2_REVERSE_CHANNEL);
+		dSol2.set(DoubleSolenoid.Value.kOff);	
 	}
 
 	/**
@@ -74,16 +84,28 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void teleopPeriodic() {
 		
-		// if gamepad button 1 pressed, go forward
-		if (gamepad.getRawButton(PNEUMATIC_BUTTON_1))
+		// if gamepad button 1 pressed, piston 1 go forward
+		if (gamepad.getRawButton(PISTON1_PNEUMATIC_BUTTON_1))
 		{
-			dSol.set(DoubleSolenoid.Value.kForward);
+			dSol1.set(DoubleSolenoid.Value.kForward);
 		}
 		
-		// if gamepad button 2 pressed, go reverse 
-		if (gamepad.getRawButton(PNEUMATIC_BUTTON_2))
+		// if gamepad button 2 pressed, piston1 go reverse 
+		if (gamepad.getRawButton(PISTON1_PNEUMATIC_BUTTON_2))
 		{
-			dSol.set(DoubleSolenoid.Value.kReverse);
+			dSol1.set(DoubleSolenoid.Value.kReverse);
+		}
+		
+		// if gamepad button 1 pressed, piston 2 go forward
+		if (gamepad.getRawButton(PISTON2_PNEUMATIC_BUTTON_1))
+		{
+			dSol2.set(DoubleSolenoid.Value.kForward);
+		}
+		
+		// if gamepad button 2 pressed, piston2 go reverse 
+		if (gamepad.getRawButton(PISTON2_PNEUMATIC_BUTTON_2))
+		{
+			dSol2.set(DoubleSolenoid.Value.kReverse);
 		}
 		
 	}

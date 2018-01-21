@@ -89,7 +89,7 @@ public class DriveControl {
             }
             overPower = 1.0;
             sensitivity = 1.0;
-            angularPower = wheel;
+            angularPower = -wheel;
         } else {
             overPower = 0.0;
             angularPower = Math.abs(throttle) * wheel * sensitivity
