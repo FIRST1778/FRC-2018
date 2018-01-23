@@ -35,10 +35,7 @@ public class CubeManagement {
 	// motor polarity
 	public static final boolean RIGHT_COLLECTOR_REVERSE_MOTOR = false; 
 	public static final boolean LEFT_COLLECTOR_REVERSE_MOTOR = false; 
-	
-	public static final boolean UPPER_REVERSE_MOTOR = false; 
-	public static final boolean LOWER_REVERSE_MOTOR = false; 
-		
+			
 	// grayhill encoder polarity
 	public static final boolean ALIGNED_SENSOR = true; 
 
@@ -49,14 +46,16 @@ public class CubeManagement {
 	private static final double kF = 0.0;
 	
 	// collector strength (%VBus - max is 1.0)
-	private static final double COLLECTOR_IN_STRENGTH = -1.00;
-	private static final double COLLECTOR_OUT_STRENGTH = 1.00;
+	private static final double COLLECTOR_IN_STRENGTH = 1.00;
+	private static final double COLLECTOR_OUT_STRENGTH = -1.00;
 	private static final boolean LEFT_COLLECTOR_INVERTED = true;
 	private static final boolean RIGHT_COLLECTOR_INVERTED = false;
 
 	// teleop lift strength (%VBus - max is 1.0)
 	private static final double LIFT_UP_STRENGTH = -0.25;
 	private static final double LIFT_DOWN_STRENGTH = 0.25;
+	private static final double LIFT_MOTOR_FACTOR = 1.0;
+	private static final double LIFT_MOTOR_DEAD_ZONE = 0.1;
 	
 	// control dead zone threshold
 	private static final double DEAD_ZONE_THRESHOLD = 0.05;
@@ -275,13 +274,14 @@ public class CubeManagement {
 	}
 	
 	private static void checkLiftControls() {
+		
 		// cube lift control
-		double liftStrength = gamepad.getRawAxis(HardwareIDs.LIFT_DOWN_AXIS);
-		if (Math.abs(liftStrength) > DEAD_ZONE_THRESHOLD)
-			liftStrength = LIFT_DOWN_STRENGTH;
-		else if (gamepad.getRawButton(HardwareIDs.LIFT_UP_BUTTON))
-			liftStrength = LIFT_UP_STRENGTH;
-		else
+		double liftStrength = gamepad.getRawAxis(HardwareIDs.LIFT_MOTOR_AXIS);
+				
+		// convert joystick value into motor speed value
+		if (Math.abs(liftStrength) >= LIFT_MOTOR_DEAD_ZONE)
+			liftStrength *= LIFT_MOTOR_FACTOR; 
+		else 
 			liftStrength = 0.0;
 			
 		// if directed lift gain is zero (idle)
@@ -313,18 +313,17 @@ public class CubeManagement {
 		// apply lift motor gain value
 		InputOutputComm.putDouble(InputOutputComm.LogTable.kMainLog,"CubeMgmt/LiftStrength", liftStrength);
 		//upperLiftMotor.set(ControlMode.PercentOutput, liftStrength);
-		
 	}
 	
 	private static void checkFlipperControls() {
-		if (gamepad.getRawButton(HardwareIDs.FLIPPER_UP_BUTTON))
-		{
-			flipperUp();
-		}
-		else if (gamepad.getRawButton(HardwareIDs.FLIPPER_DOWN_BUTTON))
-		{
+	
+		double flipperInput = gamepad.getRawAxis(HardwareIDs.FLIPPER_DOWN_AXIS);
+		if ((Math.abs(flipperInput) > DEAD_ZONE_THRESHOLD) && (flipperUp)) {
 			flipperDown();	
 		}
+		else if (gamepad.getRawButton(HardwareIDs.FLIPPER_UP_BUTTON) && (!flipperUp)) {
+			flipperUp();
+		}			
 	}
 	
 	public static void autoInit() {				
