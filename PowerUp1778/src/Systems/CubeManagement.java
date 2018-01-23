@@ -76,6 +76,11 @@ public class CubeManagement {
 	private static DoubleSolenoid flipperSolenoid;
 	private static boolean flipperUp;
 	
+	private static DoubleSolenoid clampSolenoid;
+	private static boolean clampOn;
+	private static double clampStartTimer = 0;
+	private static final double CLAMP_LIMIT_SEC = 0.25;
+	
 	private static DoubleSolenoid liftBrakeSolenoid;
 	private static boolean liftBrakeOn;
 	
@@ -99,8 +104,10 @@ public class CubeManagement {
 		/*
 		compress = new Compressor(HardwareIDs.PCM_ID);
 		flipperSolenoid = new DoubleSolenoid(HardwareIDs.PCM_ID, HardwareIDs.FLIPPER_UP_SOLENOID, HardwareIDs.FLIPPER_DOWN_SOLENOID);
+		clampSolenoid = new DoubleSolenoid(HardwareIDs.PCM_ID, HardwareIDs.CLAMP_ON_SOLENOID, HardwareIDs.CLAMP_OFF_SOLENOID);
 		liftBrakeSolenoid = new DoubleSolenoid(HardwareIDs.PCM_ID, HardwareIDs.BRAKE_ON_SOLENOID, HardwareIDs.BRAKE_OFF_SOLENOID);
-        */    
+        */
+		
 		// create and initialize collector motors (open-loop)
 		leftCollectorMotor = new Spark(HardwareIDs.LEFT_COLLECTOR_PWM_ID);
 		leftCollectorMotor.setInverted(LEFT_COLLECTOR_INVERTED);
@@ -123,6 +130,10 @@ public class CubeManagement {
 		
 		// lift up flipper
 		flipperUp();
+		
+		// clamp on
+		clampOn();
+		clampStartTimer = RobotController.getFPGATime();
 		
 		// turn on brake
 		liftBrakeOn();
@@ -211,18 +222,32 @@ public class CubeManagement {
 		//flipperSolenoid.set(DoubleSolenoid.Value.kReverse);		
 		InputOutputComm.putBoolean(InputOutputComm.LogTable.kMainLog,"CubeMgmt/Flipper", flipperUp);
 	}
-	
+
+	public static void clampOn()
+	{
+		clampOn = true;
+		//clampSolenoid.set(DoubleSolenoid.Value.kForward);		
+		InputOutputComm.putBoolean(InputOutputComm.LogTable.kMainLog,"CubeMgmt/Clamp", clampOn);
+	}
+
+	public static void clampOff()
+	{
+		clampOn = false;
+		//clampSolenoid.set(DoubleSolenoid.Value.kReverse);		
+		InputOutputComm.putBoolean(InputOutputComm.LogTable.kMainLog,"CubeMgmt/Clamp", clampOn);
+	}
+
 	public static void liftBrakeOn()
 	{
 		liftBrakeOn = true;
-		//liftBrakeSolenoid.set(DoubleSolenoid.Value.kReverse);		
+		//liftBrakeSolenoid.set(DoubleSolenoid.Value.kForward);		
 		InputOutputComm.putBoolean(InputOutputComm.LogTable.kMainLog,"CubeMgmt/LiftBrake", liftBrakeOn);
 	}
 
 	public static void liftBrakeOff()
 	{
 		liftBrakeOn = false;
-		//liftBrakeSolenoid.set(DoubleSolenoid.Value.kForward);		
+		//liftBrakeSolenoid.set(DoubleSolenoid.Value.kReverse);		
 		InputOutputComm.putBoolean(InputOutputComm.LogTable.kMainLog,"CubeMgmt/LiftBrake", liftBrakeOn);
 	}
 
@@ -271,6 +296,23 @@ public class CubeManagement {
 		InputOutputComm.putDouble(InputOutputComm.LogTable.kMainLog,"CubeMgmt/CollectorStrength", collectorStrength);
 		leftCollectorMotor.set(collectorStrength);
 		rightCollectorMotor.set(collectorStrength);
+	}
+	
+	private static void checkClampControls() {
+
+		// not enough time between clamp control events
+		if ((RobotController.getFPGATime() - clampStartTimer) < CLAMP_LIMIT_SEC)
+			return;
+
+		if (gamepad.getRawButton(HardwareIDs.CLAMP_TOGGLE_BUTTON)) {
+			if (clampOn)
+				clampOff();
+			else
+				clampOn();
+		}
+		
+		// reset clamp timer
+		clampStartTimer = RobotController.getFPGATime();
 	}
 	
 	private static void checkLiftControls() {
@@ -348,6 +390,7 @@ public class CubeManagement {
 	public static void teleopPeriodic() {
 		
 		checkCollectorControls();
+		checkClampControls();
 		checkLiftControls();
 		checkFlipperControls();
 	}

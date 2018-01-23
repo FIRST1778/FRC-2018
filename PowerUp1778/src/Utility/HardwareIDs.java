@@ -22,6 +22,9 @@ public class HardwareIDs {
 	public static final int FLIPPER_UP_SOLENOID = 0;
 	public static final int FLIPPER_DOWN_SOLENOID = 1;
 	
+	public static final int CLAMP_ON_SOLENOID = 2;
+	public static final int CLAMP_OFF_SOLENOID = 3;
+	
 	public static final int BRAKE_ON_SOLENOID = 4;
 	public static final int BRAKE_OFF_SOLENOID = 5;
 
@@ -35,7 +38,9 @@ public class HardwareIDs {
 		
 	public static final int FLIPPER_DOWN_AXIS = 3;
 	public static final int FLIPPER_UP_BUTTON = 6;
-	
+
+	public static final int CLAMP_TOGGLE_BUTTON = 9;
+
 	public static final int LIFT_MOTOR_AXIS = 5;
 
 	public static final int CLIMBER_MOTOR_AXIS = 1;
