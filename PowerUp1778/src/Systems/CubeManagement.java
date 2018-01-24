@@ -8,6 +8,7 @@ import com.ctre.phoenix.motorcontrol.LimitSwitchSource;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 
 import NetworkComm.InputOutputComm;
+import NetworkComm.RPIComm;
 import Utility.HardwareIDs;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
@@ -228,6 +229,7 @@ public class CubeManagement {
 		clampOn = true;
 		//clampSolenoid.set(DoubleSolenoid.Value.kForward);		
 		InputOutputComm.putBoolean(InputOutputComm.LogTable.kMainLog,"CubeMgmt/Clamp", clampOn);
+		RPIComm.setBoolean("clampOn", clampOn);
 	}
 
 	public static void clampOff()
@@ -235,6 +237,7 @@ public class CubeManagement {
 		clampOn = false;
 		//clampSolenoid.set(DoubleSolenoid.Value.kReverse);		
 		InputOutputComm.putBoolean(InputOutputComm.LogTable.kMainLog,"CubeMgmt/Clamp", clampOn);
+		RPIComm.setBoolean("clampOn", clampOn);
 	}
 
 	public static void liftBrakeOn()
@@ -293,7 +296,10 @@ public class CubeManagement {
 			collectorStrength = COLLECTOR_OUT_STRENGTH;
 		else
 			collectorStrength = 0.0;
+		
 		InputOutputComm.putDouble(InputOutputComm.LogTable.kMainLog,"CubeMgmt/CollectorStrength", collectorStrength);
+		RPIComm.setDouble("collectorStrength", collectorStrength);
+
 		leftCollectorMotor.set(collectorStrength);
 		rightCollectorMotor.set(collectorStrength);
 	}

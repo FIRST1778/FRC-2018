@@ -3,6 +3,7 @@ package org.usfirst.frc.team1778.robot;
 import FreezyDrive.Controller;
 import FreezyDrive.DriveControl;
 import NetworkComm.InputOutputComm;
+import NetworkComm.RPIComm;
 import StateMachine.AutoStateMachine;
 import Systems.DriveAssembly;
 import Systems.ClimberAssembly;
@@ -33,6 +34,7 @@ public class Robot extends IterativeRobot {
 		
 		// Initialize robot subsystems
 		InputOutputComm.initialize();
+		RPIComm.initialize();
 		//CubeManagement.initialize();
 		//ClimberAssembly.initialize();
 		NavXSensor.initialize();
