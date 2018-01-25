@@ -30,21 +30,6 @@ const int frameWidth = 320;
 const int frameHeight = 240;
 const int maxFps = 20;
 
-// Guidelines
-const cv::Point leftGuidelineUL(130, 160);
-const cv::Point leftGuidelineLR(40, 220);
-const cv::Point rightGuidelineUL(190, 160);
-const cv::Point rightGuidelineLR(280, 220);
-
-// Arrow Shapes
-const cv::Point arrowBodyUL(160, 170);
-const cv::Point arrowBodyLR(160, 220);
-cv::Point upArrowHead[1][3] = { cv::Point(160,160), cv::Point(155,170), cv::Point(165,170)};
-const cv::Point* upPpt[1] = { upArrowHead[0] };
-cv::Point dnArrowHead[1][3] = { cv::Point(160,230), cv::Point(155,220), cv::Point(165,220)};
-const cv::Point* dnPpt[1] = { dnArrowHead[0] };
-int npt[1] = { 3 };
-	
 // Target 1
 const cv::Point highCenter(160,80);
 const cv::Point highSize(80,30);
@@ -115,30 +100,19 @@ timeval startTimer, endTimer;
 
 // draw overlay graphics on image
 void draw_overlay(cv::Mat& inImg) 
-{	
+{
+		
 	// draw gear post guidelines
-	cv::line(inImg,leftGuidelineUL,leftGuidelineLR,cv::Scalar(0,255,255), 1, 8);
-	cv::line(inImg,rightGuidelineUL,rightGuidelineLR,cv::Scalar(0,255,255), 1, 8);
+	//cv::line(inImg,gearLineUpperCenter,gearLineUpperBottom,cv::Scalar(0,255,255), 1, 8);
+	//cv::line(inImg,gearLineLowerCenter,gearLineLowerBottom,cv::Scalar(0,255,255), 1, 8);
 	
 	// draw boxes for boiler
-	//cv::rectangle(inImg, highUL, highLR, cv::Scalar(255, 0, 0), 2, 8, 0);					
-	//cv::rectangle(inImg,middleUL,middleLR, cv::Scalar(0, 255, 0), 2, 8, 0);					
-	//cv::rectangle(inImg,lowUL, lowLR, cv::Scalar(0, 0, 255), 2, 8, 0);					
+	cv::rectangle(inImg, highUL, highLR, cv::Scalar(255, 0, 0), 2, 8, 0);					
+	cv::rectangle(inImg,middleUL,middleLR, cv::Scalar(0, 255, 0), 2, 8, 0);					
+	cv::rectangle(inImg,lowUL, lowLR, cv::Scalar(0, 0, 255), 2, 8, 0);					
 
-	// draw collector arrow (if non-zero)
-	double collectorStrength = table->GetEntry("collectorStrength").GetDouble(0.0);
-	
-	if (collectorStrength > 0) {
-		cv::fillPoly(inImg,upPpt,npt,1,cv::Scalar(0,0,255));
-		cv::line(inImg,arrowBodyUL,arrowBodyLR,cv::Scalar(0,0,255), 2, 8);
-	}
-	else if (collectorStrength < 0) {
-		cv::fillPoly(inImg,dnPpt,npt,1,cv::Scalar(0,255,0));
-		cv::line(inImg,arrowBodyUL,arrowBodyLR,cv::Scalar(0,255,0), 2, 8);		
-	}
 }
 
-// draw Frame Per sec counter and Moniker on screen
 void overlay_fps(cv::Mat& inImg)
 {
 	char str[64];
@@ -148,14 +122,6 @@ void overlay_fps(cv::Mat& inImg)
 
 	sprintf(str,"%3.1f FPS",fps);
 	cv::putText(inImg,str,cv::Point2f(5,frameHeight-5),cv::FONT_HERSHEY_PLAIN, 0.8, cv::Scalar(0,255,255,255), 1, 8);
-
-	bool clampOn = table->GetEntry("clampOn").GetBoolean(true);
-	
-	if (clampOn) {
-		sprintf(str,"CLAMP ON");
-		cv::putText(inImg,str,cv::Point2f(70,120),cv::FONT_HERSHEY_PLAIN, 2.0, cv::Scalar(0,0,255,255), 2, 8);
-	}
-	
 }
 
 void read_param_file()
@@ -224,7 +190,19 @@ void create_web_properties(cs::CvSource& cvsource)
 {
 	// add properties controllable by webpage
 	manualControlProp = cvsource.CreateBooleanProperty("Manual_Ctrl",false,false);
+	autoModeProp = cvsource.CreateBooleanProperty("Auto_Mode",false,false);
 	teleopExposureProp = cvsource.CreateProperty("Exposure_Teleop",cs::VideoProperty::Kind::kInteger,0,150,1,teleopExposure,teleopExposure);
+	autonomousExposureProp = cvsource.CreateProperty("Exposure_Auto",cs::VideoProperty::Kind::kInteger,0,150,1,autonomousExposure,autonomousExposure);
+	autoStageProp = cvsource.CreateProperty("Auto_Stage",cs::VideoProperty::Kind::kInteger,1,4,1,autoStage,autoStage);
+	minHueProp = cvsource.CreateProperty("Min_Hue",cs::VideoProperty::Kind::kInteger,0,255,1,minHue,minHue);
+	maxHueProp = cvsource.CreateProperty("Max_Hue",cs::VideoProperty::Kind::kInteger,0,255,1,maxHue,maxHue);
+	minSatProp = cvsource.CreateProperty("Min_Sat",cs::VideoProperty::Kind::kInteger,0,255,1,minSat,minSat);
+	maxSatProp = cvsource.CreateProperty("Max_Sat",cs::VideoProperty::Kind::kInteger,0,255,1,maxSat,maxSat);
+	minValProp = cvsource.CreateProperty("Min_Value",cs::VideoProperty::Kind::kInteger,0,255,1,minVal,minVal);
+	maxValProp = cvsource.CreateProperty("Max_Value",cs::VideoProperty::Kind::kInteger,0,255,1,maxVal,maxVal);
+	dilationProp = cvsource.CreateProperty("Dilation",cs::VideoProperty::Kind::kInteger,1,15,1,dilationFactor,dilationFactor);
+	minAreaProp = cvsource.CreateProperty("Min_Area",cs::VideoProperty::Kind::kInteger,1,1000,1,minArea,minArea);
+	//maxAreaProp = cvsource.CreateProperty("Max_Area",cs::VideoProperty::Kind::kInteger,1,2000,1,maxArea,maxArea);
 	saveToFileProp = cvsource.CreateBooleanProperty("Save_to_File",false,false);
 }
 
@@ -232,10 +210,59 @@ void create_web_properties(cs::CvSource& cvsource)
 void get_values()
 {
 	manualControl = manualControlProp.Get();
+	autoMode = autoModeProp.Get();
+	autoStage = autoStageProp.Get();
+	minHue = minHueProp.Get();
+	maxHue = maxHueProp.Get();
+	minSat = minSatProp.Get();
+	maxSat = maxSatProp.Get();
+	minVal = minValProp.Get();
+	maxVal = maxValProp.Get();
+	dilationFactor = dilationProp.Get();
+	desiredAutonomousExposure = autonomousExposureProp.Get();
 	desiredTeleopExposure = teleopExposureProp.Get();
+	minArea = minAreaProp.Get();
+	//maxArea = maxAreaProp.Get();
 	saveToFile = saveToFileProp.Get();
 }
 
+// check whether we are in autonomous or teleop
+// checks either the webpage or networktable for state info
+bool checkAutoState()
+{
+	// check networktable auto state
+	// using double instead of boolean for interop with roborio
+	
+	bool ntAutoState = table->GetEntry("autoCam").GetBoolean(false);
+	
+	//double ntAutoNum = table->GetEntry("autoCam").GetDouble(0.0);
+	//bool ntAutoState = (ntAutoNum > 0.0) ? true : false;
+	
+	if (manualControl) 
+	{
+		// if operating manually, update network table auto state
+		if (ntAutoState != autoMode)
+		{
+			table->GetEntry("autoCam").SetBoolean(autoMode);
+			/*
+			if (autoMode == true)
+				table->GetEntry("autoCam").SetDouble(1.0);
+			else
+				table->GetEntry("autoCam").SetDouble(0.0);
+			*/
+				
+			ntAutoState = autoMode;
+		}
+	}
+	else 
+	{
+		// if operating by NT, update autoMode
+		autoMode = ntAutoState;
+	}
+	
+	// return auto state
+	return autoMode;
+}
 
 void set_exposure(int exposure) 
 {
@@ -243,6 +270,128 @@ void set_exposure(int exposure)
 	camera.SetExposureManual(exposure);
 }
 
+// autonomous image processing function
+void processAuto(cv::Mat& inputImg, cs::CvSource& cvsource)
+{
+    // interim stage images used for auto
+    cv::Mat hsvImg, binaryImg, dilationImg, contourImg; 
+
+	// set teleopExposureState to false (if not already done)
+	if (teleopExposureState == true)
+	{
+		set_exposure(autonomousExposure);
+		teleopExposureState = false;
+	}
+	
+	// check to see if desired exposure changed
+	if (autonomousExposure != desiredAutonomousExposure)
+	{
+		autonomousExposure = desiredAutonomousExposure;
+		set_exposure(autonomousExposure);
+	}
+	
+	cv::cvtColor( inputImg, hsvImg, CV_BGR2HSV );
+	cv::inRange(hsvImg, cv::Scalar(minHue, minSat, minVal), cv::Scalar(maxHue, maxSat, maxVal), binaryImg);		/*green*/
+	if (autoStage == 1)
+		cvsource.PutFrame(binaryImg);
+
+	// dilate image (unify pieces)
+	int dil = dilationFactor;
+	int dil2 = dilationFactor*2 + 1;
+	cv::Mat dilateElement = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(dil2,dil2), cv::Point(dil,dil));
+	dilate(binaryImg, dilationImg, dilateElement);
+	if (autoStage == 2)
+		cvsource.PutFrame(dilationImg);
+
+	// find contours from dilated image, place in list (vector)
+	std::vector<cv::Vec4i> hierarchy;
+	std::vector<std::vector<cv::Point>> contours;
+	cv::findContours(dilationImg, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE,cv::Point(0,0));
+
+	std::vector<std::vector<cv::Point>> hulls (contours.size());	
+	for (int i=0; i< contours.size(); i++)
+	{
+		cv::convexHull(cv::Mat(contours[i]), hulls[i], false);
+	}
+
+	// create stats for each convex hull	
+	std::vector<cv::Moments>mu(hulls.size());	  // hull moments
+	std::vector<cv::Point2f>mc(hulls.size());       // hull mass centers
+	std::vector<double>targetArea(hulls.size());   // hull areas
+
+	for (int i=0; i<hulls.size(); i++)
+	{
+		mu[i] = cv::moments(hulls[i], false);   // find moments
+		mc[i] = cv::Point2f(mu[i].m10/mu[i].m00, mu[i].m01/mu[i].m00);
+		targetArea[i] = cv::contourArea(hulls[i]);
+	}
+
+	int maxTargetArea = -1;
+	int targetIndex = -1;
+	bool targetDetected = false;
+	for (int i=0; i<hulls.size(); i++)
+	{
+		// see if this target meets the minimum area requirement
+		if (targetArea[i] > minArea)
+		{
+			targetDetected = true;
+
+			// see if this target is the biggest so far
+			if (targetArea[i] > maxTargetArea)
+			{
+				targetIndex = i;
+				maxTargetArea = targetArea[i];
+			}
+		}
+	}
+
+	// create contour image
+	contourImg = cv::Mat::zeros(binaryImg.size(),CV_8UC3);
+	for (int i=0; i< contours.size(); i++)
+	{
+		cv::Scalar colorGreen = cv::Scalar(0, 0, 255);  // green
+		cv::Scalar colorWhite = cv::Scalar(255, 255, 255);  // white
+		cv::drawContours(contourImg, hulls, i, colorWhite, 2, 8, hierarchy, 0, cv::Point());
+	}
+	if (autoStage == 3)
+		cvsource.PutFrame(contourImg);
+
+	// if target meets criteria, do stuff
+	if (targetDetected)
+	{		
+		// draw the target on one of the images
+		cv::Scalar colorWhite = cv::Scalar(255, 255, 255);  // white
+		cv::Scalar colorGreen = cv::Scalar(0, 255, 0);  // green
+		cv::Scalar colorBlue = cv::Scalar(255, 0, 0);  // blue
+		cv::drawContours(inputImg, hulls, targetIndex, colorGreen, 2, 8, hierarchy, 0, cv::Point());
+		cv::circle(inputImg, mc[targetIndex], 3 ,colorBlue,2,6,0);
+
+		// write target info to network table
+		table->GetEntry("targets").SetBoolean(true);
+		//table->GetEntry("targetX").SetDouble(mc[targetIndex].x - imageCenterX);
+		//table->GetEntry("targetY").SetDouble(mc[targetIndex].y - imageCenterY);
+		table->GetEntry("targetX").SetDouble(mc[targetIndex].x);
+		table->GetEntry("targetY").SetDouble(mc[targetIndex].y);
+		table->GetEntry("targetArea").SetDouble(targetArea[targetIndex]);
+		table->GetEntry("frameWidth").SetDouble((double)frameWidth);
+		table->GetEntry("frameHeight").SetDouble((double)frameHeight);
+
+		//printf("Target area %3.0f detected at (%3.0f,%3.0f)\n",
+		//	targetArea[targetIndex], mc[targetIndex].x - imageCenterX,
+		//			     mc[targetIndex].y - imageCenterY);
+	}
+	else
+	{
+		// write that no target info found to network table
+		table->GetEntry("targets").SetBoolean(false);
+	}
+		
+	if (autoStage == 4)
+	{
+		overlay_fps(inputImg);		
+		cvsource.PutFrame(inputImg);
+	}
+}
 
 // teleop image processing function
 void processTeleop(cv::Mat& inputImg, cs::CvSource& cvsource)
@@ -250,6 +399,9 @@ void processTeleop(cv::Mat& inputImg, cs::CvSource& cvsource)
 	// interim stage images for teleop
 	cv::Mat overlayImg;
 
+	// reset target field for teleop
+	table->GetEntry("targets").SetBoolean(false);
+		
 	// set teleopExposure to true (if not already done)
 	if (teleopExposureState == false)
 	{
@@ -315,12 +467,12 @@ int main() {
 	tableInstance.StartServer();     // debug only - if roborio not present
 	table = tableInstance.GetTable("RPIComm/Data_Table");
 	
-	//Initial state: set networktable clampOn state to TRUE and reset exposure to teleop level 
-	table->GetEntry("collectorStrength").SetDouble(0.0);
-	table->GetEntry("clampOn").SetBoolean(true);
+	//Initial state: set networktable auto state to false and reset exposure to teleop level 
+	//table->GetEntry("autoCam").SetBoolean(false);
+	table->GetEntry("autoCam").SetDouble(0.0);
 	set_exposure(teleopExposure);
 	teleopExposureState = true;
-	
+
   // enter forever streaming loop
   int startFrameCtr = 0;
   int frameCtr = 0;
@@ -354,7 +506,13 @@ int main() {
 	// get webpage control values
 	get_values();                 
 	 
-	 // process image
-	processTeleop(inputImg, cvsource);		
+    if (checkAutoState())   // autonomous state check
+    {
+		processAuto(inputImg, cvsource);
+	}
+	else   // teleop
+	{
+		processTeleop(inputImg, cvsource);		
+	}
   }
 }

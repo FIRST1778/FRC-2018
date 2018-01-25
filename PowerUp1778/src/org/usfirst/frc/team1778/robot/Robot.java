@@ -35,7 +35,7 @@ public class Robot extends IterativeRobot {
 		// Initialize robot subsystems
 		InputOutputComm.initialize();
 		RPIComm.initialize();
-		//CubeManagement.initialize();
+		CubeManagement.initialize();
 		//ClimberAssembly.initialize();
 		NavXSensor.initialize();
 		DriveAssembly.initialize();

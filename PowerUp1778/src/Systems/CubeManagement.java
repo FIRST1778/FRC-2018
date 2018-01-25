@@ -145,12 +145,16 @@ public class CubeManagement {
 	}
 	
 	public static void resetMotors()
-	{		
+	{	
+		// turn off collector motors
 		leftCollectorMotor.set(0);
 		rightCollectorMotor.set(0);	
 		
 		// reset upper lift motor (lower lift follows)
 		//upperLiftMotor.set(ControlMode.PercentOutput, 0);
+		
+		// set lift brake
+		liftBrakeOn();
 	}
 	
 	// resets the position encoders on lift motors
@@ -212,6 +216,9 @@ public class CubeManagement {
 	
 	public static void flipperUp()
 	{
+		if (flipperUp)
+			return;
+
 		flipperUp = true;
 		//flipperSolenoid.set(DoubleSolenoid.Value.kForward);	
 		InputOutputComm.putBoolean(InputOutputComm.LogTable.kMainLog,"CubeMgmt/Flipper", flipperUp);
@@ -219,6 +226,9 @@ public class CubeManagement {
 	
 	public static void flipperDown()
 	{
+		if (!flipperUp)
+			return;
+		
 		flipperUp = false;
 		//flipperSolenoid.set(DoubleSolenoid.Value.kReverse);		
 		InputOutputComm.putBoolean(InputOutputComm.LogTable.kMainLog,"CubeMgmt/Flipper", flipperUp);
@@ -226,6 +236,9 @@ public class CubeManagement {
 
 	public static void clampOn()
 	{
+		if (clampOn)
+			return;
+		
 		clampOn = true;
 		//clampSolenoid.set(DoubleSolenoid.Value.kForward);		
 		InputOutputComm.putBoolean(InputOutputComm.LogTable.kMainLog,"CubeMgmt/Clamp", clampOn);
@@ -234,6 +247,9 @@ public class CubeManagement {
 
 	public static void clampOff()
 	{
+		if (!clampOn)
+			return;
+		
 		clampOn = false;
 		//clampSolenoid.set(DoubleSolenoid.Value.kReverse);		
 		InputOutputComm.putBoolean(InputOutputComm.LogTable.kMainLog,"CubeMgmt/Clamp", clampOn);
@@ -242,6 +258,9 @@ public class CubeManagement {
 
 	public static void liftBrakeOn()
 	{
+		if (liftBrakeOn)
+			return;
+
 		liftBrakeOn = true;
 		//liftBrakeSolenoid.set(DoubleSolenoid.Value.kForward);		
 		InputOutputComm.putBoolean(InputOutputComm.LogTable.kMainLog,"CubeMgmt/LiftBrake", liftBrakeOn);
@@ -249,6 +268,9 @@ public class CubeManagement {
 
 	public static void liftBrakeOff()
 	{
+		if (!liftBrakeOn)
+			return;
+
 		liftBrakeOn = false;
 		//liftBrakeSolenoid.set(DoubleSolenoid.Value.kReverse);		
 		InputOutputComm.putBoolean(InputOutputComm.LogTable.kMainLog,"CubeMgmt/LiftBrake", liftBrakeOn);
@@ -377,6 +399,7 @@ public class CubeManagement {
 	public static void autoInit() {				
 		resetMotors();
 		flipperUp();
+		clampOn();
 		liftBrakeOn();		
 	}
 
@@ -387,8 +410,6 @@ public class CubeManagement {
 	public static void teleopInit() {
 				
 		resetMotors();
-		flipperUp();
-		liftBrakeOn();
 				
 		liftIdleTimerStart = RobotController.getFPGATime();      
 	}

@@ -4,8 +4,6 @@ import java.util.prefs.Preferences;
 
 import NetworkComm.InputOutputComm;
 import Systems.NavXSensor;
-import Systems.UltrasonicSensor;
-
 
 public class IdleAction extends Action {
 		
