@@ -28,8 +28,14 @@ public class AutoNetworkBuilder {
 
 	// closed-loop position cruise velocity and acceleration (used for all closed-loop position control)
 	// units are RPM
-	private final static int CLOSED_LOOP_VELOCITY = 900;
-	private final static int CLOSED_LOOP_ACCEL = 450;
+	
+	// ~4.5 ft/s - FAST
+	private final static int CLOSED_LOOP_VELOCITY = 2000;
+	private final static int CLOSED_LOOP_ACCEL = 600;
+
+	// ~2 ft/s - SLOW
+	//private final static int CLOSED_LOOP_VELOCITY = 800;
+	//private final static int CLOSED_LOOP_ACCEL = 600;
 	
 	private static ArrayList<AutoNetwork> autoNets;
 	
@@ -104,10 +110,12 @@ public class AutoNetworkBuilder {
 		*/
 		
 		AutoState driveState = new AutoState("<Drive State 1>");
-		DriveForwardMagicAction driveForwardMagic = new DriveForwardMagicAction("<Drive Forward Magic Action>", 120.0, 500, 250, true, 0.0);
-		TimeEvent timer2 = new TimeEvent(20.0);  // drive forward timer event
+		DriveForwardMagicAction driveForwardMagic = new DriveForwardMagicAction("<Drive Forward Magic Action>", 84.0, CLOSED_LOOP_VELOCITY, CLOSED_LOOP_ACCEL, true, 0.0);
+		//TimeEvent timer2 = new TimeEvent(4.0);  // drive forward timer event
+		ClosedLoopPositionEvent pos1 = new ClosedLoopPositionEvent(84.0, 0.5, 1.0);
 		driveState.addAction(driveForwardMagic);
-		driveState.addEvent(timer2);
+		driveState.addEvent(pos1);
+		//driveState.addEvent(timer2);
 		
 		AutoState idleState2 = new AutoState("<Idle State 2>");
 		IdleAction deadEnd = new IdleAction("<Dead End Action>");

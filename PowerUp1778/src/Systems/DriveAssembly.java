@@ -35,9 +35,9 @@ public class DriveAssembly {
 	public static final boolean ALIGNED_RIGHT_SENSOR = true;	// encoder polarity - front right
 	public static final boolean ALIGNED_LEFT_SENSOR = true;    // encoder polarity - front left
 		
-	// PIDF values - proto.bot - initial 
-	private static final double kP = 7.0;
-	private static final double kI = 0.0;  // Integral not needed for closed loop position control
+	// PIDF values - proto.bot - initial values - tested Jan 25 with 93 lb. robot
+	private static final double kP = 10.0;
+	private static final double kI = 0.0005;  
 	private static final double kD = 0.0;
 	private static final double kF = 0.0;  // Feedforward not used for closed loop position control
 
