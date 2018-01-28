@@ -1,9 +1,11 @@
 package Systems;
 
+import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+
 import NetworkComm.InputOutputComm;
 import Utility.HardwareIDs;
 import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.Spark;
 
 public class ClimberAssembly {
 	
@@ -16,7 +18,7 @@ public class ClimberAssembly {
 		
 		InputOutputComm.initialize();
 		
-		climberMotor = new Spark(HardwareIDs.CLIMBER_PWM_ID);
+		climberMotor = new TalonSRX(HardwareIDs.CLIMBER_TALON_ID);
 				
 		gamepad = new Joystick(HardwareIDs.GAMEPAD_ID);
 		
@@ -29,7 +31,7 @@ public class ClimberAssembly {
 	// UP joystick = NEG motor throttle = correct!
 	private static final double CLIMB_MOTOR_FACTOR = 1.0;
 	
-	private static Spark climberMotor;
+	private static TalonSRX climberMotor;
 		
 	private static Joystick gamepad;
 	private static double currentClimbValue = 0.0;
@@ -55,7 +57,7 @@ public class ClimberAssembly {
 		
 		// set motor and persisted climb value
 		currentClimbValue = newClimbValue;
-		climberMotor.set(newClimbValue);
+		climberMotor.set(ControlMode.PercentOutput,newClimbValue);
 		
 		String climbValueStr = String.format("%.2f", newClimbValue);
 		InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"Climber/speed", climbValueStr);

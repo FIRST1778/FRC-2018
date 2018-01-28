@@ -23,14 +23,12 @@ public class RPIComm {
 		InputOutputComm.initialize();
 		
 		// if using Roborio-hosted network table
-		tableInstance = NetworkTableInstance.getDefault();
+		//tableInstance = NetworkTableInstance.getDefault();
 		
 		// if using RPi-hosted network table
-		/*
 		 tableInstance = NetworkTableInstance.create();
 		 tableInstance.setNetworkIdentity("Roborio_RPI_Client");
-		 tableInstance.startClient("10.17.78.179",1735);
-		 */
+		 tableInstance.startClient("10.17.78.10",1735);
 		
 		table = tableInstance.getTable("RPIComm/Data_Table");		
        		

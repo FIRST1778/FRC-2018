@@ -80,10 +80,12 @@ public class CubeManagement {
 	private static DoubleSolenoid clampSolenoid;
 	private static boolean clampOn;
 	private static double clampStartTimer = 0;
-	private static final double CLAMP_LIMIT_SEC = 0.25;
+	private static final double CLAMP_LIMIT_USEC = 500000;
 	
 	private static DoubleSolenoid liftBrakeSolenoid;
 	private static boolean liftBrakeOn;
+	private static double brakeStartTimer = 0;
+	private static final double BRAKE_LIMIT_USEC = 500000;
 	
 	private static Joystick gamepad;
 		
@@ -98,8 +100,10 @@ public class CubeManagement {
 		
 		InputOutputComm.initialize();
 		
-		// reset trigger init time
-		initTriggerTime = RobotController.getFPGATime();
+		// reset timers
+		initTriggerTime = 0;
+		clampStartTimer = 0;
+		brakeStartTimer = 0;
 
         // create pneumatics objects
 		/*
@@ -134,7 +138,6 @@ public class CubeManagement {
 		
 		// clamp on
 		clampOn();
-		clampStartTimer = RobotController.getFPGATime();
 		
 		// turn on brake
 		liftBrakeOn();
@@ -235,11 +238,12 @@ public class CubeManagement {
 	}
 
 	public static void clampOn()
-	{
+	{			
+		// if clamp is already on, return
 		if (clampOn)
 			return;
 		
-		clampOn = true;
+		clampOn = true;		
 		//clampSolenoid.set(DoubleSolenoid.Value.kForward);		
 		InputOutputComm.putBoolean(InputOutputComm.LogTable.kMainLog,"CubeMgmt/Clamp", clampOn);
 		RPIComm.setBoolean("clampOn", clampOn);
@@ -247,6 +251,7 @@ public class CubeManagement {
 
 	public static void clampOff()
 	{
+		// if clamp is already off, return
 		if (!clampOn)
 			return;
 		
@@ -254,6 +259,7 @@ public class CubeManagement {
 		//clampSolenoid.set(DoubleSolenoid.Value.kReverse);		
 		InputOutputComm.putBoolean(InputOutputComm.LogTable.kMainLog,"CubeMgmt/Clamp", clampOn);
 		RPIComm.setBoolean("clampOn", clampOn);
+
 	}
 
 	public static void liftBrakeOn()
@@ -264,6 +270,7 @@ public class CubeManagement {
 		liftBrakeOn = true;
 		//liftBrakeSolenoid.set(DoubleSolenoid.Value.kForward);		
 		InputOutputComm.putBoolean(InputOutputComm.LogTable.kMainLog,"CubeMgmt/LiftBrake", liftBrakeOn);
+		RPIComm.setBoolean("brakeOn", liftBrakeOn);
 	}
 
 	public static void liftBrakeOff()
@@ -274,6 +281,7 @@ public class CubeManagement {
 		liftBrakeOn = false;
 		//liftBrakeSolenoid.set(DoubleSolenoid.Value.kReverse);		
 		InputOutputComm.putBoolean(InputOutputComm.LogTable.kMainLog,"CubeMgmt/LiftBrake", liftBrakeOn);
+		RPIComm.setBoolean("brakeOn", liftBrakeOn);
 	}
 
 	public static void depositCube()
@@ -328,19 +336,39 @@ public class CubeManagement {
 	
 	private static void checkClampControls() {
 
-		// not enough time between clamp control events
-		if ((RobotController.getFPGATime() - clampStartTimer) < CLAMP_LIMIT_SEC)
-			return;
+		//if (gamepad.getRawButton(HardwareIDs.CLAMP_TOGGLE_BUTTON)) {
+		if (gamepad.getPOV() == 0)
+		{	
+			// not enough time between clamp control events, return
+			if ((RobotController.getFPGATime() - clampStartTimer) > CLAMP_LIMIT_USEC)
+			{				
+				if (clampOn)
+					clampOff();
+				else
+					clampOn();
+			
+				// reset clamp timer
+				clampStartTimer = RobotController.getFPGATime();				
+			}
+		}		
+	}
+	
+	private static void checkBrakeControls() {
 
-		if (gamepad.getRawButton(HardwareIDs.CLAMP_TOGGLE_BUTTON)) {
-			if (clampOn)
-				clampOff();
-			else
-				clampOn();
-		}
-		
-		// reset clamp timer
-		clampStartTimer = RobotController.getFPGATime();
+		if (gamepad.getRawButton(HardwareIDs.BRAKE_TOGGLE_BUTTON)) {
+			
+			// not enough time between clamp control events, return
+			if ((RobotController.getFPGATime() - brakeStartTimer) > BRAKE_LIMIT_USEC)
+			{				
+				if (liftBrakeOn)
+					liftBrakeOff();
+				else
+					liftBrakeOn();
+			
+				// reset clamp timer
+				brakeStartTimer = RobotController.getFPGATime();				
+			}
+		}		
 	}
 	
 	private static void checkLiftControls() {
@@ -353,32 +381,10 @@ public class CubeManagement {
 			liftStrength *= LIFT_MOTOR_FACTOR; 
 		else 
 			liftStrength = 0.0;
-			
-		// if directed lift gain is zero (idle)
-		if (liftStrength == 0)
-		{
-			// if brake is off and (lift idle time > idle threshold)
-			if ((!liftBrakeOn) && (
-					(RobotController.getFPGATime() - liftIdleTimerStart) > LIFT_IDLE_BRAKE_SECONDS)) {
-				// apply brake
-				liftBrakeOn();			
-			}
-		}
-		else {
-			
-			// if brake is on and gain is non-zero (not idle)
-			if (liftBrakeOn)
-			{
-				// turn off brake
-				liftBrakeOff();
-				
-				// wait a brief moment for brake to mechanically deactivate
-				Timer.delay(0.2);
-			}	
-			
-			// reset lift idle timer start
-			liftIdleTimerStart = RobotController.getFPGATime();
-		}
+		
+		// abort if lift brake is still on (don't fight the brake)
+		if (liftBrakeOn)
+			return;		
 	
 		// apply lift motor gain value
 		InputOutputComm.putDouble(InputOutputComm.LogTable.kMainLog,"CubeMgmt/LiftStrength", liftStrength);
@@ -412,12 +418,14 @@ public class CubeManagement {
 		resetMotors();
 				
 		liftIdleTimerStart = RobotController.getFPGATime();      
+		clampStartTimer = RobotController.getFPGATime();      
 	}
 	
 	public static void teleopPeriodic() {
 		
 		checkCollectorControls();
 		checkClampControls();
+		checkBrakeControls();
 		checkLiftControls();
 		checkFlipperControls();
 	}

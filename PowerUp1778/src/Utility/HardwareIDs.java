@@ -13,8 +13,9 @@ public class HardwareIDs {
 	public static final int LOWER_LIFT_TALON_ID = 5;
 	public static final int UPPER_LIFT_TALON_ID = 6;
 	
+	public static final int CLIMBER_TALON_ID = 9;
+	
 	// Collector and Climber Sparks (PWM)
-	public static final int CLIMBER_PWM_ID = 1;
 	public static final int LEFT_COLLECTOR_PWM_ID = 2;
 	public static final int RIGHT_COLLECTOR_PWM_ID = 3;
 	
@@ -39,7 +40,8 @@ public class HardwareIDs {
 	public static final int FLIPPER_DOWN_AXIS = 3;
 	public static final int FLIPPER_UP_BUTTON = 6;
 
-	public static final int CLAMP_TOGGLE_BUTTON = 9;
+	public static final int CLAMP_TOGGLE_BUTTON = 12;
+	public static final int BRAKE_TOGGLE_BUTTON = 10;
 
 	public static final int LIFT_MOTOR_AXIS = 5;
 
