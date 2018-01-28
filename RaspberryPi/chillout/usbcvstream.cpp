@@ -153,9 +153,16 @@ void overlay_fps(cv::Mat& inImg)
 	
 	if (clampOn) {
 		sprintf(str,"CLAMP ON");
-		cv::putText(inImg,str,cv::Point2f(70,120),cv::FONT_HERSHEY_PLAIN, 2.0, cv::Scalar(0,0,255,255), 2, 8);
+		cv::putText(inImg,str,cv::Point2f(20,160),cv::FONT_HERSHEY_PLAIN, 1.2, cv::Scalar(0,255,255,255), 2, 8);
 	}
+
+	bool brakeOn = table->GetEntry("brakeOn").GetBoolean(true);
 	
+	if (brakeOn) {
+		sprintf(str,"BRAKE ON");
+		cv::putText(inImg,str,cv::Point2f(210,160),cv::FONT_HERSHEY_PLAIN, 1.2, cv::Scalar(0,255,255,255), 2, 8);
+	}
+
 }
 
 void read_param_file()
@@ -311,13 +318,14 @@ int main() {
    
 	// initialize network table for comm with the robot
 	auto tableInstance = nt::NetworkTableInstance::GetDefault();
-	//tableInstance.SetServer("Roborio-1778-frc.local");  // send data to roborio
-	tableInstance.StartServer();     // debug only - if roborio not present
+	tableInstance.SetServer("Roborio-1778-frc.local");  // send data to roborio
+	//tableInstance.StartServer();     // debug only - if roborio not present
 	table = tableInstance.GetTable("RPIComm/Data_Table");
 	
 	//Initial state: set networktable clampOn state to TRUE and reset exposure to teleop level 
 	table->GetEntry("collectorStrength").SetDouble(0.0);
 	table->GetEntry("clampOn").SetBoolean(true);
+	table->GetEntry("brakeOn").SetBoolean(true);
 	set_exposure(teleopExposure);
 	teleopExposureState = true;
 	
