@@ -14,8 +14,9 @@ public class AutoChooser {
 	//  action type selection
 	public static final int DO_NOTHING = 0;
 	public static final int DRIVE_FORWARD = 1;
-	public static final int CUBE_OPS = 2;
-	public static final int LIFT_FOREVER = 3;
+	public static final int CUBE_OPS_STD = 2;
+	public static final int CUBE_OPS_ADV = 3;
+	public static final int LIFT_FOREVER = 4;
 		
 	// internal selection class used for SendableChooser only
 	public class ModeSelection {
@@ -44,7 +45,8 @@ public class AutoChooser {
 		chooser_action = new SendableChooser<ModeSelection>();
 		chooser_action.addDefault("DO_NOTHING", new ModeSelection(DO_NOTHING));
 		chooser_action.addObject("DRIVE_FORWARD", new ModeSelection(DRIVE_FORWARD));
-		chooser_action.addObject("CUBE_OPS", new ModeSelection(CUBE_OPS));
+		chooser_action.addObject("CUBE_OPS_STD", new ModeSelection(CUBE_OPS_STD));
+		chooser_action.addObject("CUBE_OPS_ADV", new ModeSelection(CUBE_OPS_ADV));
 		chooser_action.addObject("LIFT_FOREVER", new ModeSelection(LIFT_FOREVER));
 		SmartDashboard.putData("AutoChooser_Action", chooser_action);
 	}

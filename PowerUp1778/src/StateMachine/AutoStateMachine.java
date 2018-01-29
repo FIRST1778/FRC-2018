@@ -109,7 +109,7 @@ public class AutoStateMachine {
 			autoNetworkEnable = true;
 			netIndex = AutoNetworkBuilder.DRIVE_FORWARD;
 		}
-		else if (action == AutoChooser.CUBE_OPS)  // CUBE OPS, depends on field config and position
+		else if ((action == AutoChooser.CUBE_OPS_STD) || (action == AutoChooser.CUBE_OPS_ADV)) // CUBE OPS, depends on field config and position
 		{
 			autoNetworkEnable = true;
 			
@@ -149,16 +149,23 @@ public class AutoStateMachine {
 		int netIndex = AutoNetworkBuilder.DO_NOTHING;
 		
 		if (fieldAllianceColors[SWITCH] == LEFT) {
-			// first priority - turn on switch
+			// first priority - deposit cube on switch (same side)
 			netIndex = AutoNetworkBuilder.DEPOSIT_CUBE_SWITCH_LEFT;
 		}
 		else if (fieldAllianceColors[SCALE] == LEFT) {
-			// second priority - turn on scale
+			// second priority - deposit cube on scale (same side)
 			netIndex = AutoNetworkBuilder.DEPOSIT_CUBE_SCALE_LEFT;
 		}
 		else {
-			// third priority - move into position for other side of scale
-			netIndex = AutoNetworkBuilder.MOVE_TO_SCALE_RIGHT_FROM_LEFT;
+			if (desiredAction == AutoChooser.CUBE_OPS_ADV) {
+				// move to other side of scale and deposit cube
+				netIndex = AutoNetworkBuilder.DEPOSIT_CUBE_SCALE_RIGHT_FROM_LEFT;
+			}
+			else
+			{
+				// move into position for other side of scale
+				netIndex = AutoNetworkBuilder.MOVE_TO_SCALE_RIGHT_FROM_LEFT;
+			}
 		}
 		
 		return netIndex;
@@ -193,8 +200,14 @@ public class AutoStateMachine {
 			netIndex = AutoNetworkBuilder.DEPOSIT_CUBE_SCALE_RIGHT;
 		}
 		else {
-			// third priority - move into position for other side of scale
-			netIndex = AutoNetworkBuilder.MOVE_TO_SCALE_LEFT_FROM_RIGHT;
+			if (desiredAction == AutoChooser.CUBE_OPS_ADV) {
+				// move to other side of scale and deposit cube
+				netIndex = AutoNetworkBuilder.DEPOSIT_CUBE_SCALE_LEFT_FROM_RIGHT;
+			}
+			else {
+				// move into position for other side of scale
+				netIndex = AutoNetworkBuilder.MOVE_TO_SCALE_LEFT_FROM_RIGHT;
+			}
 		}
 
 		return netIndex;
