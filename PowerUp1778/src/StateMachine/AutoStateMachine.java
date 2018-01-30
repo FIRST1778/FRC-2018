@@ -94,8 +94,7 @@ public class AutoStateMachine {
 		// grab the selected action and position from the driver station
 		int action = autoChooser.getAction();
 		int position = autoChooser.getPosition();
-		int local_priority = autoChooser.getLocalPriority();
-		int remote_priority = autoChooser.getRemotePriority();
+		int right_left_priority = autoChooser.getRightLeftPriority();
 		int remote_scale_action = autoChooser.getRemoteScaleAction();
 		
 		int netIndex = AutoNetworkBuilder.DO_NOTHING;
@@ -117,13 +116,13 @@ public class AutoStateMachine {
 			
 			switch (position) {
 			case AutoChooser.LEFT_POSITION:
-				netIndex = leftPositionLogic(local_priority, remote_priority, remote_scale_action);
+				netIndex = leftPositionLogic(right_left_priority, remote_scale_action);
 				break;
 			case AutoChooser.CENTER_POSITION:
 				netIndex = centerPositionLogic();
 				break;
 			case AutoChooser.RIGHT_POSITION:
-				netIndex = rightPositionLogic(local_priority, remote_priority, remote_scale_action);
+				netIndex = rightPositionLogic(right_left_priority, remote_scale_action);
 				break;
 			default:
 				// no position defined - do nothing
@@ -146,67 +145,45 @@ public class AutoStateMachine {
 	}
 	
 	// logic for left position
-	private int leftPositionLogic(int local_priority, int remote_priority, int remote_scale_action)
+	private int leftPositionLogic(int right_left_priority, int remote_scale_action)
 	{
 		int netIndex = AutoNetworkBuilder.DO_NOTHING;
 		
 		// check local scale priority over local switch
-		if (local_priority == AutoChooser.LOCAL_SCALE) {
+		if (right_left_priority == AutoChooser.SCALE) 
+		{
 			// check local scale over local switch
-			if (fieldAllianceColors[SCALE] == LEFT) {
+			if (fieldAllianceColors[SCALE] == LEFT) 
+			{
 				// first priority - deposit cube on scale (same side)
 				netIndex = AutoNetworkBuilder.DEPOSIT_CUBE_SCALE_LEFT;
-				return netIndex;
 			}
-			else if (fieldAllianceColors[SWITCH] == LEFT) {
-				// second priority - deposit cube on switch (same side)
-				netIndex = AutoNetworkBuilder.DEPOSIT_CUBE_SWITCH_LEFT;
-				return netIndex;
+			else // (fieldAllianceColors[SCALE] == RIGHT) 
+			{
+				// first priority - move on scale (remote side)
+				netIndex = remoteScaleAction(LEFT,remote_scale_action);
 			}
 		}
-		else
+		else // (right_left_priority == AutoChooser.SWITCH)
 		{
 			// check local switch over local scale
-			if (fieldAllianceColors[SWITCH] == LEFT) {
+			if (fieldAllianceColors[SWITCH] == LEFT) 
+			{
 				// first priority - deposit cube on switch (same side)
 				netIndex = AutoNetworkBuilder.DEPOSIT_CUBE_SWITCH_LEFT;
-				return netIndex;
 			}
-			else if (fieldAllianceColors[SCALE] == LEFT) {
+			else if (fieldAllianceColors[SCALE] == LEFT) 
+			{
 				// second priority - deposit cube on scale (same side)
 				netIndex = AutoNetworkBuilder.DEPOSIT_CUBE_SCALE_LEFT;
-				return netIndex;
 			}
-		}
-		
-		// check remote scale priority over local switch
-		if (remote_priority == AutoChooser.REMOTE_SCALE) {
-			// check remote scale over local switch
-			if (fieldAllianceColors[SCALE] == RIGHT) {
+			else // (fieldAllianceColors[SCALE] == RIGHT) 
+			{
 				// first priority - move on scale (remote side)
 				netIndex = remoteScaleAction(LEFT,remote_scale_action);
-				return netIndex;
-			}
-			else if (fieldAllianceColors[SWITCH] == LEFT) {
-				// second priority - move on switch (same side)
-				netIndex = AutoNetworkBuilder.DEPOSIT_CUBE_SWITCH_LEFT;
-				return netIndex;
 			}
 		}
-		else {
-			// check local switch over remote scale
-			if (fieldAllianceColors[SWITCH] == LEFT) {
-				// second priority - move on switch (same side)
-				netIndex = AutoNetworkBuilder.DEPOSIT_CUBE_SWITCH_LEFT;
-				return netIndex;
-			}
-			else if (fieldAllianceColors[SCALE] == RIGHT) {
-				// first priority - move on scale (remote side)
-				netIndex = remoteScaleAction(LEFT,remote_scale_action);
-				return netIndex;
-			}
-		}
-				
+						
 		return netIndex;
 	}
 	
@@ -228,67 +205,45 @@ public class AutoStateMachine {
 	}
 	
 	// logic for right position
-	private int rightPositionLogic(int local_priority, int remote_priority, int remote_scale_action)
+	private int rightPositionLogic(int right_left_priority, int remote_scale_action)
 	{
 		int netIndex = AutoNetworkBuilder.DO_NOTHING;
 		
 		// check local scale priority over local switch
-		if (local_priority == AutoChooser.LOCAL_SCALE) {
+		if (right_left_priority == AutoChooser.SCALE) 
+		{
 			// check local scale over local switch
-			if (fieldAllianceColors[SCALE] == RIGHT) {
+			if (fieldAllianceColors[SCALE] == RIGHT) 
+			{
 				// first priority - deposit cube on scale (same side)
 				netIndex = AutoNetworkBuilder.DEPOSIT_CUBE_SCALE_RIGHT;
-				return netIndex;
 			}
-			else if (fieldAllianceColors[SWITCH] == RIGHT) {
-				// second priority - deposit cube on switch (same side)
-				netIndex = AutoNetworkBuilder.DEPOSIT_CUBE_SWITCH_RIGHT;
-				return netIndex;
+			else // (fieldAllianceColors[SCALE] == LEFT) 
+			{
+				// first priority - move on scale (remote side)
+				netIndex = remoteScaleAction(RIGHT,remote_scale_action);
 			}
 		}
-		else
+		else // (right_left_priority == AutoChooser.SWITCH)
 		{
 			// check local switch over local scale
-			if (fieldAllianceColors[SWITCH] == RIGHT) {
+			if (fieldAllianceColors[SWITCH] == RIGHT) 
+			{
 				// first priority - deposit cube on switch (same side)
 				netIndex = AutoNetworkBuilder.DEPOSIT_CUBE_SWITCH_RIGHT;
-				return netIndex;
 			}
-			else if (fieldAllianceColors[SCALE] == RIGHT) {
+			else if (fieldAllianceColors[SCALE] == RIGHT) 
+			{
 				// second priority - deposit cube on scale (same side)
 				netIndex = AutoNetworkBuilder.DEPOSIT_CUBE_SCALE_RIGHT;
-				return netIndex;
 			}
-		}
-		
-		// check remote scale priority over local switch
-		if (remote_priority == AutoChooser.REMOTE_SCALE) {
-			// check remote scale over local switch
-			if (fieldAllianceColors[SCALE] == LEFT) {
+			else // (fieldAllianceColors[SCALE] == LEFT) 
+			{
 				// first priority - move on scale (remote side)
 				netIndex = remoteScaleAction(RIGHT,remote_scale_action);
-				return netIndex;
-			}
-			else if (fieldAllianceColors[SWITCH] == RIGHT) {
-				// second priority - move on switch (same side)
-				netIndex = AutoNetworkBuilder.DEPOSIT_CUBE_SWITCH_RIGHT;
-				return netIndex;
 			}
 		}
-		else {
-			// check local switch over remote scale
-			if (fieldAllianceColors[SWITCH] == RIGHT) {
-				// second priority - move on switch (same side)
-				netIndex = AutoNetworkBuilder.DEPOSIT_CUBE_SWITCH_RIGHT;
-				return netIndex;
-			}
-			else if (fieldAllianceColors[SCALE] == LEFT) {
-				// first priority - move on scale (remote side)
-				netIndex = remoteScaleAction(RIGHT,remote_scale_action);
-				return netIndex;
-			}
-		}
-				
+						
 		return netIndex;
 	}
 	
@@ -308,7 +263,7 @@ public class AutoStateMachine {
 				netIndex = AutoNetworkBuilder.MOVE_TO_SCALE_RIGHT_FROM_LEFT;
 			}
 		}
-		else
+		else  // (fromPos == RIGHT)
 		{
 			if (remote_scale_action == AutoChooser.REMOTE_SCALE_CUBE_DROP) 
 			{
