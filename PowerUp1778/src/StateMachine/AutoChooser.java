@@ -16,6 +16,8 @@ public class AutoChooser {
 	public static final int DRIVE_FORWARD = 1;
 	public static final int CUBE_OPS = 2;
 	public static final int LIFT_FOREVER = 3;
+	public static final int TURN_FOREVER = 4;
+	public static final int PACE_FOREVER = 5;
 	
 	//  action priority type selection (left or right position only)
 	public static final int SCALE = 0;
@@ -56,6 +58,8 @@ public class AutoChooser {
 		chooser_action.addObject("DRIVE_FORWARD", new ModeSelection(DRIVE_FORWARD));
 		chooser_action.addObject("CUBE_OPS", new ModeSelection(CUBE_OPS));
 		chooser_action.addObject("LIFT_FOREVER", new ModeSelection(LIFT_FOREVER));
+		chooser_action.addObject("TURN_FOREVER", new ModeSelection(TURN_FOREVER));
+		chooser_action.addObject("PACE_FOREVER", new ModeSelection(PACE_FOREVER));
 		SmartDashboard.putData("AutoChooser_Action", chooser_action);
 		
 		// strategy chooser setup - switch or scale (for left or right only)

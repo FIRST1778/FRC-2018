@@ -135,6 +135,18 @@ public class AutoStateMachine {
 			autoNetworkEnable = true;
 			netIndex = AutoNetworkBuilder.LIFT_FOREVER;
 		}
+		else if (action == AutoChooser.TURN_FOREVER)
+		{
+			// debug network
+			autoNetworkEnable = true;
+			netIndex = AutoNetworkBuilder.TURN_FOREVER;
+		}
+		else if (action == AutoChooser.PACE_FOREVER)
+		{
+			// debug network
+			autoNetworkEnable = true;
+			netIndex = AutoNetworkBuilder.PACE_FOREVER;
+		}
 		else {
 			autoNetworkEnable = false;
 		}

@@ -27,6 +27,8 @@ public class AutoNetworkBuilder {
 
 	// debug networks
 	public final static int LIFT_FOREVER = 12;
+	public final static int TURN_FOREVER = 13;
+	public final static int PACE_FOREVER = 14;
 
 	// closed-loop position cruise velocity and acceleration (used for all closed-loop position control)
 	// units are RPM
@@ -79,6 +81,8 @@ public class AutoNetworkBuilder {
 		autoNets.add(MOVE_TO_SCALE_LEFT_FROM_RIGHT, createMoveToScaleLeftFromRight());	
 
 		autoNets.add(LIFT_FOREVER, createLiftingForeverNetwork());	
+		autoNets.add(TURN_FOREVER, createTurningForeverNetwork());	
+		autoNets.add(PACE_FOREVER, createPacingForeverNetwork());	
 
 		return autoNets;
 	}
@@ -1088,69 +1092,91 @@ public class AutoNetworkBuilder {
 		
 		return autoNet;
 	}
+	
+	
+	/*****************************************************************************************************/
+	/**** DEBUG NETWORKS **** Networks below this are used only for debug - disable during competition ***/
+	/*****************************************************************************************************/	
 
 	// **** Turning Network ***** 
-	// 1) move camera
-	// 2) Turn RIGHT 90 degrees a number of times
-	// 3) Turn LEFT 90 degrees a number of times
-	// 4) go back to step 2 
+	// 1) Turn RIGHT 90 degrees a number of times
+	// 2) Turn LEFT 90 degrees a number of times
+	// 3) go back to step 1 
 	private static AutoNetwork createTurningForeverNetwork() {
 		
 		AutoNetwork autoNet = new AutoNetwork("<Turning Forever Network>");
 		
 		AutoState turnState0 = new AutoState("<Turn Left State 0>");
 		TurnPIDAction turnPidAction0 = new TurnPIDAction("<Turn Left PID action 0>", -90.0, 0.5, true);
-		TimeEvent timer2 = new TimeEvent(10.0);  // drive forward timer event - allow PID time to settle
+		//TimeEvent timer2 = new TimeEvent(10.0);  // drive forward timer event - allow PID time to settle
+		ClosedLoopAngleEvent angle1 = new ClosedLoopAngleEvent(-90.0,2.0,1.0);
 		turnState0.addAction(turnPidAction0);
-		turnState0.addEvent(timer2);
+		//turnState0.addEvent(timer2);
+		turnState0.addEvent(angle1);
 
 		AutoState turnState1 = new AutoState("<Turn Right State 1>");
 		TurnPIDAction turnPidAction1 = new TurnPIDAction("<Turn right PID action 1>", 90.0, 0.5, true);
-		TimeEvent timer3 = new TimeEvent(10.0);  // drive forward timer event - allow PID time to settle
+		//TimeEvent timer3 = new TimeEvent(10.0);  // drive forward timer event - allow PID time to settle
+		ClosedLoopAngleEvent angle2 = new ClosedLoopAngleEvent(90.0,2.0,1.0);
 		turnState1.addAction(turnPidAction1);
-		turnState1.addEvent(timer3);
+		//turnState1.addEvent(timer3);
+		turnState1.addEvent(angle2);
 						
 		AutoState turnState2 = new AutoState("<Turn Left State 2>");
 		TurnPIDAction turnPidAction2 = new TurnPIDAction("<Turn Left PID action 2>", -90.0, 0.5, true);
-		TimeEvent timer4 = new TimeEvent(10.0);  // drive forward timer event - allow PID time to settle
+		//TimeEvent timer4 = new TimeEvent(10.0);  // drive forward timer event - allow PID time to settle
+		ClosedLoopAngleEvent angle3 = new ClosedLoopAngleEvent(-90.0,2.0,1.0);
 		turnState2.addAction(turnPidAction2);
-		turnState2.addEvent(timer4);
+		//turnState2.addEvent(timer4);
+		turnState2.addEvent(angle3);
 
 		AutoState turnState3 = new AutoState("<Turn Right State 3>");
 		TurnPIDAction turnPidAction3 = new TurnPIDAction("<Turn right PID action 3>", 90.0, 0.5, true);
-		TimeEvent timer5 = new TimeEvent(10.0);  // drive forward timer event - allow PID time to settle
+		//TimeEvent timer5 = new TimeEvent(10.0);  // drive forward timer event - allow PID time to settle
+		ClosedLoopAngleEvent angle4 = new ClosedLoopAngleEvent(90.0,2.0,1.0);
 		turnState3.addAction(turnPidAction3);
-		turnState3.addEvent(timer5);
+		//turnState3.addEvent(timer5);
+		turnState3.addEvent(angle4);
 		
 		AutoState turnState4 = new AutoState("<Turn Left State 4>");
 		TurnPIDAction turnPidAction4 = new TurnPIDAction("<Turn left PID action 4>", -90.0, 0.5, true);
-		TimeEvent timer6 = new TimeEvent(10.0);  // drive forward timer event - allow PID time to settle
+		//TimeEvent timer6 = new TimeEvent(10.0);  // drive forward timer event - allow PID time to settle
+		ClosedLoopAngleEvent angle5 = new ClosedLoopAngleEvent(-90.0,2.0,1.0);
 		turnState4.addAction(turnPidAction4);
-		turnState4.addEvent(timer6);
+		//turnState4.addEvent(timer6);
+		turnState4.addEvent(angle5);
 		
 		AutoState turnState5 = new AutoState("<Turn Right State 5>");
 		TurnPIDAction turnPidAction5 = new TurnPIDAction("<Turn right PID action 5>", 90.0, 0.5, true);
-		TimeEvent timer7 = new TimeEvent(10.0);  // drive forward timer event - allow PID time to settle
+		//TimeEvent timer7 = new TimeEvent(10.0);  // drive forward timer event - allow PID time to settle
+		ClosedLoopAngleEvent angle6 = new ClosedLoopAngleEvent(90.0,2.0,1.0);
 		turnState5.addAction(turnPidAction5);
-		turnState5.addEvent(timer7);
+		//turnState5.addEvent(timer7);
+		turnState5.addEvent(angle6);
 		
 		AutoState turnState6 = new AutoState("<Turn Left State 6>");
 		TurnPIDAction turnPidAction6 = new TurnPIDAction("<Turn left PID action 6>", -90.0, 0.5, true);
-		TimeEvent timer8 = new TimeEvent(10.0);  // drive forward timer event - allow PID time to settle
+		//TimeEvent timer8 = new TimeEvent(10.0);  // drive forward timer event - allow PID time to settle
+		ClosedLoopAngleEvent angle7 = new ClosedLoopAngleEvent(-90.0,2.0,1.0);
 		turnState6.addAction(turnPidAction6);
-		turnState6.addEvent(timer8);
+		//turnState6.addEvent(timer8);
+		turnState6.addEvent(angle7);
 
 		AutoState turnState7 = new AutoState("<Turn Right State 7>");
 		TurnPIDAction turnPidAction7 = new TurnPIDAction("<Turn Right PID action 7>", 90.0, 0.5, true);
-		TimeEvent timer9 = new TimeEvent(10.0);  // drive forward timer event - allow PID time to settle
+		//TimeEvent timer9 = new TimeEvent(10.0);  // drive forward timer event - allow PID time to settle
+		ClosedLoopAngleEvent angle8 = new ClosedLoopAngleEvent(90.0,2.0,1.0);
 		turnState7.addAction(turnPidAction7);
-		turnState7.addEvent(timer9);
+		//turnState7.addEvent(timer9);
+		turnState7.addEvent(angle8);
 
 		AutoState turnState8 = new AutoState("<Turn Left State 8>");
 		TurnPIDAction turnPidAction8 = new TurnPIDAction("<Turn left PID action 8>", -90.0, 0.5, true);
-		TimeEvent timer10 = new TimeEvent(10.0);  // drive forward timer event - allow PID time to settle
+		//TimeEvent timer10 = new TimeEvent(10.0);  // drive forward timer event - allow PID time to settle
+		ClosedLoopAngleEvent angle9 = new ClosedLoopAngleEvent(-90.0,2.0,1.0);
 		turnState4.addAction(turnPidAction8);
-		turnState4.addEvent(timer10);
+		//turnState4.addEvent(timer10);
+		turnState4.addEvent(angle9);
 		
 		// connect each event with a state to move to
 		turnState0.associateNextState(turnState1);
@@ -1204,23 +1230,29 @@ public class AutoNetworkBuilder {
 		*/
 		
 		AutoState driveState1 = new AutoState("<Drive Magic State 1>");
-		DriveForwardMagicAction driveForwardMagic = new DriveForwardMagicAction("<Drive Forward Magic Action>", 60.0, 200, 150, true, 0.0);
-		TimeEvent timer2 = new TimeEvent(5.0);  // drive forward timer event
+		DriveForwardMagicAction driveForwardMagic = new DriveForwardMagicAction("<Drive Forward Magic Action>", 60.0, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW, true, 0.0);
+		//TimeEvent timer2 = new TimeEvent(5.0);  // drive forward timer event
+		ClosedLoopPositionEvent pos1 = new ClosedLoopPositionEvent(60.0, 0.5, 1.0);
 		driveState1.addAction(driveForwardMagic);
-		driveState1.addEvent(timer2);
+		//driveState1.addEvent(timer2);
+		driveState1.addEvent(pos1);
 		
 		// turn right 180 degrees.  Do it in two 90 degree turns (for PID)
 		AutoState turnRightState0 = new AutoState("<Turn right State 0>");
 		TurnPIDAction turnRightPidAction0 = new TurnPIDAction("<Turn right PID action 0>", 90.0, 0.3, true);
-		TimeEvent timer3 = new TimeEvent(5.0);  // allow PID time to settle
+		//TimeEvent timer3 = new TimeEvent(5.0);  // allow PID time to settle
+		ClosedLoopAngleEvent angle1 = new ClosedLoopAngleEvent(90.0,2.0,1.0);
 		turnRightState0.addAction(turnRightPidAction0);
-		turnRightState0.addEvent(timer3);
+		//turnRightState0.addEvent(timer3);
+		turnRightState0.addEvent(angle1);
 
 		AutoState turnRightState1 = new AutoState("<Turn right State 1>");
 		TurnPIDAction turnRightPidAction1 = new TurnPIDAction("<Turn right PID action 0>", 90.0, 0.3, true);
-		TimeEvent timer4 = new TimeEvent(5.0);  // allow PID time to settle
+		//TimeEvent timer4 = new TimeEvent(5.0);  // allow PID time to settle
+		ClosedLoopAngleEvent angle2 = new ClosedLoopAngleEvent(90.0,2.0,1.0);
 		turnRightState1.addAction(turnRightPidAction1);
-		turnRightState1.addEvent(timer4);
+		//turnRightState1.addEvent(timer4);
+		turnRightState1.addEvent(angle2);
 		
 		/*
 		AutoState turnRightState = new AutoState("<Turn to 180 deg>");
@@ -1239,23 +1271,29 @@ public class AutoNetworkBuilder {
 		*/
 		
 		AutoState driveState2 = new AutoState("<Drive Magic State 2>");
-		DriveForwardMagicAction driveForwardMagic2 = new DriveForwardMagicAction("<Drive Forward Magic Action>", 60.0, 200, 150, true, 0.0);
-		TimeEvent timer5 = new TimeEvent(5.0);  // drive forward timer event
+		DriveForwardMagicAction driveForwardMagic2 = new DriveForwardMagicAction("<Drive Forward Magic Action>", 60.0, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW, true, 0.0);
+		//TimeEvent timer5 = new TimeEvent(5.0);  // drive forward timer event
+		ClosedLoopPositionEvent pos2 = new ClosedLoopPositionEvent(60.0, 0.5, 1.0);
 		driveState2.addAction(driveForwardMagic2);
-		driveState2.addEvent(timer5);
+		//driveState2.addEvent(timer5);
+		driveState2.addEvent(pos2);
 		
 		// turn left 180 degrees.  Do it in two 90 degree turns (for PID)
 		AutoState turnLeftState0 = new AutoState("<Turn left State 0>");
 		TurnPIDAction turnLeftPidAction0 = new TurnPIDAction("<Turn left PID action 0>", -90.0, 0.3, true);
-		TimeEvent timer6 = new TimeEvent(5.0);  // allow PID time to settle
+		//TimeEvent timer6 = new TimeEvent(5.0);  // allow PID time to settle
+		ClosedLoopAngleEvent angle3 = new ClosedLoopAngleEvent(-90.0,2.0,1.0);
 		turnLeftState0.addAction(turnLeftPidAction0);
-		turnLeftState0.addEvent(timer6);
+		//turnLeftState0.addEvent(timer6);
+		turnLeftState0.addEvent(angle3);
 
 		AutoState turnLeftState1 = new AutoState("<Turn left State 1>");
 		TurnPIDAction turnLeftPidAction1 = new TurnPIDAction("<Turn left PID action 1>", -90.0, 0.3, true);
-		TimeEvent timer7 = new TimeEvent(5.0);  // allow PID time to settle
+		//TimeEvent timer7 = new TimeEvent(5.0);  // allow PID time to settle
+		ClosedLoopAngleEvent angle4 = new ClosedLoopAngleEvent(-90.0,2.0,1.0);
 		turnLeftState1.addAction(turnLeftPidAction1);
-		turnLeftState1.addEvent(timer7);
+		//turnLeftState1.addEvent(timer7);
+		turnLeftState1.addEvent(angle4);
 		
 		/*
 		AutoState turnLeftState = new AutoState("<Turn to 0 deg>");
@@ -1285,12 +1323,6 @@ public class AutoNetworkBuilder {
 				
 		return autoNet;
 	}
-	
-	
-		
-	/*****************************************************************************************************/
-	/**** DEBUG NETWORKS **** Networks below this are used only for debug - disable during competition ***/
-	/*****************************************************************************************************/	
 
 	// **** Lifting Forever Network - Lift up to different levels forever ***** 
 	//

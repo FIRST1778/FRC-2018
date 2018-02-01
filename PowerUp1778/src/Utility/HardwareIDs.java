@@ -40,7 +40,6 @@ public class HardwareIDs {
 	public static final int FLIPPER_DOWN_AXIS = 3;
 	public static final int FLIPPER_UP_BUTTON = 6;
 
-	public static final int CLAMP_TOGGLE_BUTTON = 12;
 	public static final int BRAKE_TOGGLE_BUTTON = 10;
 
 	public static final int LIFT_MOTOR_AXIS = 5;
