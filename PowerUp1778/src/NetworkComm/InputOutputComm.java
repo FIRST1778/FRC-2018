@@ -3,20 +3,26 @@ package NetworkComm;
 //import edu.wpi.first.wpilibj.networktables.NetworkTable;  // deprecated in 2018
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class InputOutputComm {
 	
 	private static boolean initialized = false;
+	private static final String PI_ADDRESS = "10.17.78.10";
+	private static final String PORT = "1181";
 	
 	public static void initialize() {
 		if (initialized)
 			return;
 		
-        //table = NetworkTable.getTable("InputOutput1778/DataTable");    // deprecated in 2018
-		
+		// get default local network table
 		tableInstance = NetworkTableInstance.getDefault();
 		table = tableInstance.getTable("InputOutput1778/DataTable");		
    
+		// put Pi Camera Server data in table (for auto detect by Shuffleboard)
+	    table.getEntry("/CameraPublisher/PiCamera/streams")
+	    .setStringArray(new String[]{"mjpeg:http://" + PI_ADDRESS + ":" + PORT + "/?action=stream"});
+	    
         initialized = true;
 	}
 			
