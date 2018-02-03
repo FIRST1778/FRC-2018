@@ -29,6 +29,7 @@ public class AutoNetworkBuilder {
 	public final static int LIFT_FOREVER = 12;
 	public final static int TURN_FOREVER = 13;
 	public final static int PACE_FOREVER = 14;
+	public final static int TURN_ONCE = 15;
 
 	// closed-loop position cruise velocity and acceleration (used for all closed-loop position control)
 	// units are RPM
@@ -60,9 +61,7 @@ public class AutoNetworkBuilder {
 			initialize();
 		
 		autoNets = new ArrayList<AutoNetwork>();
-			
-		/***** use only when storing the preferences first time *****/
-				
+							
 		// create networks
 		autoNets.add(DO_NOTHING, createDoNothingNetwork());	
 		autoNets.add(DRIVE_FORWARD, createDriveForward());	
@@ -83,6 +82,7 @@ public class AutoNetworkBuilder {
 		autoNets.add(LIFT_FOREVER, createLiftingForeverNetwork());	
 		autoNets.add(TURN_FOREVER, createTurningForeverNetwork());	
 		autoNets.add(PACE_FOREVER, createPacingForeverNetwork());	
+		autoNets.add(TURN_ONCE, createTurningOnceNetwork());	
 
 		return autoNets;
 	}
@@ -1198,6 +1198,37 @@ public class AutoNetworkBuilder {
 		autoNet.addState(turnState6);
 		autoNet.addState(turnState7);
 		autoNet.addState(turnState8);
+				
+		return autoNet;
+	}
+	
+	// **** Turning ONCE Network ***** 
+	// 1) Turn RIGHT 90 degrees once
+	// 2) go to idle and stay there
+	private static AutoNetwork createTurningOnceNetwork() {
+		
+		AutoNetwork autoNet = new AutoNetwork("<Turning ONCE Network>");
+		
+		AutoState turnState1 = new AutoState("<Turn Right State 1>");
+		TurnPIDAction turnPidAction1 = new TurnPIDAction("<Turn right PID action 1>", 90.0, 0.5, true);
+		//TimeEvent timer3 = new TimeEvent(10.0);  // drive forward timer event - allow PID time to settle
+		ClosedLoopAngleEvent angle2 = new ClosedLoopAngleEvent(90.0,2.0,1.0);
+		turnState1.addAction(turnPidAction1);
+		//turnState1.addEvent(timer3);
+		turnState1.addEvent(angle2);
+		
+		AutoState idleState = new AutoState("<Idle State 2>");
+		IdleAction deadEnd = new IdleAction("<Dead End Action>");
+		DriveForwardAction driveForward4 = new DriveForwardAction("<Drive Forward Action 4 -reset>", 0.0, true, 0.0);  // reset gyro 
+		idleState.addAction(deadEnd);
+		idleState.addAction(driveForward4);
+						
+		
+		// connect each event with a state to move to
+		turnState1.associateNextState(idleState);
+						
+		autoNet.addState(turnState1);
+		autoNet.addState(idleState);
 				
 		return autoNet;
 	}
