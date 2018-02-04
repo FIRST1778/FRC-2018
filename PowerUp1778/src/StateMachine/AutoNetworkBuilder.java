@@ -102,9 +102,8 @@ public class AutoNetworkBuilder {
 	}
 
 	// **** MOVE FORWARD Network ***** 
-	// 1) Move camera
-	// 2) drive forward for a number of sec
-	// 3) go back to idle and stay there 
+	// 1) drive forward for a number of sec
+	// 2) go back to idle and stay there 
 	private static AutoNetwork createDriveForward() {
 		
 		AutoNetwork autoNet = new AutoNetwork("<Drive Forward Network>");
@@ -117,11 +116,14 @@ public class AutoNetworkBuilder {
 		driveState.addEvent(timer2);
 		*/
 		
+		double dist_inches = 84.0;
 		AutoState driveState = new AutoState("<Drive State 1>");
-		DriveForwardMagicAction driveForwardMagic = new DriveForwardMagicAction("<Drive Forward Magic Action>", 84.0, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST, true, 0.0);
-		TimeEvent timer2 = new TimeEvent(4.0);  // drive forward timer event
+		DriveForwardMagicAction driveForwardMagic = new DriveForwardMagicAction("<Drive Forward Magic Action>", dist_inches, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST, true, 0.0);
+		//TimeEvent timer2 = new TimeEvent(4.0);  // drive forward timer event
+		ClosedLoopPositionEvent pos1 = new ClosedLoopPositionEvent(dist_inches, 0.5, 1.0);
 		driveState.addAction(driveForwardMagic);
-		driveState.addEvent(timer2);
+		//driveState.addEvent(timer2);
+		driveState.addEvent(pos1);
 		
 		AutoState idleState2 = new AutoState("<Idle State 2>");
 		IdleAction deadEnd = new IdleAction("<Dead End Action>");
@@ -147,35 +149,21 @@ public class AutoNetworkBuilder {
 	private static AutoNetwork createDepositCubeSwitchLeft() {
 		
 		AutoNetwork autoNet = new AutoNetwork("<Deposit Cube Switch (left side) Network>");
-		
-		/*
+				
+		double dist_inches1 = 144.0;
 		AutoState driveState = new AutoState("<Drive State 1>");
-		DriveForwardAction driveForward = new DriveForwardAction("<Drive Forward Action>", 0.3, true, 0.0);
-		TimeEvent timer2 = new TimeEvent(1.29);  // drive forward timer event
-		driveState.addAction(driveForward);
-		driveState.addEvent(timer2);
-		*/
-		
-		AutoState driveState = new AutoState("<Drive State 1>");
-		DriveForwardMagicAction driveForwardMagic = new DriveForwardMagicAction("<Drive Forward Magic Action>", 144.0, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST, true, 0.0);
+		DriveForwardMagicAction driveForwardMagic = new DriveForwardMagicAction("<Drive Forward Magic Action>", dist_inches1, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST, true, 0.0);
 		//TimeEvent timer2 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
-		ClosedLoopPositionEvent pos1 = new ClosedLoopPositionEvent(144.0, 0.5, 1.0);
+		ClosedLoopPositionEvent pos1 = new ClosedLoopPositionEvent(dist_inches1, 0.5, 1.0);
 		driveState.addAction(driveForwardMagic);
 		//driveState.addEvent(timer2);
 		driveState.addEvent(pos1);
-		
-		/*
+				
+		double angle_deg1 = 90.0;
 		AutoState turnRightState = new AutoState("<Turn Right State>");
-		TurnAction turnRightAction = new TurnAction("<Turn right action>", 90.0, 0.3, false);   // don't reset gyro - use absolute heading 60 deg
-		GyroAngleEvent gyroRight = new GyroAngleEvent(90.0, false, GyroAngleEvent.AnglePolarity.kGreaterThan);
-		turnRightState.addAction(turnRightAction);
-		turnRightState.addEvent(gyroRight);
-		*/
-		
-		AutoState turnRightState = new AutoState("<Turn Right State>");
-		TurnPIDAction turnPidAction = new TurnPIDAction("<Turn right PID action>", 90.0, 0.35, true);
+		TurnPIDAction turnPidAction = new TurnPIDAction("<Turn right PID action>", angle_deg1, 0.35, true);
 		//TimeEvent timer3 = new TimeEvent(2.5);  // timer event - allow PID time to settle
-		ClosedLoopAngleEvent angle1 = new ClosedLoopAngleEvent(90.0,2.0,1.0);
+		ClosedLoopAngleEvent angle1 = new ClosedLoopAngleEvent(angle_deg1,5.0,1.0);
 		turnRightState.addAction(turnPidAction);
 		//turnRightState.addEvent(timer3);
 		turnRightState.addEvent(angle1);
@@ -188,14 +176,15 @@ public class AutoNetworkBuilder {
 
 		AutoState liftState = new AutoState("<Lift State 1>");
 		LiftAction liftAction = new LiftAction("<Lift Action>", CubeManagement.SWITCH_LEVEL);
-		TimeEvent timer5b = new TimeEvent(4.0);  // lift timer event
+		TimeEvent timer5b = new TimeEvent(1.0);  // lift timer event
 		liftState.addAction(liftAction);
 		liftState.addEvent(timer5b);
-					
+				
+		double dist_inches2 = 36.0;
 		AutoState driveState2 = new AutoState("<Drive State 2>");
-		DriveForwardMagicAction driveForwardMagic2 = new DriveForwardMagicAction("<Drive Forward Magic Action 2>", 24.0, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW, true, 0.0);
+		DriveForwardMagicAction driveForwardMagic2 = new DriveForwardMagicAction("<Drive Forward Magic Action 2>", dist_inches2, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW, true, 0.0);
 		//TimeEvent timer6 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
-		ClosedLoopPositionEvent pos2 = new ClosedLoopPositionEvent(24.0, 0.5, 1.0);
+		ClosedLoopPositionEvent pos2 = new ClosedLoopPositionEvent(dist_inches2, 0.5, 1.0);
 		driveState2.addAction(driveForwardMagic2);
 		//driveState2.addEvent(timer6);
 		driveState2.addEvent(pos2);
@@ -243,34 +232,20 @@ public class AutoNetworkBuilder {
 		
 		AutoNetwork autoNet = new AutoNetwork("<Deposit Cube Scale (left side) Network>");
 		
-		/*
+		double dist_inches1 = 302.0;
 		AutoState driveState = new AutoState("<Drive State 1>");
-		DriveForwardAction driveForward = new DriveForwardAction("<Drive Forward Action>", 0.3, true, 0.0);
-		TimeEvent timer2 = new TimeEvent(1.29);  // drive forward timer event
-		driveState.addAction(driveForward);
-		driveState.addEvent(timer2);
-		*/
-		
-		AutoState driveState = new AutoState("<Drive State 1>");
-		DriveForwardMagicAction driveForwardMagic = new DriveForwardMagicAction("<Drive Forward Magic Action>", 306.0, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST, true, 0.0);
+		DriveForwardMagicAction driveForwardMagic = new DriveForwardMagicAction("<Drive Forward Magic Action>", dist_inches1, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST, true, 0.0);
 		//TimeEvent timer2 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
-		ClosedLoopPositionEvent pos1 = new ClosedLoopPositionEvent(306.0, 0.5, 1.0);
+		ClosedLoopPositionEvent pos1 = new ClosedLoopPositionEvent(dist_inches1, 0.5, 1.0);
 		driveState.addAction(driveForwardMagic);
 		//driveState.addEvent(timer2);
 		driveState.addEvent(pos1);
 		
-		/*
+		double angle_deg1 = 90.0;
 		AutoState turnRightState = new AutoState("<Turn Right State>");
-		TurnAction turnRightAction = new TurnAction("<Turn right action>", 60.0, 0.3, false);   // don't reset gyro - use absolute heading 60 deg
-		GyroAngleEvent gyroRight = new GyroAngleEvent(60.0, false, GyroAngleEvent.AnglePolarity.kGreaterThan);
-		turnRightState.addAction(turnRightAction);
-		turnRightState.addEvent(gyroRight);
-		*/
-		
-		AutoState turnRightState = new AutoState("<Turn Right State>");
-		TurnPIDAction turnPidAction = new TurnPIDAction("<Turn right PID action>", 90.0, 0.35, true);
+		TurnPIDAction turnPidAction = new TurnPIDAction("<Turn right PID action>", angle_deg1, 0.35, true);
 		//TimeEvent timer3 = new TimeEvent(2.5);  // timer event - allow PID time to settle
-		ClosedLoopAngleEvent angle1 = new ClosedLoopAngleEvent(90.0,2.0,1.0);
+		ClosedLoopAngleEvent angle1 = new ClosedLoopAngleEvent(angle_deg1,2.0,1.0);
 		turnRightState.addAction(turnPidAction);
 		//turnRightState.addEvent(timer3);
 		turnRightState.addEvent(angle1);
@@ -287,10 +262,11 @@ public class AutoNetworkBuilder {
 		liftState.addAction(liftAction);
 		liftState.addEvent(timer5b);
 				
+		double dist_inches2 = 24.0;
 		AutoState driveState2 = new AutoState("<Drive State 2>");
-		DriveForwardMagicAction driveForwardMagic2 = new DriveForwardMagicAction("<Drive Forward Magic Action 2>", 12.0, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW, true, 0.0);
+		DriveForwardMagicAction driveForwardMagic2 = new DriveForwardMagicAction("<Drive Forward Magic Action 2>", dist_inches2, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW, true, 0.0);
 		//TimeEvent timer4 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
-		ClosedLoopPositionEvent pos2 = new ClosedLoopPositionEvent(12.0, 0.5, 1.0);
+		ClosedLoopPositionEvent pos2 = new ClosedLoopPositionEvent(dist_inches2, 0.5, 1.0);
 		driveState2.addAction(driveForwardMagic2);
 		//driveState2.addEvent(timer4);
 		driveState2.addEvent(pos2);
@@ -339,51 +315,39 @@ public class AutoNetworkBuilder {
 	private static AutoNetwork createDepositCubeScaleRightFromLeft() {
 		
 		AutoNetwork autoNet = new AutoNetwork("<Deposit Cube Scale (right from left side) Network>");
-		
-		/*
+				
+		double dist_inches1 = 200.0;
 		AutoState driveState = new AutoState("<Drive State 1>");
-		DriveForwardAction driveForward = new DriveForwardAction("<Drive Forward Action>", 0.3, true, 0.0);
-		TimeEvent timer2 = new TimeEvent(1.29);  // drive forward timer event
-		driveState.addAction(driveForward);
-		driveState.addEvent(timer2);
-		*/
-		
-		AutoState driveState = new AutoState("<Drive State 1>");
-		DriveForwardMagicAction driveForwardMagic = new DriveForwardMagicAction("<Drive Forward Magic Action>", 216.0, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST, true, 0.0);
+		DriveForwardMagicAction driveForwardMagic = new DriveForwardMagicAction("<Drive Forward Magic Action>", dist_inches1, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST, true, 0.0);
 		//TimeEvent timer2 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
-		ClosedLoopPositionEvent pos1 = new ClosedLoopPositionEvent(216.0, 0.5, 1.0);
+		ClosedLoopPositionEvent pos1 = new ClosedLoopPositionEvent(dist_inches1, 0.5, 1.0);
 		driveState.addAction(driveForwardMagic);
 		//driveState.addEvent(timer2);
 		driveState.addEvent(pos1);
 		
-		/*
+		double angle_deg1 = 90.0;
 		AutoState turnRightState = new AutoState("<Turn Right State>");
-		TurnAction turnRightAction = new TurnAction("<Turn right action>", 60.0, 0.3, false);   // don't reset gyro - use absolute heading 60 deg
-		GyroAngleEvent gyroRight = new GyroAngleEvent(60.0, false, GyroAngleEvent.AnglePolarity.kGreaterThan);
-		turnRightState.addAction(turnRightAction);
-		turnRightState.addEvent(gyroRight);
-		*/
-		
-		AutoState turnRightState = new AutoState("<Turn Right State>");
-		TurnPIDAction turnPidAction = new TurnPIDAction("<Turn right PID action>", 90.0, 0.35, true);
+		TurnPIDAction turnPidAction = new TurnPIDAction("<Turn right PID action>", angle_deg1, 0.35, true);
 		//TimeEvent timer3 = new TimeEvent(2.5);  // timer event - allow PID time to settle
-		ClosedLoopAngleEvent angle1 = new ClosedLoopAngleEvent(90.0,2.0,1.0);
+		ClosedLoopAngleEvent angle1 = new ClosedLoopAngleEvent(angle_deg1,5.0,1.0);
 		turnRightState.addAction(turnPidAction);
 		//turnRightState.addEvent(timer3);
 		turnRightState.addEvent(angle1);
 
+		double dist_inches2 = 256.0;
 		AutoState driveState2 = new AutoState("<Drive State 2>");
-		DriveForwardMagicAction driveForwardMagic2 = new DriveForwardMagicAction("<Drive Forward Magic Action>", 240.0, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST, true, 0.0);
+		DriveForwardMagicAction driveForwardMagic2 = new DriveForwardMagicAction("<Drive Forward Magic Action>", dist_inches2, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST, true, 0.0);
 		//TimeEvent timer4 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
-		ClosedLoopPositionEvent pos2 = new ClosedLoopPositionEvent(240.0, 0.5, 1.0);
+		ClosedLoopPositionEvent pos2 = new ClosedLoopPositionEvent(dist_inches2, 0.5, 1.0);
 		driveState2.addAction(driveForwardMagic2);
 		//driveState.addEvent(timer4);
 		driveState2.addEvent(pos2);
 		
+		double angle_deg2 = -135.0;
 		AutoState turnLeftState = new AutoState("<Turn Left State>");
-		TurnPIDAction turnPidAction2 = new TurnPIDAction("<Turn left PID action 2>", -135.0, 0.35, true);
+		TurnPIDAction turnPidAction2 = new TurnPIDAction("<Turn left PID action 2>", angle_deg2, 0.35, true);
 		//TimeEvent timer5 = new TimeEvent(2.5);  // timer event - allow PID time to settle
-		ClosedLoopAngleEvent angle2 = new ClosedLoopAngleEvent(-135.0,2.0,1.0);
+		ClosedLoopAngleEvent angle2 = new ClosedLoopAngleEvent(angle_deg2,5.0,1.0);
 		turnLeftState.addAction(turnPidAction2);
 		//turnLeftState.addEvent(timer5);
 		turnLeftState.addEvent(angle2);
@@ -400,10 +364,11 @@ public class AutoNetworkBuilder {
 		liftState.addAction(liftAction);
 		liftState.addEvent(timer7);
 				
+		double dist_inches3 = 36.0;
 		AutoState driveState3 = new AutoState("<Drive State 3>");
-		DriveForwardMagicAction driveForwardMagic3 = new DriveForwardMagicAction("<Drive Forward Magic Action 3>", 12.0, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW, true, 0.0);
+		DriveForwardMagicAction driveForwardMagic3 = new DriveForwardMagicAction("<Drive Forward Magic Action 3>", dist_inches3, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW, true, 0.0);
 		//TimeEvent timer8 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
-		ClosedLoopPositionEvent pos3 = new ClosedLoopPositionEvent(12.0, 0.5, 1.0);
+		ClosedLoopPositionEvent pos3 = new ClosedLoopPositionEvent(dist_inches3, 0.5, 1.0);
 		driveState3.addAction(driveForwardMagic3);
 		//driveState3.addEvent(timer8);
 		driveState3.addEvent(pos3);
@@ -454,42 +419,29 @@ public class AutoNetworkBuilder {
 		
 		AutoNetwork autoNet = new AutoNetwork("<Move to Scale Right (left side) Network>");
 		
-		/*
+		double dist_inches1 = 200.0;
 		AutoState driveState = new AutoState("<Drive State 1>");
-		DriveForwardAction driveForward = new DriveForwardAction("<Drive Forward Action>", 0.3, true, 0.0);
-		TimeEvent timer2 = new TimeEvent(1.29);  // drive forward timer event
-		driveState.addAction(driveForward);
-		driveState.addEvent(timer2);
-		*/
-		
-		AutoState driveState = new AutoState("<Drive State 1>");
-		DriveForwardMagicAction driveForwardMagic = new DriveForwardMagicAction("<Drive Forward Magic Action>", 216.0, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST, true, 0.0);
+		DriveForwardMagicAction driveForwardMagic = new DriveForwardMagicAction("<Drive Forward Magic Action>", dist_inches1, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST, true, 0.0);
 		//TimeEvent timer2 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
-		ClosedLoopPositionEvent pos1 = new ClosedLoopPositionEvent(216.0, 0.5, 1.0);
+		ClosedLoopPositionEvent pos1 = new ClosedLoopPositionEvent(dist_inches1, 0.5, 1.0);
 		driveState.addAction(driveForwardMagic);
 		//driveState.addEvent(timer2);
 		driveState.addEvent(pos1);
 		
-		/*
+		double angle_deg1 = 90.0;
 		AutoState turnRightState = new AutoState("<Turn Right State>");
-		TurnAction turnRightAction = new TurnAction("<Turn right action>", 60.0, 0.3, false);   // don't reset gyro - use absolute heading 60 deg
-		GyroAngleEvent gyroRight = new GyroAngleEvent(60.0, false, GyroAngleEvent.AnglePolarity.kGreaterThan);
-		turnRightState.addAction(turnRightAction);
-		turnRightState.addEvent(gyroRight);
-		*/
-		
-		AutoState turnRightState = new AutoState("<Turn Right State>");
-		TurnPIDAction turnPidAction = new TurnPIDAction("<Turn right PID action>", 90.0, 0.35, true);
+		TurnPIDAction turnPidAction = new TurnPIDAction("<Turn right PID action>", angle_deg1, 0.35, true);
 		//TimeEvent timer3 = new TimeEvent(2.5);  // timer event - allow PID time to settle
-		ClosedLoopAngleEvent angle1 = new ClosedLoopAngleEvent(90.0,2.0,1.0);
+		ClosedLoopAngleEvent angle1 = new ClosedLoopAngleEvent(angle_deg1,5.0,1.0);
 		turnRightState.addAction(turnPidAction);
 		//turnRightState.addEvent(timer3);
 		turnRightState.addEvent(angle1);
 				
+		double dist_inches2 = 192.0;
 		AutoState driveState2 = new AutoState("<Drive State 2>");
-		DriveForwardMagicAction driveForwardMagic2 = new DriveForwardMagicAction("<Drive Forward Magic Action 2>", 216.0, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST, true, 0.0);
+		DriveForwardMagicAction driveForwardMagic2 = new DriveForwardMagicAction("<Drive Forward Magic Action 2>", dist_inches2, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST, true, 0.0);
 		//TimeEvent timer4 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
-		ClosedLoopPositionEvent pos2 = new ClosedLoopPositionEvent(216.0, 0.5, 1.0);
+		ClosedLoopPositionEvent pos2 = new ClosedLoopPositionEvent(dist_inches2, 0.5, 1.0);
 		driveState2.addAction(driveForwardMagic2);
 		//driveState2.addEvent(timer4);
 		driveState2.addEvent(pos2);
@@ -502,7 +454,7 @@ public class AutoNetworkBuilder {
 
 		AutoState liftState = new AutoState("<Lift State 1>");
 		LiftAction liftAction = new LiftAction("<Lift Action>", CubeManagement.SCALE_LEVEL);
-		TimeEvent timer6b = new TimeEvent(4.0);  // lift timer event
+		TimeEvent timer6b = new TimeEvent(1.0);  // lift timer event
 		liftState.addAction(liftAction);
 		liftState.addEvent(timer6b);
 
@@ -543,50 +495,38 @@ public class AutoNetworkBuilder {
 		
 		AutoNetwork autoNet = new AutoNetwork("<Deposit Cube Switch (center left) Network>");
 		
-		/*
+		double dist_inches1 = 60.0;
 		AutoState driveState = new AutoState("<Drive State 1>");
-		DriveForwardAction driveForward = new DriveForwardAction("<Drive Forward Action>", 0.3, true, 0.0);
-		TimeEvent timer2 = new TimeEvent(1.29);  // drive forward timer event
-		driveState.addAction(driveForward);
-		driveState.addEvent(timer2);
-		*/
-		
-		AutoState driveState = new AutoState("<Drive State 1>");
-		DriveForwardMagicAction driveForwardMagic = new DriveForwardMagicAction("<Drive Forward Magic Action>", 72.0, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST, true, 0.0);
+		DriveForwardMagicAction driveForwardMagic = new DriveForwardMagicAction("<Drive Forward Magic Action>", dist_inches1, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST, true, 0.0);
 		//TimeEvent timer2 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
-		ClosedLoopPositionEvent pos1 = new ClosedLoopPositionEvent(72.0, 0.5, 1.0);
+		ClosedLoopPositionEvent pos1 = new ClosedLoopPositionEvent(dist_inches1, 0.5, 1.0);
 		driveState.addAction(driveForwardMagic);
 		//driveState.addEvent(timer2);
 		driveState.addEvent(pos1);
-		
-		/*
-		AutoState turnRightState = new AutoState("<Turn Right State>");
-		TurnAction turnRightAction = new TurnAction("<Turn right action>", 60.0, 0.3, false);   // don't reset gyro - use absolute heading 60 deg
-		GyroAngleEvent gyroRight = new GyroAngleEvent(60.0, false, GyroAngleEvent.AnglePolarity.kGreaterThan);
-		turnRightState.addAction(turnRightAction);
-		turnRightState.addEvent(gyroRight);
-		*/
-		
+				
+		double angle_deg1 = -90.0;
 		AutoState turnLeftState = new AutoState("<Turn Left State>");
-		TurnPIDAction turnPidAction1 = new TurnPIDAction("<Turn Left PID action>", -90.0, 0.35, true);
+		TurnPIDAction turnPidAction1 = new TurnPIDAction("<Turn Left PID action>", angle_deg1, 0.35, true);
 		//TimeEvent timer3 = new TimeEvent(2.5);  // timer event - allow PID time to settle
-		ClosedLoopAngleEvent angle1 = new ClosedLoopAngleEvent(-90.0,2.0,1.0);
+		ClosedLoopAngleEvent angle1 = new ClosedLoopAngleEvent(angle_deg1,5.0,1.0);
 		turnLeftState.addAction(turnPidAction1);
 		//turnRightState.addEvent(timer3);
 		turnLeftState.addEvent(angle1);
 				
+		double dist_inches2 = 66.0;
 		AutoState driveState2 = new AutoState("<Drive State 2>");
-		DriveForwardMagicAction driveForwardMagic2 = new DriveForwardMagicAction("<Drive Forward Magic Action 2>", 72.0, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST, true, 0.0);
+		DriveForwardMagicAction driveForwardMagic2 = new DriveForwardMagicAction("<Drive Forward Magic Action 2>", dist_inches2, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST, true, 0.0);
 		//TimeEvent timer4 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
-		ClosedLoopPositionEvent pos2 = new ClosedLoopPositionEvent(72.0, 0.5, 1.0);
+		ClosedLoopPositionEvent pos2 = new ClosedLoopPositionEvent(dist_inches2, 0.5, 1.0);
 		driveState2.addAction(driveForwardMagic2);
 		//driveState2.addEvent(timer4);
 		driveState2.addEvent(pos2);
 
+		double angle_deg2 = 90.0;
 		AutoState turnRightState = new AutoState("<Turn Right State>");
-		TurnPIDAction turnPidAction2 = new TurnPIDAction("<Turn Right PID action>", 90.0, 0.35, true);
+		TurnPIDAction turnPidAction2 = new TurnPIDAction("<Turn Right PID action>", angle_deg2, 0.35, true);
 		//TimeEvent timer5 = new TimeEvent(2.5);  // timer event - allow PID time to settle
-		ClosedLoopAngleEvent angle2 = new ClosedLoopAngleEvent(90.0,2.0,1.0);
+		ClosedLoopAngleEvent angle2 = new ClosedLoopAngleEvent(angle_deg2,5.0,1.0);
 		turnRightState.addAction(turnPidAction2);
 		//turnRightState.addEvent(timer5);
 		turnRightState.addEvent(angle2);
@@ -599,14 +539,15 @@ public class AutoNetworkBuilder {
 
 		AutoState liftState = new AutoState("<Lift State 1>");
 		LiftAction liftAction = new LiftAction("<Lift Action>", CubeManagement.SWITCH_LEVEL);
-		TimeEvent timer7b = new TimeEvent(4.0);  // lift timer event
+		TimeEvent timer7b = new TimeEvent(1.0);  // lift timer event
 		liftState.addAction(liftAction);
 		liftState.addEvent(timer7b);
 
+		double dist_inches3 = 38.0;
 		AutoState driveState3 = new AutoState("<Drive State 3>");
-		DriveForwardMagicAction driveForwardMagic3 = new DriveForwardMagicAction("<Drive Forward Magic Action 3>", 36.0, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW, true, 0.0);
+		DriveForwardMagicAction driveForwardMagic3 = new DriveForwardMagicAction("<Drive Forward Magic Action 3>", dist_inches3, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW, true, 0.0);
 		//TimeEvent timer8 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
-		ClosedLoopPositionEvent pos3 = new ClosedLoopPositionEvent(36.0, 0.5, 1.0);
+		ClosedLoopPositionEvent pos3 = new ClosedLoopPositionEvent(dist_inches3, 0.5, 1.0);
 		driveState3.addAction(driveForwardMagic3);
 		//driveState3.addEvent(timer8);
 		driveState3.addEvent(pos3);
@@ -660,34 +601,38 @@ public class AutoNetworkBuilder {
 		
 		AutoNetwork autoNet = new AutoNetwork("<Deposit Cube Switch (center right) Network>");
 		
+		double dist_inches1 = 60.0;
 		AutoState driveState = new AutoState("<Drive State 1>");
-		DriveForwardMagicAction driveForwardMagic = new DriveForwardMagicAction("<Drive Forward Magic Action>", 72.0, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST, true, 0.0);
+		DriveForwardMagicAction driveForwardMagic = new DriveForwardMagicAction("<Drive Forward Magic Action>", dist_inches1, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST, true, 0.0);
 		//TimeEvent timer2 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
-		ClosedLoopPositionEvent pos1 = new ClosedLoopPositionEvent(72.0, 0.5, 1.0);
+		ClosedLoopPositionEvent pos1 = new ClosedLoopPositionEvent(dist_inches1, 0.5, 1.0);
 		driveState.addAction(driveForwardMagic);
 		//driveState.addEvent(timer2);
 		driveState.addEvent(pos1);
 				
+		double angle_deg1 = 90.0;
 		AutoState turnRightState = new AutoState("<Turn Right State>");
-		TurnPIDAction turnPidAction = new TurnPIDAction("<Turn right PID action>", 90.0, 0.35, true);
+		TurnPIDAction turnPidAction = new TurnPIDAction("<Turn right PID action>", angle_deg1, 0.35, true);
 		//TimeEvent timer3 = new TimeEvent(2.5);  // timer event - allow PID time to settle
-		ClosedLoopAngleEvent angle1 = new ClosedLoopAngleEvent(90.0,2.0,1.0);
+		ClosedLoopAngleEvent angle1 = new ClosedLoopAngleEvent(angle_deg1,5.0,1.0);
 		turnRightState.addAction(turnPidAction);
 		//turnRightState.addEvent(timer3);
 		turnRightState.addEvent(angle1);
 		
+		double dist_inches2 = 42.0;
 		AutoState driveState2 = new AutoState("<Drive State 2>");
-		DriveForwardMagicAction driveForwardMagic2 = new DriveForwardMagicAction("<Drive Forward Magic Action 2>", 60.0, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST, true, 0.0);
+		DriveForwardMagicAction driveForwardMagic2 = new DriveForwardMagicAction("<Drive Forward Magic Action 2>", dist_inches2, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST, true, 0.0);
 		//TimeEvent timer4 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
-		ClosedLoopPositionEvent pos2 = new ClosedLoopPositionEvent(60.0, 0.5, 1.0);
+		ClosedLoopPositionEvent pos2 = new ClosedLoopPositionEvent(dist_inches2, 0.5, 1.0);
 		driveState2.addAction(driveForwardMagic2);
 		//driveState2.addEvent(timer4);
 		driveState2.addEvent(pos2);
 		
+		double angle_deg2 = -90.0;
 		AutoState turnLeftState = new AutoState("<Turn Left State>");
-		TurnPIDAction turnPidAction2 = new TurnPIDAction("<Turn left PID action>", -90.0, 0.35, true);
+		TurnPIDAction turnPidAction2 = new TurnPIDAction("<Turn left PID action>", angle_deg2, 0.35, true);
 		//TimeEvent timer5 = new TimeEvent(2.5);  // timer event - allow PID time to settle
-		ClosedLoopAngleEvent angle2 = new ClosedLoopAngleEvent(-90.0,2.0,1.0);
+		ClosedLoopAngleEvent angle2 = new ClosedLoopAngleEvent(angle_deg2,5.0,1.0);
 		turnLeftState.addAction(turnPidAction2);
 		//turnLeftState.addEvent(timer5);
 		turnLeftState.addEvent(angle2);
@@ -700,14 +645,15 @@ public class AutoNetworkBuilder {
 
 		AutoState liftState = new AutoState("<Lift State 1>");
 		LiftAction liftAction = new LiftAction("<Lift Action>", CubeManagement.SWITCH_LEVEL);
-		TimeEvent timer7b = new TimeEvent(4.0);  // lift timer event
+		TimeEvent timer7b = new TimeEvent(1.0);  // lift timer event
 		liftState.addAction(liftAction);
 		liftState.addEvent(timer7b);
 
+		double dist_inches3 = 38.0;
 		AutoState driveState3 = new AutoState("<Drive State 3>");
-		DriveForwardMagicAction driveForwardMagic3 = new DriveForwardMagicAction("<Drive Forward Magic Action 3>", 36.0, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW, true, 0.0);
+		DriveForwardMagicAction driveForwardMagic3 = new DriveForwardMagicAction("<Drive Forward Magic Action 3>", dist_inches3, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW, true, 0.0);
 		//TimeEvent timer8 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
-		ClosedLoopPositionEvent pos3 = new ClosedLoopPositionEvent(36.0, 0.5, 1.0);
+		ClosedLoopPositionEvent pos3 = new ClosedLoopPositionEvent(dist_inches3, 0.5, 1.0);
 		driveState3.addAction(driveForwardMagic3);
 		//driveState3.addEvent(timer8);
 		driveState3.addEvent(pos3);
@@ -750,7 +696,7 @@ public class AutoNetworkBuilder {
 	
 	// **** DEPOSIT CUBE SWITCH RIGHT SIDE Network ***** 
 	// 1) drive forward for a number of sec
-	// 2) Turn RIGHT a number of degrees
+	// 2) Turn LEFT a number of degrees
 	// 3) flipper down
 	// 4) raise lift
 	// 5) drive forward
@@ -760,18 +706,20 @@ public class AutoNetworkBuilder {
 		
 		AutoNetwork autoNet = new AutoNetwork("<Deposit Cube Switch (Right Side) Network>");
 				
+		double dist_inches1 = 144.0;
 		AutoState driveState = new AutoState("<Drive State 1>");
-		DriveForwardMagicAction driveForwardMagic = new DriveForwardMagicAction("<Drive Forward Magic Action>", 144.0, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST, true, 0.0);
+		DriveForwardMagicAction driveForwardMagic = new DriveForwardMagicAction("<Drive Forward Magic Action>", dist_inches1, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST, true, 0.0);
 		//TimeEvent timer2 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
-		ClosedLoopPositionEvent pos1 = new ClosedLoopPositionEvent(144.0, 0.5, 1.0);
+		ClosedLoopPositionEvent pos1 = new ClosedLoopPositionEvent(dist_inches1, 0.5, 1.0);
 		driveState.addAction(driveForwardMagic);
 		//driveState.addEvent(timer2);
 		driveState.addEvent(pos1);
 		
+		double angle_deg1 = -90.0;
 		AutoState turnLeftState = new AutoState("<Turn Left State>");
-		TurnPIDAction turnPidAction = new TurnPIDAction("<Turn left PID action>", -90.0, 0.35, true);
+		TurnPIDAction turnPidAction = new TurnPIDAction("<Turn left PID action>", angle_deg1, 0.35, true);
 		//TimeEvent timer3 = new TimeEvent(2.5);  // timer event - allow PID time to settle
-		ClosedLoopAngleEvent angle1 = new ClosedLoopAngleEvent(-90.0,2.0,1.0);
+		ClosedLoopAngleEvent angle1 = new ClosedLoopAngleEvent(angle_deg1,5.0,1.0);
 		turnLeftState.addAction(turnPidAction);
 		//turnLeftState.addEvent(timer3);
 		turnLeftState.addEvent(angle1);
@@ -784,14 +732,15 @@ public class AutoNetworkBuilder {
 
 		AutoState liftState = new AutoState("<Lift State 1>");
 		LiftAction liftAction = new LiftAction("<Lift Action>", CubeManagement.SWITCH_LEVEL);
-		TimeEvent timer5b = new TimeEvent(4.0);  // lift timer event
+		TimeEvent timer5b = new TimeEvent(1.0);  // lift timer event
 		liftState.addAction(liftAction);
 		liftState.addEvent(timer5b);
 
+		double dist_inches2 = 36.0;
 		AutoState driveState2 = new AutoState("<Drive State 2>");
-		DriveForwardMagicAction driveForwardMagic2 = new DriveForwardMagicAction("<Drive Forward Magic Action 2>", 24.0, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW, true, 0.0);
+		DriveForwardMagicAction driveForwardMagic2 = new DriveForwardMagicAction("<Drive Forward Magic Action 2>", dist_inches2, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW, true, 0.0);
 		//TimeEvent timer6 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
-		ClosedLoopPositionEvent pos2 = new ClosedLoopPositionEvent(24.0, 0.5, 1.0);
+		ClosedLoopPositionEvent pos2 = new ClosedLoopPositionEvent(dist_inches2, 0.5, 1.0);
 		driveState2.addAction(driveForwardMagic2);
 		//driveState2.addEvent(timer6);
 		driveState2.addEvent(pos2);
@@ -839,18 +788,20 @@ public class AutoNetworkBuilder {
 		
 		AutoNetwork autoNet = new AutoNetwork("<Deposit Cube Scale (Right Side) Network>");
 						
+		double dist_inches1 = 302.0;
 		AutoState driveState = new AutoState("<Drive State 1>");
-		DriveForwardMagicAction driveForwardMagic = new DriveForwardMagicAction("<Drive Forward Magic Action>", 306.0, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST, true, 0.0);
+		DriveForwardMagicAction driveForwardMagic = new DriveForwardMagicAction("<Drive Forward Magic Action>", dist_inches1, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST, true, 0.0);
 		//TimeEvent timer2 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
-		ClosedLoopPositionEvent pos1 = new ClosedLoopPositionEvent(306.0, 0.5, 1.0);
+		ClosedLoopPositionEvent pos1 = new ClosedLoopPositionEvent(dist_inches1, 0.5, 1.0);
 		driveState.addAction(driveForwardMagic);
 		//driveState.addEvent(timer2);
 		driveState.addEvent(pos1);
 		
+		double angle_deg1 = -90.0;
 		AutoState turnLeftState = new AutoState("<Turn Left State>");
-		TurnPIDAction turnPidAction = new TurnPIDAction("<Turn left PID action>", -90.0, 0.35, true);
+		TurnPIDAction turnPidAction = new TurnPIDAction("<Turn left PID action>", angle_deg1, 0.35, true);
 		//TimeEvent timer3 = new TimeEvent(2.5);  // timer event - allow PID time to settle
-		ClosedLoopAngleEvent angle1 = new ClosedLoopAngleEvent(-90.0,2.0,1.0);
+		ClosedLoopAngleEvent angle1 = new ClosedLoopAngleEvent(angle_deg1,5.0,1.0);
 		turnLeftState.addAction(turnPidAction);
 		//turnLeftState.addEvent(timer3);
 		turnLeftState.addEvent(angle1);
@@ -863,14 +814,15 @@ public class AutoNetworkBuilder {
 
 		AutoState liftState = new AutoState("<Lift State 1>");
 		LiftAction liftAction = new LiftAction("<Lift Action>", CubeManagement.SCALE_LEVEL);
-		TimeEvent timer5b = new TimeEvent(4.0);  // lift timer event
+		TimeEvent timer5b = new TimeEvent(1.0);  // lift timer event
 		liftState.addAction(liftAction);
 		liftState.addEvent(timer5b);
 
+		double dist_inches2 = 24.0;
 		AutoState driveState2 = new AutoState("<Drive State 2>");
-		DriveForwardMagicAction driveForwardMagic2 = new DriveForwardMagicAction("<Drive Forward Magic Action 2>", 12.0, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW, true, 0.0);
+		DriveForwardMagicAction driveForwardMagic2 = new DriveForwardMagicAction("<Drive Forward Magic Action 2>", dist_inches2, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW, true, 0.0);
 		//TimeEvent timer6 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
-		ClosedLoopPositionEvent pos2 = new ClosedLoopPositionEvent(12.0, 0.5, 1.0);
+		ClosedLoopPositionEvent pos2 = new ClosedLoopPositionEvent(dist_inches2, 0.5, 1.0);
 		driveState2.addAction(driveForwardMagic2);
 		//driveState2.addEvent(timer6);
 		driveState2.addEvent(pos2);
@@ -920,50 +872,38 @@ public class AutoNetworkBuilder {
 		
 		AutoNetwork autoNet = new AutoNetwork("<Deposit Cube Scale (left from right side) Network>");
 		
-		/*
+		double dist_inches1 = 200.0;
 		AutoState driveState = new AutoState("<Drive State 1>");
-		DriveForwardAction driveForward = new DriveForwardAction("<Drive Forward Action>", 0.3, true, 0.0);
-		TimeEvent timer2 = new TimeEvent(1.29);  // drive forward timer event
-		driveState.addAction(driveForward);
-		driveState.addEvent(timer2);
-		*/
-		
-		AutoState driveState = new AutoState("<Drive State 1>");
-		DriveForwardMagicAction driveForwardMagic = new DriveForwardMagicAction("<Drive Forward Magic Action>", 216.0, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST, true, 0.0);
+		DriveForwardMagicAction driveForwardMagic = new DriveForwardMagicAction("<Drive Forward Magic Action>", dist_inches1, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST, true, 0.0);
 		//TimeEvent timer2 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
-		ClosedLoopPositionEvent pos1 = new ClosedLoopPositionEvent(216.0, 0.5, 1.0);
+		ClosedLoopPositionEvent pos1 = new ClosedLoopPositionEvent(dist_inches1, 0.5, 1.0);
 		driveState.addAction(driveForwardMagic);
 		//driveState.addEvent(timer2);
 		driveState.addEvent(pos1);
 		
-		/*
-		AutoState turnRightState = new AutoState("<Turn Right State>");
-		TurnAction turnRightAction = new TurnAction("<Turn right action>", 60.0, 0.3, false);   // don't reset gyro - use absolute heading 60 deg
-		GyroAngleEvent gyroRight = new GyroAngleEvent(60.0, false, GyroAngleEvent.AnglePolarity.kGreaterThan);
-		turnRightState.addAction(turnRightAction);
-		turnRightState.addEvent(gyroRight);
-		*/
-		
+		double angle_deg1 = -90.0;
 		AutoState turnLeftState = new AutoState("<Turn Left State>");
-		TurnPIDAction turnPidAction = new TurnPIDAction("<Turn left PID action>", -90.0, 0.35, true);
+		TurnPIDAction turnPidAction = new TurnPIDAction("<Turn left PID action>", angle_deg1, 0.35, true);
 		//TimeEvent timer3 = new TimeEvent(2.5);  // timer event - allow PID time to settle
-		ClosedLoopAngleEvent angle1 = new ClosedLoopAngleEvent(-90.0,2.0,1.0);
+		ClosedLoopAngleEvent angle1 = new ClosedLoopAngleEvent(angle_deg1,5.0,1.0);
 		turnLeftState.addAction(turnPidAction);
 		//turnLeftState.addEvent(timer3);
 		turnLeftState.addEvent(angle1);
 
+		double dist_inches2 = 256.0;
 		AutoState driveState2 = new AutoState("<Drive State 2>");
-		DriveForwardMagicAction driveForwardMagic2 = new DriveForwardMagicAction("<Drive Forward Magic Action>", 240.0, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST, true, 0.0);
+		DriveForwardMagicAction driveForwardMagic2 = new DriveForwardMagicAction("<Drive Forward Magic Action>", dist_inches2, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST, true, 0.0);
 		//TimeEvent timer4 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
-		ClosedLoopPositionEvent pos2 = new ClosedLoopPositionEvent(240.0, 0.5, 1.0);
+		ClosedLoopPositionEvent pos2 = new ClosedLoopPositionEvent(dist_inches2, 0.5, 1.0);
 		driveState2.addAction(driveForwardMagic2);
 		//driveState.addEvent(timer4);
 		driveState2.addEvent(pos2);
 		
+		double angle_deg2 = 135.0;
 		AutoState turnRightState = new AutoState("<Turn Right State>");
-		TurnPIDAction turnPidAction2 = new TurnPIDAction("<Turn right PID action 2>", 135.0, 0.35, true);
+		TurnPIDAction turnPidAction2 = new TurnPIDAction("<Turn right PID action 2>", angle_deg2, 0.35, true);
 		//TimeEvent timer5 = new TimeEvent(2.5);  // timer event - allow PID time to settle
-		ClosedLoopAngleEvent angle2 = new ClosedLoopAngleEvent(135.0,2.0,1.0);
+		ClosedLoopAngleEvent angle2 = new ClosedLoopAngleEvent(angle_deg2,5.0,1.0);
 		turnRightState.addAction(turnPidAction2);
 		//turnRightState.addEvent(timer5);
 		turnRightState.addEvent(angle2);
@@ -976,14 +916,15 @@ public class AutoNetworkBuilder {
 
 		AutoState liftState = new AutoState("<Lift State 1>");
 		LiftAction liftAction = new LiftAction("<Lift Action>", CubeManagement.SCALE_LEVEL);
-		TimeEvent timer7 = new TimeEvent(3.0);  // lift timer event
+		TimeEvent timer7 = new TimeEvent(1.0);  // lift timer event
 		liftState.addAction(liftAction);
 		liftState.addEvent(timer7);
 				
+		double dist_inches3 = 36.0;
 		AutoState driveState3 = new AutoState("<Drive State 3>");
-		DriveForwardMagicAction driveForwardMagic3 = new DriveForwardMagicAction("<Drive Forward Magic Action 3>", 12.0, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW, true, 0.0);
+		DriveForwardMagicAction driveForwardMagic3 = new DriveForwardMagicAction("<Drive Forward Magic Action 3>", dist_inches3, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW, true, 0.0);
 		//TimeEvent timer8 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
-		ClosedLoopPositionEvent pos3 = new ClosedLoopPositionEvent(12.0, 0.5, 1.0);
+		ClosedLoopPositionEvent pos3 = new ClosedLoopPositionEvent(dist_inches3, 0.5, 1.0);
 		driveState3.addAction(driveForwardMagic3);
 		//driveState3.addEvent(timer8);
 		driveState3.addEvent(pos3);
@@ -1034,26 +975,29 @@ public class AutoNetworkBuilder {
 		
 		AutoNetwork autoNet = new AutoNetwork("<Move to Scale Left (Right Side) Network>");
 						
+		double dist_inches1 = 200.0;
 		AutoState driveState = new AutoState("<Drive State 1>");
-		DriveForwardMagicAction driveForwardMagic = new DriveForwardMagicAction("<Drive Forward Magic Action>", 216.0, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST, true, 0.0);
+		DriveForwardMagicAction driveForwardMagic = new DriveForwardMagicAction("<Drive Forward Magic Action>", dist_inches1, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST, true, 0.0);
 		//TimeEvent timer2 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
-		ClosedLoopPositionEvent pos1 = new ClosedLoopPositionEvent(216.0, 0.5, 1.0);
+		ClosedLoopPositionEvent pos1 = new ClosedLoopPositionEvent(dist_inches1, 0.5, 1.0);
 		driveState.addAction(driveForwardMagic);
 		//driveState.addEvent(timer2);
 		driveState.addEvent(pos1);
 				
+		double angle_deg1 = -90.0;
 		AutoState turnLeftState = new AutoState("<Turn Left State>");
-		TurnPIDAction turnPidAction = new TurnPIDAction("<Turn left PID action>", -90.0, 0.35, true);
+		TurnPIDAction turnPidAction = new TurnPIDAction("<Turn left PID action>", angle_deg1, 0.35, true);
 		//TimeEvent timer3 = new TimeEvent(2.5);  // timer event - allow PID time to settle
-		ClosedLoopAngleEvent angle1 = new ClosedLoopAngleEvent(-90.0,2.0,1.0);
+		ClosedLoopAngleEvent angle1 = new ClosedLoopAngleEvent(angle_deg1,5.0,1.0);
 		turnLeftState.addAction(turnPidAction);
 		//turnLeftState.addEvent(timer3);
 		turnLeftState.addEvent(angle1);
 		
+		double dist_inches2 = 192.0;
 		AutoState driveState2 = new AutoState("<Drive State 2>");
-		DriveForwardMagicAction driveForwardMagic2 = new DriveForwardMagicAction("<Drive Forward Magic Action 2>", 216.0, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST, true, 0.0);
+		DriveForwardMagicAction driveForwardMagic2 = new DriveForwardMagicAction("<Drive Forward Magic Action 2>", dist_inches2, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST, true, 0.0);
 		//TimeEvent timer4 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
-		ClosedLoopPositionEvent pos2 = new ClosedLoopPositionEvent(216.0, 0.5, 1.0);
+		ClosedLoopPositionEvent pos2 = new ClosedLoopPositionEvent(dist_inches2, 0.5, 1.0);
 		driveState2.addAction(driveForwardMagic2);
 		//driveState2.addEvent(timer4);
 		driveState2.addEvent(pos2);
@@ -1066,7 +1010,7 @@ public class AutoNetworkBuilder {
 
 		AutoState liftState = new AutoState("<Lift State 1>");
 		LiftAction liftAction = new LiftAction("<Lift Action>", CubeManagement.SCALE_LEVEL);
-		TimeEvent timer6b = new TimeEvent(4.0);  // lift timer event
+		TimeEvent timer6b = new TimeEvent(1.0);  // lift timer event
 		liftState.addAction(liftAction);
 		liftState.addEvent(timer6b);
 
@@ -1210,9 +1154,9 @@ public class AutoNetworkBuilder {
 		AutoNetwork autoNet = new AutoNetwork("<Turning ONCE Network>");
 		
 		AutoState turnState1 = new AutoState("<Turn Right State 1>");
-		TurnPIDAction turnPidAction1 = new TurnPIDAction("<Turn right PID action 1>", 90.0, 0.5, true);
+		TurnPIDAction turnPidAction1 = new TurnPIDAction("<Turn right PID action 1>", 90.0, 0.6, true);
 		//TimeEvent timer3 = new TimeEvent(10.0);  // drive forward timer event - allow PID time to settle
-		ClosedLoopAngleEvent angle2 = new ClosedLoopAngleEvent(90.0,2.0,1.0);
+		ClosedLoopAngleEvent angle2 = new ClosedLoopAngleEvent(90.0,1.0,1.0);
 		turnState1.addAction(turnPidAction1);
 		//turnState1.addEvent(timer3);
 		turnState1.addEvent(angle2);

@@ -99,7 +99,7 @@ public class AutoStateMachine {
 		
 		int netIndex = AutoNetworkBuilder.DO_NOTHING;
 		
-		if ((action == AutoChooser.DO_NOTHING) || (position == AutoChooser.POS_UNDEFINED))
+		if (action == AutoChooser.DO_NOTHING)
 		{
 			// auto state machine operation disabled
 			autoNetworkEnable = false;
@@ -146,6 +146,12 @@ public class AutoStateMachine {
 			// debug network
 			autoNetworkEnable = true;
 			netIndex = AutoNetworkBuilder.PACE_FOREVER;
+		}
+		else if (action == AutoChooser.TURN_ONCE)
+		{
+			// debug network
+			autoNetworkEnable = true;
+			netIndex = AutoNetworkBuilder.TURN_ONCE;
 		}
 		else {
 			autoNetworkEnable = false;

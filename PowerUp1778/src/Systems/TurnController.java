@@ -34,17 +34,19 @@ public class TurnController {
 	// instance data and methods
 	private static PIDController pidCtrl;
 	
+	/*
 	// comp.bot - tuned 7/20/2017
 	private static final double kP = 0.075;
 	private static final double kI = 0.0;   // I not needed for PID position control
 	private static final double kD = 0.14;
 	private static final double kF = 0;     // F not needed for PID position control
-		
+	*/
+	
 	// proto.bot - tuned version
-	//private static final double kP = 0.04;
-	//private static final double kI = 0;     // I not needed for PID position control
-	//private static final double kD = 0.175;
-	//private static final double kF = 0;     // F not needed for PID position control
+	private static final double kP = 0.03;
+	private static final double kI = 0.00002; 
+	private static final double kD = 0.0005;
+	private static final double kF = 0;     // F not needed for PID position control
 	
 	private static final double maxSpeed = 0.5;
 	
