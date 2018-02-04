@@ -7,6 +7,7 @@
 
 #include <cstdio>
 #include <iostream>
+#include <string>
 
 #include <ctime>
 #include <unistd.h>
@@ -307,7 +308,8 @@ int main() {
   cs::CvSink cvsink{"cvsink"};
   cvsink.SetSource(camera);
   cs::CvSource cvsource{"cvsource", cs::VideoMode::kMJPEG, frameWidth, frameHeight, maxFps};
-  cs::MjpegServer cvMjpegServer{"cvhttpserver", 8082};
+  //cs::MjpegServer cvMjpegServer{"cvhttpserver", 8082};
+  cs::MjpegServer cvMjpegServer{"cvhttpserver", 1181};
   cvMjpegServer.SetSource(cvsource);
 
   // set up web controls
@@ -318,11 +320,17 @@ int main() {
    
 	// initialize network table for comm with the robot
 	auto tableInstance = nt::NetworkTableInstance::GetDefault();
+	
 	tableInstance.SetServer("Roborio-1778-frc.local");  // send data to roborio
-	//tableInstance.StartServer();     // debug only - if roborio not present
-	table = tableInstance.GetTable("RPIComm/Data_Table");
+	//tableInstance.StartServer();          // DEBUG ONLY - use only if no roborio present
+	
+	// set location of the camera stream in the network table (will be picked up by DS)
+	std::string streamNames[1];
+	streamNames[0] = "mjpeg:http://10.0.0.179:1181/?action=stream";	
+	tableInstance.GetEntry("/CameraPublisher/ChillOutPiCam/streams").SetStringArray(streamNames);
 	
 	//Initial state: set networktable clampOn state to TRUE and reset exposure to teleop level 
+	table = tableInstance.GetTable("RPIComm/Data_Table");
 	table->GetEntry("collectorStrength").SetDouble(0.0);
 	table->GetEntry("clampOn").SetBoolean(true);
 	table->GetEntry("brakeOn").SetBoolean(true);
