@@ -86,7 +86,85 @@ public class AutoNetworkBuilder {
 
 		return autoNets;
 	}
-			
+	
+	///////////////////////////////////////////////////////////
+	/*            AutoState Creation Methods                 */
+	/*            (These are used repeatedly)                */
+	///////////////////////////////////////////////////////////
+	
+	private static AutoState createIdleState(String state_name)
+	{
+		AutoState idleState = new AutoState(state_name);
+		IdleAction deadEnd = new IdleAction("<Dead End Action>");
+		DriveForwardAction driveForwardReset = new DriveForwardAction("<Drive Forward Action -reset>", 0.0, true, 0.0);  // reset gyro
+		idleState.addAction(deadEnd);
+		idleState.addAction(driveForwardReset);
+		
+		return idleState;
+	}
+		
+	private static AutoState createMagicDriveState(String state_name, double dist_inches, int max_vel_rpm, int max_accel_rpm) 
+	{		
+		AutoState driveState = new AutoState(state_name);
+		DriveForwardMagicAction driveForwardMagicAction = new DriveForwardMagicAction("<Drive Forward Magic Action>", dist_inches, max_vel_rpm, max_accel_rpm, true, 0.0);
+		//TimeEvent timer = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
+		ClosedLoopPositionEvent pos = new ClosedLoopPositionEvent(dist_inches, 0.5, 1.0);
+		driveState.addAction(driveForwardMagicAction);
+		//driveState.addEvent(timer);
+		driveState.addEvent(pos);
+		
+		return driveState;
+	}
+
+	private static AutoState createMagicTurnState(String state_name, double angle_deg, double percent_vbus)
+	{
+		AutoState turnState = new AutoState(state_name);
+		TurnPIDAction turnPidAction = new TurnPIDAction("<Turn PID action>", angle_deg, percent_vbus, true);
+		//TimeEvent timer = new TimeEvent(2.5);  // timer event - allow PID time to settle
+		ClosedLoopAngleEvent angle = new ClosedLoopAngleEvent(angle_deg,5.0,1.0);
+		turnState.addAction(turnPidAction);
+		//turnState.addEvent(timer);
+		turnState.addEvent(angle);
+		
+		return turnState;
+	}
+	
+	private static AutoState createFlipperState(String state_name, boolean flipperUp)
+	{
+		AutoState flipperState = new AutoState(state_name);
+		FlipperAction flipperAction = new FlipperAction("<Flipper Action>", flipperUp);
+		TimeEvent timer = new TimeEvent(0.1);  // flipper timer event
+		flipperState.addAction(flipperAction);
+		flipperState.addEvent(timer);
+		
+		return flipperState;
+	}
+
+	private static AutoState createLiftState(String state_name, int lift_level)
+	{
+		AutoState liftState = new AutoState(state_name);
+		LiftAction liftAction = new LiftAction("<Lift Action>", lift_level);
+		TimeEvent timer5b = new TimeEvent(1.0);  // lift timer event
+		liftState.addAction(liftAction);
+		liftState.addEvent(timer5b);
+		
+		return liftState;
+	}
+	
+	private static AutoState createCubeDepositState(String state_name, double secs)
+	{
+		AutoState depositCubeState = new AutoState(state_name);
+		DepositCubeAction deposit1 = new DepositCubeAction("<Deposit Cube Action>");
+		TimeEvent timer = new TimeEvent(secs);  // deposit cube timer event
+		depositCubeState.addAction(deposit1);
+		depositCubeState.addEvent(timer);
+
+		return depositCubeState;
+	}
+
+	////////////////////////////////////////////////////////////
+
+
 	// **** DO NOTHING Network ***** 
 	private static AutoNetwork createDoNothingNetwork() {
 		
@@ -108,32 +186,16 @@ public class AutoNetworkBuilder {
 		
 		AutoNetwork autoNet = new AutoNetwork("<Drive Forward Network>");
 			
-		/*
-		AutoState driveState = new AutoState("<Drive State 1>");
-		DriveForwardAction driveForward = new DriveForwardAction("<Drive Forward Action>", 0.3, true, 0.0);
-		TimeEvent timer2 = new TimeEvent(5.0);  // timer event
-		driveState.addAction(driveForward);
-		driveState.addEvent(timer2);
-		*/
-		
-		double dist_inches = 84.0;
-		AutoState driveState = new AutoState("<Drive State 1>");
-		DriveForwardMagicAction driveForwardMagic = new DriveForwardMagicAction("<Drive Forward Magic Action>", dist_inches, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST, true, 0.0);
-		//TimeEvent timer2 = new TimeEvent(4.0);  // drive forward timer event
-		ClosedLoopPositionEvent pos1 = new ClosedLoopPositionEvent(dist_inches, 0.5, 1.0);
-		driveState.addAction(driveForwardMagic);
-		//driveState.addEvent(timer2);
-		driveState.addEvent(pos1);
-		
-		AutoState idleState2 = new AutoState("<Idle State 2>");
-		IdleAction deadEnd = new IdleAction("<Dead End Action>");
-		idleState2.addAction(deadEnd);
-				
-		// connect each event with a state to move to
-		driveState.associateNextState(idleState2);
+		// create states
+		AutoState driveState = createMagicDriveState("<Drive State 1>", 84.0, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST);
+		AutoState idleState = createIdleState("<Idle State>");
+
+		// connect the state sequence
+		driveState.associateNextState(idleState);
 						
+		// add states to the network list
 		autoNet.addState(driveState);
-		autoNet.addState(idleState2);
+		autoNet.addState(idleState);
 				
 		return autoNet;
 	}
@@ -149,73 +211,32 @@ public class AutoNetworkBuilder {
 	private static AutoNetwork createDepositCubeSwitchLeft() {
 		
 		AutoNetwork autoNet = new AutoNetwork("<Deposit Cube Switch (left side) Network>");
-				
-		double dist_inches1 = 144.0;
-		AutoState driveState = new AutoState("<Drive State 1>");
-		DriveForwardMagicAction driveForwardMagic = new DriveForwardMagicAction("<Drive Forward Magic Action>", dist_inches1, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST, true, 0.0);
-		//TimeEvent timer2 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
-		ClosedLoopPositionEvent pos1 = new ClosedLoopPositionEvent(dist_inches1, 0.5, 1.0);
-		driveState.addAction(driveForwardMagic);
-		//driveState.addEvent(timer2);
-		driveState.addEvent(pos1);
-				
-		double angle_deg1 = 90.0;
-		AutoState turnRightState = new AutoState("<Turn Right State>");
-		TurnPIDAction turnPidAction = new TurnPIDAction("<Turn right PID action>", angle_deg1, 0.35, true);
-		//TimeEvent timer3 = new TimeEvent(2.5);  // timer event - allow PID time to settle
-		ClosedLoopAngleEvent angle1 = new ClosedLoopAngleEvent(angle_deg1,5.0,1.0);
-		turnRightState.addAction(turnPidAction);
-		//turnRightState.addEvent(timer3);
-		turnRightState.addEvent(angle1);
+			
+		// create states
+		AutoState driveState = createMagicDriveState("<Drive State 1>", 144.0, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST);
+		AutoState turnRightState = createMagicTurnState("<Turn Right State>", 90.0, 0.35);
+		AutoState flipperDownState = createFlipperState("<Flipper Down State>", false);
+		AutoState liftUpState = createLiftState("<Lift Up State>", CubeManagement.SWITCH_LEVEL);
+		AutoState driveState2 = createMagicDriveState("<Drive State 2>", 36.0, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW);
+		AutoState depositCubeState = createCubeDepositState("<Deposit Cube State>", 3.0);
+		AutoState idleState = createIdleState("<Idle State>");
 		
-		AutoState flipperState = new AutoState("<Flipper State 1>");
-		FlipperAction flipperAction = new FlipperAction("<Flipper Down Action>", false);
-		TimeEvent timer4 = new TimeEvent(0.1);  // flipper timer event
-		flipperState.addAction(flipperAction);
-		flipperState.addEvent(timer4);
-
-		AutoState liftState = new AutoState("<Lift State 1>");
-		LiftAction liftAction = new LiftAction("<Lift Action>", CubeManagement.SWITCH_LEVEL);
-		TimeEvent timer5b = new TimeEvent(1.0);  // lift timer event
-		liftState.addAction(liftAction);
-		liftState.addEvent(timer5b);
-				
-		double dist_inches2 = 36.0;
-		AutoState driveState2 = new AutoState("<Drive State 2>");
-		DriveForwardMagicAction driveForwardMagic2 = new DriveForwardMagicAction("<Drive Forward Magic Action 2>", dist_inches2, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW, true, 0.0);
-		//TimeEvent timer6 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
-		ClosedLoopPositionEvent pos2 = new ClosedLoopPositionEvent(dist_inches2, 0.5, 1.0);
-		driveState2.addAction(driveForwardMagic2);
-		//driveState2.addEvent(timer6);
-		driveState2.addEvent(pos2);
-
-		AutoState depositCubeState = new AutoState("<Deposit Cube State 1>");
-		DepositCubeAction deposit1 = new DepositCubeAction("<Deposit Cube Action>");
-		TimeEvent timer7 = new TimeEvent(3.0);  // deposit cube timer event
-		depositCubeState.addAction(deposit1);
-		depositCubeState.addEvent(timer7);
-		
-		AutoState idleState2 = new AutoState("<Idle State 2>");
-		DriveForwardAction driveForward4 = new DriveForwardAction("<Drive Forward Action 4 -reset>", 0.0, true, 0.0);  // reset gyro
-		IdleAction deadEnd = new IdleAction("<Dead End Action>");
-		idleState2.addAction(driveForward4);
-		idleState2.addAction(deadEnd);
-				
-		// connect each event with a state to move to
+		// connect the state sequence
 		driveState.associateNextState(turnRightState);
-		turnRightState.associateNextState(flipperState);
-		flipperState.associateNextState(liftState);
-		liftState.associateNextState(driveState2);
+		turnRightState.associateNextState(flipperDownState);
+		flipperDownState.associateNextState(liftUpState);
+		liftUpState.associateNextState(driveState2);
 		driveState2.associateNextState(depositCubeState);
-		depositCubeState.associateNextState(idleState2);
-						
+		depositCubeState.associateNextState(idleState);
+				
+		// add states to the network list
 		autoNet.addState(driveState);
 		autoNet.addState(turnRightState);
-		autoNet.addState(flipperState);
-		autoNet.addState(liftState);
+		autoNet.addState(flipperDownState);
+		autoNet.addState(liftUpState);
 		autoNet.addState(driveState2);
 		autoNet.addState(depositCubeState);
-		autoNet.addState(idleState2);
+		autoNet.addState(idleState);
 				
 		return autoNet;
 	}
@@ -232,72 +253,31 @@ public class AutoNetworkBuilder {
 		
 		AutoNetwork autoNet = new AutoNetwork("<Deposit Cube Scale (left side) Network>");
 		
-		double dist_inches1 = 302.0;
-		AutoState driveState = new AutoState("<Drive State 1>");
-		DriveForwardMagicAction driveForwardMagic = new DriveForwardMagicAction("<Drive Forward Magic Action>", dist_inches1, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST, true, 0.0);
-		//TimeEvent timer2 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
-		ClosedLoopPositionEvent pos1 = new ClosedLoopPositionEvent(dist_inches1, 0.5, 1.0);
-		driveState.addAction(driveForwardMagic);
-		//driveState.addEvent(timer2);
-		driveState.addEvent(pos1);
-		
-		double angle_deg1 = 90.0;
-		AutoState turnRightState = new AutoState("<Turn Right State>");
-		TurnPIDAction turnPidAction = new TurnPIDAction("<Turn right PID action>", angle_deg1, 0.35, true);
-		//TimeEvent timer3 = new TimeEvent(2.5);  // timer event - allow PID time to settle
-		ClosedLoopAngleEvent angle1 = new ClosedLoopAngleEvent(angle_deg1,2.0,1.0);
-		turnRightState.addAction(turnPidAction);
-		//turnRightState.addEvent(timer3);
-		turnRightState.addEvent(angle1);
-		
-		AutoState flipperState = new AutoState("<Flipper State 1>");
-		FlipperAction flipperAction = new FlipperAction("<Flipper Down Action>", false);
-		TimeEvent timer4 = new TimeEvent(0.1);  // flipper timer event
-		flipperState.addAction(flipperAction);
-		flipperState.addEvent(timer4);
-
-		AutoState liftState = new AutoState("<Lift State 1>");
-		LiftAction liftAction = new LiftAction("<Lift Action>", CubeManagement.SCALE_LEVEL);
-		TimeEvent timer5b = new TimeEvent(3.0);  // lift timer event
-		liftState.addAction(liftAction);
-		liftState.addEvent(timer5b);
-				
-		double dist_inches2 = 24.0;
-		AutoState driveState2 = new AutoState("<Drive State 2>");
-		DriveForwardMagicAction driveForwardMagic2 = new DriveForwardMagicAction("<Drive Forward Magic Action 2>", dist_inches2, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW, true, 0.0);
-		//TimeEvent timer4 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
-		ClosedLoopPositionEvent pos2 = new ClosedLoopPositionEvent(dist_inches2, 0.5, 1.0);
-		driveState2.addAction(driveForwardMagic2);
-		//driveState2.addEvent(timer4);
-		driveState2.addEvent(pos2);
-
-		AutoState depositCubeState = new AutoState("<Deposit Cube State 1>");
-		DepositCubeAction deposit1 = new DepositCubeAction("<Deposit Cube Action>");
-		TimeEvent timer7 = new TimeEvent(3.0);  // deposit cube timer event
-		depositCubeState.addAction(deposit1);
-		depositCubeState.addEvent(timer7);
-		
-		AutoState idleState2 = new AutoState("<Idle State 2>");
-		DriveForwardAction driveForward4 = new DriveForwardAction("<Drive Forward Action 4 -reset>", 0.0, true, 0.0);  // reset gyro
-		IdleAction deadEnd = new IdleAction("<Dead End Action>");
-		idleState2.addAction(driveForward4);
-		idleState2.addAction(deadEnd);
-				
-		// connect each event with a state to move to
+		// create states
+		AutoState driveState = createMagicDriveState("<Drive State 1>", 302.0, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST);
+		AutoState turnRightState = createMagicTurnState("<Turn Right State>", 90.0, 0.35);
+		AutoState flipperDownState = createFlipperState("<Flipper Down State>", false);
+		AutoState liftUpState = createLiftState("<Lift Up State>", CubeManagement.SCALE_LEVEL);
+		AutoState driveState2 = createMagicDriveState("<Drive State 2>", 24.0, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW);
+		AutoState depositCubeState = createCubeDepositState("<Deposit Cube State>", 3.0);
+		AutoState idleState = createIdleState("<Idle State>");
+			
+		// connect the state sequence
 		driveState.associateNextState(turnRightState);
-		turnRightState.associateNextState(flipperState);
-		flipperState.associateNextState(liftState);
-		liftState.associateNextState(driveState2);
+		turnRightState.associateNextState(flipperDownState);
+		flipperDownState.associateNextState(liftUpState);
+		liftUpState.associateNextState(driveState2);
 		driveState2.associateNextState(depositCubeState);
-		depositCubeState.associateNextState(idleState2);
+		depositCubeState.associateNextState(idleState);
 						
+		// add states to the network list
 		autoNet.addState(driveState);
 		autoNet.addState(turnRightState);
-		autoNet.addState(flipperState);
-		autoNet.addState(liftState);
+		autoNet.addState(flipperDownState);
+		autoNet.addState(liftUpState);
 		autoNet.addState(driveState2);
 		autoNet.addState(depositCubeState);
-		autoNet.addState(idleState2);
+		autoNet.addState(idleState);
 				
 		return autoNet;
 	}
@@ -316,94 +296,37 @@ public class AutoNetworkBuilder {
 		
 		AutoNetwork autoNet = new AutoNetwork("<Deposit Cube Scale (right from left side) Network>");
 				
-		double dist_inches1 = 200.0;
-		AutoState driveState = new AutoState("<Drive State 1>");
-		DriveForwardMagicAction driveForwardMagic = new DriveForwardMagicAction("<Drive Forward Magic Action>", dist_inches1, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST, true, 0.0);
-		//TimeEvent timer2 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
-		ClosedLoopPositionEvent pos1 = new ClosedLoopPositionEvent(dist_inches1, 0.5, 1.0);
-		driveState.addAction(driveForwardMagic);
-		//driveState.addEvent(timer2);
-		driveState.addEvent(pos1);
-		
-		double angle_deg1 = 90.0;
-		AutoState turnRightState = new AutoState("<Turn Right State>");
-		TurnPIDAction turnPidAction = new TurnPIDAction("<Turn right PID action>", angle_deg1, 0.35, true);
-		//TimeEvent timer3 = new TimeEvent(2.5);  // timer event - allow PID time to settle
-		ClosedLoopAngleEvent angle1 = new ClosedLoopAngleEvent(angle_deg1,5.0,1.0);
-		turnRightState.addAction(turnPidAction);
-		//turnRightState.addEvent(timer3);
-		turnRightState.addEvent(angle1);
+		// create states
+		AutoState driveState = createMagicDriveState("<Drive State 1>", 200.0, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST);
+		AutoState turnRightState = createMagicTurnState("<Turn Right State>", 90.0, 0.35);
+		AutoState driveState2 = createMagicDriveState("<Drive State 2>", 256.0, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST);
+		AutoState turnLeftState = createMagicTurnState("<Turn Left State>", -135.0, 0.35);
+		AutoState flipperDownState = createFlipperState("<Flipper Down State>", false);
+		AutoState liftUpState = createLiftState("<Lift Up State>", CubeManagement.SCALE_LEVEL);
+		AutoState driveState3 = createMagicDriveState("<Drive State 3>", 36.0, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW);
+		AutoState depositCubeState = createCubeDepositState("<Deposit Cube State>", 3.0);
+		AutoState idleState = createIdleState("<Idle State>");
 
-		double dist_inches2 = 256.0;
-		AutoState driveState2 = new AutoState("<Drive State 2>");
-		DriveForwardMagicAction driveForwardMagic2 = new DriveForwardMagicAction("<Drive Forward Magic Action>", dist_inches2, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST, true, 0.0);
-		//TimeEvent timer4 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
-		ClosedLoopPositionEvent pos2 = new ClosedLoopPositionEvent(dist_inches2, 0.5, 1.0);
-		driveState2.addAction(driveForwardMagic2);
-		//driveState.addEvent(timer4);
-		driveState2.addEvent(pos2);
-		
-		double angle_deg2 = -135.0;
-		AutoState turnLeftState = new AutoState("<Turn Left State>");
-		TurnPIDAction turnPidAction2 = new TurnPIDAction("<Turn left PID action 2>", angle_deg2, 0.35, true);
-		//TimeEvent timer5 = new TimeEvent(2.5);  // timer event - allow PID time to settle
-		ClosedLoopAngleEvent angle2 = new ClosedLoopAngleEvent(angle_deg2,5.0,1.0);
-		turnLeftState.addAction(turnPidAction2);
-		//turnLeftState.addEvent(timer5);
-		turnLeftState.addEvent(angle2);
-
-		AutoState flipperState = new AutoState("<Flipper State 1>");
-		FlipperAction flipperAction = new FlipperAction("<Flipper Down Action>", false);
-		TimeEvent timer6 = new TimeEvent(0.1);  // flipper timer event
-		flipperState.addAction(flipperAction);
-		flipperState.addEvent(timer6);
-
-		AutoState liftState = new AutoState("<Lift State 1>");
-		LiftAction liftAction = new LiftAction("<Lift Action>", CubeManagement.SCALE_LEVEL);
-		TimeEvent timer7 = new TimeEvent(3.0);  // lift timer event
-		liftState.addAction(liftAction);
-		liftState.addEvent(timer7);
-				
-		double dist_inches3 = 36.0;
-		AutoState driveState3 = new AutoState("<Drive State 3>");
-		DriveForwardMagicAction driveForwardMagic3 = new DriveForwardMagicAction("<Drive Forward Magic Action 3>", dist_inches3, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW, true, 0.0);
-		//TimeEvent timer8 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
-		ClosedLoopPositionEvent pos3 = new ClosedLoopPositionEvent(dist_inches3, 0.5, 1.0);
-		driveState3.addAction(driveForwardMagic3);
-		//driveState3.addEvent(timer8);
-		driveState3.addEvent(pos3);
-
-		AutoState depositCubeState = new AutoState("<Deposit Cube State 1>");
-		DepositCubeAction deposit1 = new DepositCubeAction("<Deposit Cube Action>");
-		TimeEvent timer9 = new TimeEvent(3.0);  // deposit cube timer event
-		depositCubeState.addAction(deposit1);
-		depositCubeState.addEvent(timer9);
-		
-		AutoState idleState2 = new AutoState("<Idle State 2>");
-		DriveForwardAction driveForward4 = new DriveForwardAction("<Drive Forward Action 4 -reset>", 0.0, true, 0.0);  // reset gyro
-		IdleAction deadEnd = new IdleAction("<Dead End Action>");
-		idleState2.addAction(driveForward4);
-		idleState2.addAction(deadEnd);
-				
-		// connect each event with a state to move to
+		// connect the state sequence
 		driveState.associateNextState(turnRightState);
 		turnRightState.associateNextState(driveState2);
 		driveState2.associateNextState(turnLeftState);
-		turnLeftState.associateNextState(flipperState);
-		flipperState.associateNextState(liftState);
-		liftState.associateNextState(driveState3);
+		turnLeftState.associateNextState(flipperDownState);
+		flipperDownState.associateNextState(liftUpState);
+		liftUpState.associateNextState(driveState3);
 		driveState3.associateNextState(depositCubeState);
-		depositCubeState.associateNextState(idleState2);
+		depositCubeState.associateNextState(idleState);
 						
+		// add states to the network list
 		autoNet.addState(driveState);
 		autoNet.addState(turnRightState);
 		autoNet.addState(driveState2);
 		autoNet.addState(turnLeftState);
-		autoNet.addState(flipperState);
-		autoNet.addState(liftState);
+		autoNet.addState(flipperDownState);
+		autoNet.addState(liftUpState);
 		autoNet.addState(driveState3);
 		autoNet.addState(depositCubeState);
-		autoNet.addState(idleState2);
+		autoNet.addState(idleState);
 				
 		return autoNet;
 	}
@@ -418,65 +341,29 @@ public class AutoNetworkBuilder {
 	private static AutoNetwork createMoveToScaleRightFromLeft() {
 		
 		AutoNetwork autoNet = new AutoNetwork("<Move to Scale Right (left side) Network>");
-		
-		double dist_inches1 = 200.0;
-		AutoState driveState = new AutoState("<Drive State 1>");
-		DriveForwardMagicAction driveForwardMagic = new DriveForwardMagicAction("<Drive Forward Magic Action>", dist_inches1, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST, true, 0.0);
-		//TimeEvent timer2 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
-		ClosedLoopPositionEvent pos1 = new ClosedLoopPositionEvent(dist_inches1, 0.5, 1.0);
-		driveState.addAction(driveForwardMagic);
-		//driveState.addEvent(timer2);
-		driveState.addEvent(pos1);
-		
-		double angle_deg1 = 90.0;
-		AutoState turnRightState = new AutoState("<Turn Right State>");
-		TurnPIDAction turnPidAction = new TurnPIDAction("<Turn right PID action>", angle_deg1, 0.35, true);
-		//TimeEvent timer3 = new TimeEvent(2.5);  // timer event - allow PID time to settle
-		ClosedLoopAngleEvent angle1 = new ClosedLoopAngleEvent(angle_deg1,5.0,1.0);
-		turnRightState.addAction(turnPidAction);
-		//turnRightState.addEvent(timer3);
-		turnRightState.addEvent(angle1);
 				
-		double dist_inches2 = 192.0;
-		AutoState driveState2 = new AutoState("<Drive State 2>");
-		DriveForwardMagicAction driveForwardMagic2 = new DriveForwardMagicAction("<Drive Forward Magic Action 2>", dist_inches2, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST, true, 0.0);
-		//TimeEvent timer4 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
-		ClosedLoopPositionEvent pos2 = new ClosedLoopPositionEvent(dist_inches2, 0.5, 1.0);
-		driveState2.addAction(driveForwardMagic2);
-		//driveState2.addEvent(timer4);
-		driveState2.addEvent(pos2);
-
-		AutoState flipperState = new AutoState("<Flipper State 1>");
-		FlipperAction flipperAction = new FlipperAction("<Flipper Down Action>", false);
-		TimeEvent timer5 = new TimeEvent(0.1);  // flipper timer event
-		flipperState.addAction(flipperAction);
-		flipperState.addEvent(timer5);
-
-		AutoState liftState = new AutoState("<Lift State 1>");
-		LiftAction liftAction = new LiftAction("<Lift Action>", CubeManagement.SCALE_LEVEL);
-		TimeEvent timer6b = new TimeEvent(1.0);  // lift timer event
-		liftState.addAction(liftAction);
-		liftState.addEvent(timer6b);
-
-		AutoState idleState2 = new AutoState("<Idle State 2>");
-		DriveForwardAction driveForward4 = new DriveForwardAction("<Drive Forward Action 4 -reset>", 0.0, true, 0.0);  // reset gyro
-		IdleAction deadEnd = new IdleAction("<Dead End Action>");
-		idleState2.addAction(driveForward4);
-		idleState2.addAction(deadEnd);
-				
-		// connect each event with a state to move to
+		// create states
+		AutoState driveState = createMagicDriveState("<Drive State 1>", 200.0, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST);
+		AutoState turnRightState = createMagicTurnState("<Turn Right State>", 90.0, 0.35);
+		AutoState driveState2 = createMagicDriveState("<Drive State 2>", 192.0, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST);
+		AutoState flipperDownState = createFlipperState("<Flipper Down State>", false);
+		AutoState liftUpState = createLiftState("<Lift Up State>", CubeManagement.SCALE_LEVEL);
+		AutoState idleState = createIdleState("<Idle State>");
+		
+		// connect the state sequence
 		driveState.associateNextState(turnRightState);
 		turnRightState.associateNextState(driveState2);
-		driveState2.associateNextState(flipperState);
-		flipperState.associateNextState(liftState);
-		liftState.associateNextState(idleState2);
+		driveState2.associateNextState(flipperDownState);
+		flipperDownState.associateNextState(liftUpState);
+		liftUpState.associateNextState(idleState);
 						
+		// add states to the network list
 		autoNet.addState(driveState);
 		autoNet.addState(turnRightState);
 		autoNet.addState(driveState2);
-		autoNet.addState(flipperState);
-		autoNet.addState(liftState);
-		autoNet.addState(idleState2);
+		autoNet.addState(flipperDownState);
+		autoNet.addState(liftUpState);
+		autoNet.addState(idleState);
 				
 		return autoNet;
 	}
@@ -494,95 +381,38 @@ public class AutoNetworkBuilder {
 	private static AutoNetwork createDepositCubeSwitchCenterLeft() {
 		
 		AutoNetwork autoNet = new AutoNetwork("<Deposit Cube Switch (center left) Network>");
-		
-		double dist_inches1 = 60.0;
-		AutoState driveState = new AutoState("<Drive State 1>");
-		DriveForwardMagicAction driveForwardMagic = new DriveForwardMagicAction("<Drive Forward Magic Action>", dist_inches1, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST, true, 0.0);
-		//TimeEvent timer2 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
-		ClosedLoopPositionEvent pos1 = new ClosedLoopPositionEvent(dist_inches1, 0.5, 1.0);
-		driveState.addAction(driveForwardMagic);
-		//driveState.addEvent(timer2);
-		driveState.addEvent(pos1);
 				
-		double angle_deg1 = -90.0;
-		AutoState turnLeftState = new AutoState("<Turn Left State>");
-		TurnPIDAction turnPidAction1 = new TurnPIDAction("<Turn Left PID action>", angle_deg1, 0.35, true);
-		//TimeEvent timer3 = new TimeEvent(2.5);  // timer event - allow PID time to settle
-		ClosedLoopAngleEvent angle1 = new ClosedLoopAngleEvent(angle_deg1,5.0,1.0);
-		turnLeftState.addAction(turnPidAction1);
-		//turnRightState.addEvent(timer3);
-		turnLeftState.addEvent(angle1);
-				
-		double dist_inches2 = 66.0;
-		AutoState driveState2 = new AutoState("<Drive State 2>");
-		DriveForwardMagicAction driveForwardMagic2 = new DriveForwardMagicAction("<Drive Forward Magic Action 2>", dist_inches2, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST, true, 0.0);
-		//TimeEvent timer4 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
-		ClosedLoopPositionEvent pos2 = new ClosedLoopPositionEvent(dist_inches2, 0.5, 1.0);
-		driveState2.addAction(driveForwardMagic2);
-		//driveState2.addEvent(timer4);
-		driveState2.addEvent(pos2);
+		// create states
+		AutoState driveState = createMagicDriveState("<Drive State 1>", 60.0, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST);
+		AutoState turnLeftState = createMagicTurnState("<Turn Left State>", -90.0, 0.35);
+		AutoState driveState2 = createMagicDriveState("<Drive State 2>", 66.0, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST);
+		AutoState turnRightState = createMagicTurnState("<Turn Right State>", 90.0, 0.35);
+		AutoState flipperDownState = createFlipperState("<Flipper Down State>", false);
+		AutoState liftUpState = createLiftState("<Lift Up State>", CubeManagement.SWITCH_LEVEL);
+		AutoState driveState3 = createMagicDriveState("<Drive State 3>", 38.0, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW);
+		AutoState depositCubeState = createCubeDepositState("<Cube Deposit State>", 3.0);
+		AutoState idleState = createIdleState("<Idle State>");
 
-		double angle_deg2 = 90.0;
-		AutoState turnRightState = new AutoState("<Turn Right State>");
-		TurnPIDAction turnPidAction2 = new TurnPIDAction("<Turn Right PID action>", angle_deg2, 0.35, true);
-		//TimeEvent timer5 = new TimeEvent(2.5);  // timer event - allow PID time to settle
-		ClosedLoopAngleEvent angle2 = new ClosedLoopAngleEvent(angle_deg2,5.0,1.0);
-		turnRightState.addAction(turnPidAction2);
-		//turnRightState.addEvent(timer5);
-		turnRightState.addEvent(angle2);
-		
-		AutoState flipperState = new AutoState("<Flipper State 1>");
-		FlipperAction flipperAction = new FlipperAction("<Flipper Down Action>", false);
-		TimeEvent timer6 = new TimeEvent(0.1);  // flipper timer event
-		flipperState.addAction(flipperAction);
-		flipperState.addEvent(timer6);
-
-		AutoState liftState = new AutoState("<Lift State 1>");
-		LiftAction liftAction = new LiftAction("<Lift Action>", CubeManagement.SWITCH_LEVEL);
-		TimeEvent timer7b = new TimeEvent(1.0);  // lift timer event
-		liftState.addAction(liftAction);
-		liftState.addEvent(timer7b);
-
-		double dist_inches3 = 38.0;
-		AutoState driveState3 = new AutoState("<Drive State 3>");
-		DriveForwardMagicAction driveForwardMagic3 = new DriveForwardMagicAction("<Drive Forward Magic Action 3>", dist_inches3, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW, true, 0.0);
-		//TimeEvent timer8 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
-		ClosedLoopPositionEvent pos3 = new ClosedLoopPositionEvent(dist_inches3, 0.5, 1.0);
-		driveState3.addAction(driveForwardMagic3);
-		//driveState3.addEvent(timer8);
-		driveState3.addEvent(pos3);
-
-		AutoState depositCubeState = new AutoState("<Deposit Cube State 1>");
-		DepositCubeAction deposit1 = new DepositCubeAction("<Deposit Cube Action>");
-		TimeEvent timer9 = new TimeEvent(3.0);  // deposit cube timer event
-		depositCubeState.addAction(deposit1);
-		depositCubeState.addEvent(timer9);
-		
-		AutoState idleState2 = new AutoState("<Idle State 2>");
-		DriveForwardAction driveForward4 = new DriveForwardAction("<Drive Forward Action 4 -reset>", 0.0, true, 0.0);  // reset gyro
-		IdleAction deadEnd = new IdleAction("<Dead End Action>");
-		idleState2.addAction(driveForward4);
-		idleState2.addAction(deadEnd);
-				
-		// connect each event with a state to move to
+		// connect the state sequence
 		driveState.associateNextState(turnLeftState);
 		turnLeftState.associateNextState(driveState2);
 		driveState2.associateNextState(turnRightState);
-		turnRightState.associateNextState(flipperState);
-		flipperState.associateNextState(liftState);
-		liftState.associateNextState(driveState3);
+		turnRightState.associateNextState(flipperDownState);
+		flipperDownState.associateNextState(liftUpState);
+		liftUpState.associateNextState(driveState3);
 		driveState3.associateNextState(depositCubeState);
-		depositCubeState.associateNextState(idleState2);
+		depositCubeState.associateNextState(idleState);
 						
+		// add states to the network list
 		autoNet.addState(driveState);
 		autoNet.addState(turnLeftState);
 		autoNet.addState(driveState2);
 		autoNet.addState(turnRightState);
-		autoNet.addState(flipperState);
-		autoNet.addState(liftState);
+		autoNet.addState(flipperDownState);
+		autoNet.addState(liftUpState);
 		autoNet.addState(driveState3);
 		autoNet.addState(depositCubeState);
-		autoNet.addState(idleState2);
+		autoNet.addState(idleState);
 				
 		return autoNet;
 	}
@@ -600,95 +430,38 @@ public class AutoNetworkBuilder {
 	private static AutoNetwork createDepositCubeSwitchCenterRight() {
 		
 		AutoNetwork autoNet = new AutoNetwork("<Deposit Cube Switch (center right) Network>");
-		
-		double dist_inches1 = 60.0;
-		AutoState driveState = new AutoState("<Drive State 1>");
-		DriveForwardMagicAction driveForwardMagic = new DriveForwardMagicAction("<Drive Forward Magic Action>", dist_inches1, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST, true, 0.0);
-		//TimeEvent timer2 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
-		ClosedLoopPositionEvent pos1 = new ClosedLoopPositionEvent(dist_inches1, 0.5, 1.0);
-		driveState.addAction(driveForwardMagic);
-		//driveState.addEvent(timer2);
-		driveState.addEvent(pos1);
 				
-		double angle_deg1 = 90.0;
-		AutoState turnRightState = new AutoState("<Turn Right State>");
-		TurnPIDAction turnPidAction = new TurnPIDAction("<Turn right PID action>", angle_deg1, 0.35, true);
-		//TimeEvent timer3 = new TimeEvent(2.5);  // timer event - allow PID time to settle
-		ClosedLoopAngleEvent angle1 = new ClosedLoopAngleEvent(angle_deg1,5.0,1.0);
-		turnRightState.addAction(turnPidAction);
-		//turnRightState.addEvent(timer3);
-		turnRightState.addEvent(angle1);
-		
-		double dist_inches2 = 42.0;
-		AutoState driveState2 = new AutoState("<Drive State 2>");
-		DriveForwardMagicAction driveForwardMagic2 = new DriveForwardMagicAction("<Drive Forward Magic Action 2>", dist_inches2, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST, true, 0.0);
-		//TimeEvent timer4 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
-		ClosedLoopPositionEvent pos2 = new ClosedLoopPositionEvent(dist_inches2, 0.5, 1.0);
-		driveState2.addAction(driveForwardMagic2);
-		//driveState2.addEvent(timer4);
-		driveState2.addEvent(pos2);
-		
-		double angle_deg2 = -90.0;
-		AutoState turnLeftState = new AutoState("<Turn Left State>");
-		TurnPIDAction turnPidAction2 = new TurnPIDAction("<Turn left PID action>", angle_deg2, 0.35, true);
-		//TimeEvent timer5 = new TimeEvent(2.5);  // timer event - allow PID time to settle
-		ClosedLoopAngleEvent angle2 = new ClosedLoopAngleEvent(angle_deg2,5.0,1.0);
-		turnLeftState.addAction(turnPidAction2);
-		//turnLeftState.addEvent(timer5);
-		turnLeftState.addEvent(angle2);
-	
-		AutoState flipperState = new AutoState("<Flipper State 1>");
-		FlipperAction flipperAction = new FlipperAction("<Flipper Down Action>", false);
-		TimeEvent timer6 = new TimeEvent(0.1);  // flipper timer event
-		flipperState.addAction(flipperAction);
-		flipperState.addEvent(timer6);
-
-		AutoState liftState = new AutoState("<Lift State 1>");
-		LiftAction liftAction = new LiftAction("<Lift Action>", CubeManagement.SWITCH_LEVEL);
-		TimeEvent timer7b = new TimeEvent(1.0);  // lift timer event
-		liftState.addAction(liftAction);
-		liftState.addEvent(timer7b);
-
-		double dist_inches3 = 38.0;
-		AutoState driveState3 = new AutoState("<Drive State 3>");
-		DriveForwardMagicAction driveForwardMagic3 = new DriveForwardMagicAction("<Drive Forward Magic Action 3>", dist_inches3, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW, true, 0.0);
-		//TimeEvent timer8 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
-		ClosedLoopPositionEvent pos3 = new ClosedLoopPositionEvent(dist_inches3, 0.5, 1.0);
-		driveState3.addAction(driveForwardMagic3);
-		//driveState3.addEvent(timer8);
-		driveState3.addEvent(pos3);
-
-		AutoState depositCubeState = new AutoState("<Deposit Cube State 1>");
-		DepositCubeAction deposit1 = new DepositCubeAction("<Deposit Cube Action>");
-		TimeEvent timer9 = new TimeEvent(3.0);  // deposit cube timer event
-		depositCubeState.addAction(deposit1);
-		depositCubeState.addEvent(timer9);
-		
-		AutoState idleState2 = new AutoState("<Idle State 2>");
-		DriveForwardAction driveForward4 = new DriveForwardAction("<Drive Forward Action 4 -reset>", 0.0, true, 0.0);  // reset gyro
-		IdleAction deadEnd = new IdleAction("<Dead End Action>");
-		idleState2.addAction(driveForward4);
-		idleState2.addAction(deadEnd);
-				
-		// connect each event with a state to move to
+		// create states
+		AutoState driveState = createMagicDriveState("<Drive State 1>", 60.0, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST);
+		AutoState turnRightState = createMagicTurnState("<Turn Right State>", 90.0, 0.35);
+		AutoState driveState2 = createMagicDriveState("<Drive State 2>", 42.0, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST);
+		AutoState turnLeftState = createMagicTurnState("<Turn Left State>", -90.0, 0.35);
+		AutoState flipperDownState = createFlipperState("<Flipper Down State>", false);
+		AutoState liftUpState = createLiftState("<Lift Up State>", CubeManagement.SWITCH_LEVEL);
+		AutoState driveState3 = createMagicDriveState("<Drive State 3>", 38.0, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW);
+		AutoState depositCubeState = createCubeDepositState("<Cube Deposit State>", 3.0);
+		AutoState idleState = createIdleState("<Idle State>");
+			
+		// connect the state sequence
 		driveState.associateNextState(turnRightState);
 		turnRightState.associateNextState(driveState2);
 		driveState2.associateNextState(turnLeftState);
-		turnLeftState.associateNextState(flipperState);
-		flipperState.associateNextState(liftState);
-		liftState.associateNextState(driveState3);
+		turnLeftState.associateNextState(flipperDownState);
+		flipperDownState.associateNextState(liftUpState);
+		liftUpState.associateNextState(driveState3);
 		driveState3.associateNextState(depositCubeState);
-		depositCubeState.associateNextState(idleState2);
+		depositCubeState.associateNextState(idleState);
 						
+		// add states to the network list
 		autoNet.addState(driveState);
 		autoNet.addState(turnRightState);
 		autoNet.addState(driveState2);
 		autoNet.addState(turnLeftState);
-		autoNet.addState(flipperState);
-		autoNet.addState(liftState);
+		autoNet.addState(flipperDownState);
+		autoNet.addState(liftUpState);
 		autoNet.addState(driveState3);
 		autoNet.addState(depositCubeState);
-		autoNet.addState(idleState2);
+		autoNet.addState(idleState);
 				
 		return autoNet;
 	}
@@ -705,73 +478,32 @@ public class AutoNetworkBuilder {
 	private static AutoNetwork createDepositCubeSwitchRight() {
 		
 		AutoNetwork autoNet = new AutoNetwork("<Deposit Cube Switch (Right Side) Network>");
-				
-		double dist_inches1 = 144.0;
-		AutoState driveState = new AutoState("<Drive State 1>");
-		DriveForwardMagicAction driveForwardMagic = new DriveForwardMagicAction("<Drive Forward Magic Action>", dist_inches1, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST, true, 0.0);
-		//TimeEvent timer2 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
-		ClosedLoopPositionEvent pos1 = new ClosedLoopPositionEvent(dist_inches1, 0.5, 1.0);
-		driveState.addAction(driveForwardMagic);
-		//driveState.addEvent(timer2);
-		driveState.addEvent(pos1);
 		
-		double angle_deg1 = -90.0;
-		AutoState turnLeftState = new AutoState("<Turn Left State>");
-		TurnPIDAction turnPidAction = new TurnPIDAction("<Turn left PID action>", angle_deg1, 0.35, true);
-		//TimeEvent timer3 = new TimeEvent(2.5);  // timer event - allow PID time to settle
-		ClosedLoopAngleEvent angle1 = new ClosedLoopAngleEvent(angle_deg1,5.0,1.0);
-		turnLeftState.addAction(turnPidAction);
-		//turnLeftState.addEvent(timer3);
-		turnLeftState.addEvent(angle1);
-		
-		AutoState flipperState = new AutoState("<Flipper State 1>");
-		FlipperAction flipperAction = new FlipperAction("<Flipper Down Action>", false);
-		TimeEvent timer4 = new TimeEvent(0.1);  // flipper timer event
-		flipperState.addAction(flipperAction);
-		flipperState.addEvent(timer4);
+		// create states
+		AutoState driveState = createMagicDriveState("<Drive State 1>", 144.0, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST);
+		AutoState turnLeftState = createMagicTurnState("<Turn Left State>", -90.0, 0.35);
+		AutoState flipperDownState = createFlipperState("<Flipper Down State>", false);
+		AutoState liftUpState = createLiftState("<Lift Up State>", CubeManagement.SWITCH_LEVEL);
+		AutoState driveState2 = createMagicDriveState("<Drive State 2>", 36.0, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW);
+		AutoState depositCubeState = createCubeDepositState("<Deposit Cube State>", 3.0);
+		AutoState idleState = createIdleState("<Idle State>");
 
-		AutoState liftState = new AutoState("<Lift State 1>");
-		LiftAction liftAction = new LiftAction("<Lift Action>", CubeManagement.SWITCH_LEVEL);
-		TimeEvent timer5b = new TimeEvent(1.0);  // lift timer event
-		liftState.addAction(liftAction);
-		liftState.addEvent(timer5b);
-
-		double dist_inches2 = 36.0;
-		AutoState driveState2 = new AutoState("<Drive State 2>");
-		DriveForwardMagicAction driveForwardMagic2 = new DriveForwardMagicAction("<Drive Forward Magic Action 2>", dist_inches2, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW, true, 0.0);
-		//TimeEvent timer6 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
-		ClosedLoopPositionEvent pos2 = new ClosedLoopPositionEvent(dist_inches2, 0.5, 1.0);
-		driveState2.addAction(driveForwardMagic2);
-		//driveState2.addEvent(timer6);
-		driveState2.addEvent(pos2);
-		
-		AutoState depositCubeState = new AutoState("<Deposit Cube State 1>");
-		DepositCubeAction deposit1 = new DepositCubeAction("<Deposit Cube Action>");
-		TimeEvent timer7 = new TimeEvent(3.0);  // deposit cube timer event
-		depositCubeState.addAction(deposit1);
-		depositCubeState.addEvent(timer7);
-		
-		AutoState idleState2 = new AutoState("<Idle State 2>");
-		IdleAction deadEnd = new IdleAction("<Dead End Action>");
-		DriveForwardAction driveForward4 = new DriveForwardAction("<Drive Forward Action 4 -reset>", 0.0, true, 0.0);  // reset gyro 
-		idleState2.addAction(deadEnd);
-		idleState2.addAction(driveForward4);
-				
-		// connect each event with a state to move to
+		// connect the state sequence
 		driveState.associateNextState(turnLeftState);
-		turnLeftState.associateNextState(flipperState);
-		flipperState.associateNextState(liftState);
-		liftState.associateNextState(driveState2);
+		turnLeftState.associateNextState(flipperDownState);
+		flipperDownState.associateNextState(liftUpState);
+		liftUpState.associateNextState(driveState2);
 		driveState2.associateNextState(depositCubeState);
-		depositCubeState.associateNextState(idleState2);
+		depositCubeState.associateNextState(idleState);
 						
+		// add states to the network list
 		autoNet.addState(driveState);
 		autoNet.addState(turnLeftState);
-		autoNet.addState(flipperState);
-		autoNet.addState(liftState);
+		autoNet.addState(flipperDownState);
+		autoNet.addState(liftUpState);
 		autoNet.addState(driveState2);
 		autoNet.addState(depositCubeState);
-		autoNet.addState(idleState2);
+		autoNet.addState(idleState);
 		
 		return autoNet;
 	}
@@ -787,73 +519,32 @@ public class AutoNetworkBuilder {
 	private static AutoNetwork createDepositCubeScaleRight() {
 		
 		AutoNetwork autoNet = new AutoNetwork("<Deposit Cube Scale (Right Side) Network>");
-						
-		double dist_inches1 = 302.0;
-		AutoState driveState = new AutoState("<Drive State 1>");
-		DriveForwardMagicAction driveForwardMagic = new DriveForwardMagicAction("<Drive Forward Magic Action>", dist_inches1, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST, true, 0.0);
-		//TimeEvent timer2 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
-		ClosedLoopPositionEvent pos1 = new ClosedLoopPositionEvent(dist_inches1, 0.5, 1.0);
-		driveState.addAction(driveForwardMagic);
-		//driveState.addEvent(timer2);
-		driveState.addEvent(pos1);
-		
-		double angle_deg1 = -90.0;
-		AutoState turnLeftState = new AutoState("<Turn Left State>");
-		TurnPIDAction turnPidAction = new TurnPIDAction("<Turn left PID action>", angle_deg1, 0.35, true);
-		//TimeEvent timer3 = new TimeEvent(2.5);  // timer event - allow PID time to settle
-		ClosedLoopAngleEvent angle1 = new ClosedLoopAngleEvent(angle_deg1,5.0,1.0);
-		turnLeftState.addAction(turnPidAction);
-		//turnLeftState.addEvent(timer3);
-		turnLeftState.addEvent(angle1);
-		
-		AutoState flipperState = new AutoState("<Flipper State 1>");
-		FlipperAction flipperAction = new FlipperAction("<Flipper Down Action>", false);
-		TimeEvent timer4 = new TimeEvent(0.1);  // flipper timer event
-		flipperState.addAction(flipperAction);
-		flipperState.addEvent(timer4);
+					
+		// create states
+		AutoState driveState = createMagicDriveState("<Drive State 1>", 302.0, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST);
+		AutoState turnLeftState = createMagicTurnState("<Turn Left State>", -90.0, 0.35);
+		AutoState flipperDownState = createFlipperState("<Flipper Down State>", false);
+		AutoState liftUpState = createLiftState("<Lift Up State>", CubeManagement.SCALE_LEVEL);
+		AutoState driveState2 = createMagicDriveState("<Drive State 2>", 24.0, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW);
+		AutoState depositCubeState = createCubeDepositState("<Deposit Cube State>", 3.0);
+		AutoState idleState = createIdleState("<Idle State>");
 
-		AutoState liftState = new AutoState("<Lift State 1>");
-		LiftAction liftAction = new LiftAction("<Lift Action>", CubeManagement.SCALE_LEVEL);
-		TimeEvent timer5b = new TimeEvent(1.0);  // lift timer event
-		liftState.addAction(liftAction);
-		liftState.addEvent(timer5b);
-
-		double dist_inches2 = 24.0;
-		AutoState driveState2 = new AutoState("<Drive State 2>");
-		DriveForwardMagicAction driveForwardMagic2 = new DriveForwardMagicAction("<Drive Forward Magic Action 2>", dist_inches2, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW, true, 0.0);
-		//TimeEvent timer6 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
-		ClosedLoopPositionEvent pos2 = new ClosedLoopPositionEvent(dist_inches2, 0.5, 1.0);
-		driveState2.addAction(driveForwardMagic2);
-		//driveState2.addEvent(timer6);
-		driveState2.addEvent(pos2);
-		
-		AutoState depositCubeState = new AutoState("<Deposit Cube State 1>");
-		DepositCubeAction deposit1 = new DepositCubeAction("<Deposit Cube Action>");
-		TimeEvent timer7 = new TimeEvent(3.0);  // deposit cube timer event
-		depositCubeState.addAction(deposit1);
-		depositCubeState.addEvent(timer7);
-		
-		AutoState idleState2 = new AutoState("<Idle State 2>");
-		IdleAction deadEnd = new IdleAction("<Dead End Action>");
-		DriveForwardAction driveForward4 = new DriveForwardAction("<Drive Forward Action 4 -reset>", 0.0, true, 0.0);  // reset gyro 
-		idleState2.addAction(deadEnd);
-		idleState2.addAction(driveForward4);
-				
-		// connect each event with a state to move to
+		// connect the state sequence
 		driveState.associateNextState(turnLeftState);
-		turnLeftState.associateNextState(flipperState);
-		flipperState.associateNextState(liftState);
-		liftState.associateNextState(driveState2);
+		turnLeftState.associateNextState(flipperDownState);
+		flipperDownState.associateNextState(liftUpState);
+		liftUpState.associateNextState(driveState2);
 		driveState2.associateNextState(depositCubeState);
-		depositCubeState.associateNextState(idleState2);
+		depositCubeState.associateNextState(idleState);
 						
+		// add states to the network list
 		autoNet.addState(driveState);
 		autoNet.addState(turnLeftState);
-		autoNet.addState(flipperState);
-		autoNet.addState(liftState);
+		autoNet.addState(flipperDownState);
+		autoNet.addState(liftUpState);
 		autoNet.addState(driveState2);
 		autoNet.addState(depositCubeState);
-		autoNet.addState(idleState2);
+		autoNet.addState(idleState);
 		
 		return autoNet;
 	}
@@ -872,94 +563,37 @@ public class AutoNetworkBuilder {
 		
 		AutoNetwork autoNet = new AutoNetwork("<Deposit Cube Scale (left from right side) Network>");
 		
-		double dist_inches1 = 200.0;
-		AutoState driveState = new AutoState("<Drive State 1>");
-		DriveForwardMagicAction driveForwardMagic = new DriveForwardMagicAction("<Drive Forward Magic Action>", dist_inches1, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST, true, 0.0);
-		//TimeEvent timer2 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
-		ClosedLoopPositionEvent pos1 = new ClosedLoopPositionEvent(dist_inches1, 0.5, 1.0);
-		driveState.addAction(driveForwardMagic);
-		//driveState.addEvent(timer2);
-		driveState.addEvent(pos1);
-		
-		double angle_deg1 = -90.0;
-		AutoState turnLeftState = new AutoState("<Turn Left State>");
-		TurnPIDAction turnPidAction = new TurnPIDAction("<Turn left PID action>", angle_deg1, 0.35, true);
-		//TimeEvent timer3 = new TimeEvent(2.5);  // timer event - allow PID time to settle
-		ClosedLoopAngleEvent angle1 = new ClosedLoopAngleEvent(angle_deg1,5.0,1.0);
-		turnLeftState.addAction(turnPidAction);
-		//turnLeftState.addEvent(timer3);
-		turnLeftState.addEvent(angle1);
-
-		double dist_inches2 = 256.0;
-		AutoState driveState2 = new AutoState("<Drive State 2>");
-		DriveForwardMagicAction driveForwardMagic2 = new DriveForwardMagicAction("<Drive Forward Magic Action>", dist_inches2, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST, true, 0.0);
-		//TimeEvent timer4 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
-		ClosedLoopPositionEvent pos2 = new ClosedLoopPositionEvent(dist_inches2, 0.5, 1.0);
-		driveState2.addAction(driveForwardMagic2);
-		//driveState.addEvent(timer4);
-		driveState2.addEvent(pos2);
-		
-		double angle_deg2 = 135.0;
-		AutoState turnRightState = new AutoState("<Turn Right State>");
-		TurnPIDAction turnPidAction2 = new TurnPIDAction("<Turn right PID action 2>", angle_deg2, 0.35, true);
-		//TimeEvent timer5 = new TimeEvent(2.5);  // timer event - allow PID time to settle
-		ClosedLoopAngleEvent angle2 = new ClosedLoopAngleEvent(angle_deg2,5.0,1.0);
-		turnRightState.addAction(turnPidAction2);
-		//turnRightState.addEvent(timer5);
-		turnRightState.addEvent(angle2);
-
-		AutoState flipperState = new AutoState("<Flipper State 1>");
-		FlipperAction flipperAction = new FlipperAction("<Flipper Down Action>", false);
-		TimeEvent timer6 = new TimeEvent(0.1);  // flipper timer event
-		flipperState.addAction(flipperAction);
-		flipperState.addEvent(timer6);
-
-		AutoState liftState = new AutoState("<Lift State 1>");
-		LiftAction liftAction = new LiftAction("<Lift Action>", CubeManagement.SCALE_LEVEL);
-		TimeEvent timer7 = new TimeEvent(1.0);  // lift timer event
-		liftState.addAction(liftAction);
-		liftState.addEvent(timer7);
-				
-		double dist_inches3 = 36.0;
-		AutoState driveState3 = new AutoState("<Drive State 3>");
-		DriveForwardMagicAction driveForwardMagic3 = new DriveForwardMagicAction("<Drive Forward Magic Action 3>", dist_inches3, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW, true, 0.0);
-		//TimeEvent timer8 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
-		ClosedLoopPositionEvent pos3 = new ClosedLoopPositionEvent(dist_inches3, 0.5, 1.0);
-		driveState3.addAction(driveForwardMagic3);
-		//driveState3.addEvent(timer8);
-		driveState3.addEvent(pos3);
-
-		AutoState depositCubeState = new AutoState("<Deposit Cube State 1>");
-		DepositCubeAction deposit1 = new DepositCubeAction("<Deposit Cube Action>");
-		TimeEvent timer9 = new TimeEvent(3.0);  // deposit cube timer event
-		depositCubeState.addAction(deposit1);
-		depositCubeState.addEvent(timer9);
-		
-		AutoState idleState2 = new AutoState("<Idle State 2>");
-		DriveForwardAction driveForward4 = new DriveForwardAction("<Drive Forward Action 4 -reset>", 0.0, true, 0.0);  // reset gyro
-		IdleAction deadEnd = new IdleAction("<Dead End Action>");
-		idleState2.addAction(driveForward4);
-		idleState2.addAction(deadEnd);
-				
-		// connect each event with a state to move to
+		// create states
+		AutoState driveState = createMagicDriveState("<Drive State 1>", 200.0, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST);
+		AutoState turnLeftState = createMagicTurnState("<Turn Left State>", -90.0, 0.35);
+		AutoState driveState2 = createMagicDriveState("<Drive State 2>", 256.0, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST);
+		AutoState turnRightState = createMagicTurnState("<Turn Right State>", 135.0, 0.35);
+		AutoState flipperDownState = createFlipperState("<Flipper Down State>", false);
+		AutoState liftUpState = createLiftState("<Lift Up State>", CubeManagement.SCALE_LEVEL);
+		AutoState driveState3 = createMagicDriveState("<Drive State 3>", 36.0, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW);
+		AutoState depositCubeState = createCubeDepositState("<Deposit Cube State>", 3.0);
+		AutoState idleState = createIdleState("<Idle State>");
+			
+		// connect the state sequence
 		driveState.associateNextState(turnLeftState);
 		turnLeftState.associateNextState(driveState2);
 		driveState2.associateNextState(turnRightState);
-		turnRightState.associateNextState(flipperState);
-		flipperState.associateNextState(liftState);
-		liftState.associateNextState(driveState3);
+		turnRightState.associateNextState(flipperDownState);
+		flipperDownState.associateNextState(liftUpState);
+		liftUpState.associateNextState(driveState3);
 		driveState3.associateNextState(depositCubeState);
-		depositCubeState.associateNextState(idleState2);
+		depositCubeState.associateNextState(idleState);
 						
+		// add states to the network list
 		autoNet.addState(driveState);
 		autoNet.addState(turnLeftState);
 		autoNet.addState(driveState2);
 		autoNet.addState(turnRightState);
-		autoNet.addState(flipperState);
-		autoNet.addState(liftState);
+		autoNet.addState(flipperDownState);
+		autoNet.addState(liftUpState);
 		autoNet.addState(driveState3);
 		autoNet.addState(depositCubeState);
-		autoNet.addState(idleState2);
+		autoNet.addState(idleState);
 				
 		return autoNet;
 	}	
@@ -974,65 +608,29 @@ public class AutoNetworkBuilder {
 	private static AutoNetwork createMoveToScaleLeftFromRight() {
 		
 		AutoNetwork autoNet = new AutoNetwork("<Move to Scale Left (Right Side) Network>");
-						
-		double dist_inches1 = 200.0;
-		AutoState driveState = new AutoState("<Drive State 1>");
-		DriveForwardMagicAction driveForwardMagic = new DriveForwardMagicAction("<Drive Forward Magic Action>", dist_inches1, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST, true, 0.0);
-		//TimeEvent timer2 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
-		ClosedLoopPositionEvent pos1 = new ClosedLoopPositionEvent(dist_inches1, 0.5, 1.0);
-		driveState.addAction(driveForwardMagic);
-		//driveState.addEvent(timer2);
-		driveState.addEvent(pos1);
-				
-		double angle_deg1 = -90.0;
-		AutoState turnLeftState = new AutoState("<Turn Left State>");
-		TurnPIDAction turnPidAction = new TurnPIDAction("<Turn left PID action>", angle_deg1, 0.35, true);
-		//TimeEvent timer3 = new TimeEvent(2.5);  // timer event - allow PID time to settle
-		ClosedLoopAngleEvent angle1 = new ClosedLoopAngleEvent(angle_deg1,5.0,1.0);
-		turnLeftState.addAction(turnPidAction);
-		//turnLeftState.addEvent(timer3);
-		turnLeftState.addEvent(angle1);
-		
-		double dist_inches2 = 192.0;
-		AutoState driveState2 = new AutoState("<Drive State 2>");
-		DriveForwardMagicAction driveForwardMagic2 = new DriveForwardMagicAction("<Drive Forward Magic Action 2>", dist_inches2, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST, true, 0.0);
-		//TimeEvent timer4 = new TimeEvent(2.5);  // drive forward timer event - allow PID time to settle
-		ClosedLoopPositionEvent pos2 = new ClosedLoopPositionEvent(dist_inches2, 0.5, 1.0);
-		driveState2.addAction(driveForwardMagic2);
-		//driveState2.addEvent(timer4);
-		driveState2.addEvent(pos2);
-
-		AutoState flipperState = new AutoState("<Flipper State 1>");
-		FlipperAction flipperAction = new FlipperAction("<Flipper Down Action>", false);
-		TimeEvent timer5 = new TimeEvent(0.1);  // flipper timer event
-		flipperState.addAction(flipperAction);
-		flipperState.addEvent(timer5);
-
-		AutoState liftState = new AutoState("<Lift State 1>");
-		LiftAction liftAction = new LiftAction("<Lift Action>", CubeManagement.SCALE_LEVEL);
-		TimeEvent timer6b = new TimeEvent(1.0);  // lift timer event
-		liftState.addAction(liftAction);
-		liftState.addEvent(timer6b);
-
-		AutoState idleState2 = new AutoState("<Idle State 2>");
-		IdleAction deadEnd = new IdleAction("<Dead End Action>");
-		DriveForwardAction driveForward4 = new DriveForwardAction("<Drive Forward Action 4 -reset>", 0.0, true, 0.0);  // reset gyro 
-		idleState2.addAction(deadEnd);
-		idleState2.addAction(driveForward4);
-				
-		// connect each event with a state to move to
+					
+		// create states
+		AutoState driveState = createMagicDriveState("<Drive State 1>", 200.0, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST);
+		AutoState turnLeftState = createMagicTurnState("<Turn Left State>", -90.0, 0.35);
+		AutoState driveState2 = createMagicDriveState("<Drive State 2>", 192.0, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST);
+		AutoState flipperDownState = createFlipperState("<Flipper Down State>", false);
+		AutoState liftUpState = createLiftState("<Lift Up State>", CubeManagement.SCALE_LEVEL);
+		AutoState idleState = createIdleState("<Idle State>");
+			
+		// connect the state sequence
 		driveState.associateNextState(turnLeftState);
 		turnLeftState.associateNextState(driveState2);
-		driveState2.associateNextState(flipperState);
-		flipperState.associateNextState(liftState);
-		liftState.associateNextState(idleState2);
+		driveState2.associateNextState(flipperDownState);
+		flipperDownState.associateNextState(liftUpState);
+		liftUpState.associateNextState(idleState);
 						
+		// add states to the network list
 		autoNet.addState(driveState);
 		autoNet.addState(turnLeftState);
 		autoNet.addState(driveState2);
-		autoNet.addState(flipperState);
-		autoNet.addState(liftState);
-		autoNet.addState(idleState2);
+		autoNet.addState(flipperDownState);
+		autoNet.addState(liftUpState);
+		autoNet.addState(idleState);
 		
 		return autoNet;
 	}
@@ -1049,80 +647,19 @@ public class AutoNetworkBuilder {
 	private static AutoNetwork createTurningForeverNetwork() {
 		
 		AutoNetwork autoNet = new AutoNetwork("<Turning Forever Network>");
+				
+		// create states
+		AutoState turnState0 = createMagicTurnState("<Turn 0 State>", -90.0, 0.35);
+		AutoState turnState1 = createMagicTurnState("<Turn 1 State>", 90.0, 0.35);
+		AutoState turnState2 = createMagicTurnState("<Turn 2 State>", -90.0, 0.35);
+		AutoState turnState3 = createMagicTurnState("<Turn 3 State>", 90.0, 0.35);
+		AutoState turnState4 = createMagicTurnState("<Turn 4 State>", -90.0, 0.35);
+		AutoState turnState5 = createMagicTurnState("<Turn 5 State>", 90.0, 0.35);
+		AutoState turnState6 = createMagicTurnState("<Turn 6 State>", -90.0, 0.35);
+		AutoState turnState7 = createMagicTurnState("<Turn 7 State>", 90.0, 0.35);
+		AutoState turnState8 = createMagicTurnState("<Turn 8 State>", -90.0, 0.35);
 		
-		AutoState turnState0 = new AutoState("<Turn Left State 0>");
-		TurnPIDAction turnPidAction0 = new TurnPIDAction("<Turn Left PID action 0>", -90.0, 0.5, true);
-		//TimeEvent timer2 = new TimeEvent(10.0);  // drive forward timer event - allow PID time to settle
-		ClosedLoopAngleEvent angle1 = new ClosedLoopAngleEvent(-90.0,2.0,1.0);
-		turnState0.addAction(turnPidAction0);
-		//turnState0.addEvent(timer2);
-		turnState0.addEvent(angle1);
-
-		AutoState turnState1 = new AutoState("<Turn Right State 1>");
-		TurnPIDAction turnPidAction1 = new TurnPIDAction("<Turn right PID action 1>", 90.0, 0.5, true);
-		//TimeEvent timer3 = new TimeEvent(10.0);  // drive forward timer event - allow PID time to settle
-		ClosedLoopAngleEvent angle2 = new ClosedLoopAngleEvent(90.0,2.0,1.0);
-		turnState1.addAction(turnPidAction1);
-		//turnState1.addEvent(timer3);
-		turnState1.addEvent(angle2);
-						
-		AutoState turnState2 = new AutoState("<Turn Left State 2>");
-		TurnPIDAction turnPidAction2 = new TurnPIDAction("<Turn Left PID action 2>", -90.0, 0.5, true);
-		//TimeEvent timer4 = new TimeEvent(10.0);  // drive forward timer event - allow PID time to settle
-		ClosedLoopAngleEvent angle3 = new ClosedLoopAngleEvent(-90.0,2.0,1.0);
-		turnState2.addAction(turnPidAction2);
-		//turnState2.addEvent(timer4);
-		turnState2.addEvent(angle3);
-
-		AutoState turnState3 = new AutoState("<Turn Right State 3>");
-		TurnPIDAction turnPidAction3 = new TurnPIDAction("<Turn right PID action 3>", 90.0, 0.5, true);
-		//TimeEvent timer5 = new TimeEvent(10.0);  // drive forward timer event - allow PID time to settle
-		ClosedLoopAngleEvent angle4 = new ClosedLoopAngleEvent(90.0,2.0,1.0);
-		turnState3.addAction(turnPidAction3);
-		//turnState3.addEvent(timer5);
-		turnState3.addEvent(angle4);
-		
-		AutoState turnState4 = new AutoState("<Turn Left State 4>");
-		TurnPIDAction turnPidAction4 = new TurnPIDAction("<Turn left PID action 4>", -90.0, 0.5, true);
-		//TimeEvent timer6 = new TimeEvent(10.0);  // drive forward timer event - allow PID time to settle
-		ClosedLoopAngleEvent angle5 = new ClosedLoopAngleEvent(-90.0,2.0,1.0);
-		turnState4.addAction(turnPidAction4);
-		//turnState4.addEvent(timer6);
-		turnState4.addEvent(angle5);
-		
-		AutoState turnState5 = new AutoState("<Turn Right State 5>");
-		TurnPIDAction turnPidAction5 = new TurnPIDAction("<Turn right PID action 5>", 90.0, 0.5, true);
-		//TimeEvent timer7 = new TimeEvent(10.0);  // drive forward timer event - allow PID time to settle
-		ClosedLoopAngleEvent angle6 = new ClosedLoopAngleEvent(90.0,2.0,1.0);
-		turnState5.addAction(turnPidAction5);
-		//turnState5.addEvent(timer7);
-		turnState5.addEvent(angle6);
-		
-		AutoState turnState6 = new AutoState("<Turn Left State 6>");
-		TurnPIDAction turnPidAction6 = new TurnPIDAction("<Turn left PID action 6>", -90.0, 0.5, true);
-		//TimeEvent timer8 = new TimeEvent(10.0);  // drive forward timer event - allow PID time to settle
-		ClosedLoopAngleEvent angle7 = new ClosedLoopAngleEvent(-90.0,2.0,1.0);
-		turnState6.addAction(turnPidAction6);
-		//turnState6.addEvent(timer8);
-		turnState6.addEvent(angle7);
-
-		AutoState turnState7 = new AutoState("<Turn Right State 7>");
-		TurnPIDAction turnPidAction7 = new TurnPIDAction("<Turn Right PID action 7>", 90.0, 0.5, true);
-		//TimeEvent timer9 = new TimeEvent(10.0);  // drive forward timer event - allow PID time to settle
-		ClosedLoopAngleEvent angle8 = new ClosedLoopAngleEvent(90.0,2.0,1.0);
-		turnState7.addAction(turnPidAction7);
-		//turnState7.addEvent(timer9);
-		turnState7.addEvent(angle8);
-
-		AutoState turnState8 = new AutoState("<Turn Left State 8>");
-		TurnPIDAction turnPidAction8 = new TurnPIDAction("<Turn left PID action 8>", -90.0, 0.5, true);
-		//TimeEvent timer10 = new TimeEvent(10.0);  // drive forward timer event - allow PID time to settle
-		ClosedLoopAngleEvent angle9 = new ClosedLoopAngleEvent(-90.0,2.0,1.0);
-		turnState4.addAction(turnPidAction8);
-		//turnState4.addEvent(timer10);
-		turnState4.addEvent(angle9);
-		
-		// connect each event with a state to move to
+		// connect the state sequence
 		turnState0.associateNextState(turnState1);
 		turnState1.associateNextState(turnState2);
 		turnState2.associateNextState(turnState3);
@@ -1133,6 +670,7 @@ public class AutoNetworkBuilder {
 		turnState7.associateNextState(turnState8);
 		turnState8.associateNextState(turnState0);   // go back to right turning
 						
+		// add states to the network list
 		autoNet.addState(turnState0);
 		autoNet.addState(turnState1);
 		autoNet.addState(turnState2);
@@ -1153,24 +691,14 @@ public class AutoNetworkBuilder {
 		
 		AutoNetwork autoNet = new AutoNetwork("<Turning ONCE Network>");
 		
-		AutoState turnState1 = new AutoState("<Turn Right State 1>");
-		TurnPIDAction turnPidAction1 = new TurnPIDAction("<Turn right PID action 1>", 90.0, 0.6, true);
-		//TimeEvent timer3 = new TimeEvent(10.0);  // drive forward timer event - allow PID time to settle
-		ClosedLoopAngleEvent angle2 = new ClosedLoopAngleEvent(90.0,1.0,1.0);
-		turnState1.addAction(turnPidAction1);
-		//turnState1.addEvent(timer3);
-		turnState1.addEvent(angle2);
+		// create the states
+		AutoState turnState1 = createMagicTurnState("<Turn 1 State>", 90.0, 0.6);
+		AutoState idleState = createIdleState("Idle State");
 		
-		AutoState idleState = new AutoState("<Idle State 2>");
-		IdleAction deadEnd = new IdleAction("<Dead End Action>");
-		DriveForwardAction driveForward4 = new DriveForwardAction("<Drive Forward Action 4 -reset>", 0.0, true, 0.0);  // reset gyro 
-		idleState.addAction(deadEnd);
-		idleState.addAction(driveForward4);
-						
-		
-		// connect each event with a state to move to
+		// connect the state sequence
 		turnState1.associateNextState(idleState);
 						
+		// add states to the network list
 		autoNet.addState(turnState1);
 		autoNet.addState(idleState);
 				
@@ -1189,98 +717,16 @@ public class AutoNetworkBuilder {
 	private static AutoNetwork createPacingForeverNetwork() {
 		
 		AutoNetwork autoNet = new AutoNetwork("<Pacing Forever Network>");
+				
+		// create states
+		AutoState driveState1 = createMagicDriveState("<Drive State 1>", 60.0, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST);
+		AutoState turnRightState0 = createMagicTurnState("<Turn Right State 0>", 90.0, 0.35);
+		AutoState turnRightState1 = createMagicTurnState("<Turn Right State 1>", 90.0, 0.35);
+		AutoState driveState2 = createMagicDriveState("<Drive State 2>", 60.0, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST);
+		AutoState turnLeftState0 = createMagicTurnState("<Turn Left State 0>", -90.0, 0.35);
+		AutoState turnLeftState1 = createMagicTurnState("<Turn Left State 1>", -90.0, 0.35);
 		
-		AutoState idleState = new AutoState("<Idle State 1>");
-		IdleAction startIdle = new IdleAction("<Start Idle Action 1>");
-		TimeEvent timer1 = new TimeEvent(0.1);  // timer event
-		idleState.addAction(startIdle);
-		idleState.addEvent(timer1);
-
-		/*
-		AutoState driveState1 = new AutoState("<Drive State 1>");
-		DriveForwardAction driveForward1 = new DriveForwardAction("<Drive Forward Action 1>", 0.3, false, 0);
-		TimeEvent timer2 = new TimeEvent(2.0);  // drive forward timer event
-		driveState1.addAction(driveForward1);
-		driveState1.addEvent(timer2);
-		*/
-		
-		AutoState driveState1 = new AutoState("<Drive Magic State 1>");
-		DriveForwardMagicAction driveForwardMagic = new DriveForwardMagicAction("<Drive Forward Magic Action>", 60.0, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW, true, 0.0);
-		//TimeEvent timer2 = new TimeEvent(5.0);  // drive forward timer event
-		ClosedLoopPositionEvent pos1 = new ClosedLoopPositionEvent(60.0, 0.5, 1.0);
-		driveState1.addAction(driveForwardMagic);
-		//driveState1.addEvent(timer2);
-		driveState1.addEvent(pos1);
-		
-		// turn right 180 degrees.  Do it in two 90 degree turns (for PID)
-		AutoState turnRightState0 = new AutoState("<Turn right State 0>");
-		TurnPIDAction turnRightPidAction0 = new TurnPIDAction("<Turn right PID action 0>", 90.0, 0.3, true);
-		//TimeEvent timer3 = new TimeEvent(5.0);  // allow PID time to settle
-		ClosedLoopAngleEvent angle1 = new ClosedLoopAngleEvent(90.0,2.0,1.0);
-		turnRightState0.addAction(turnRightPidAction0);
-		//turnRightState0.addEvent(timer3);
-		turnRightState0.addEvent(angle1);
-
-		AutoState turnRightState1 = new AutoState("<Turn right State 1>");
-		TurnPIDAction turnRightPidAction1 = new TurnPIDAction("<Turn right PID action 0>", 90.0, 0.3, true);
-		//TimeEvent timer4 = new TimeEvent(5.0);  // allow PID time to settle
-		ClosedLoopAngleEvent angle2 = new ClosedLoopAngleEvent(90.0,2.0,1.0);
-		turnRightState1.addAction(turnRightPidAction1);
-		//turnRightState1.addEvent(timer4);
-		turnRightState1.addEvent(angle2);
-		
-		/*
-		AutoState turnRightState = new AutoState("<Turn to 180 deg>");
-		TurnAction turnRightAction = new TurnAction("<Turn to 180 deg action>", 180, 0.3, false);
-		GyroAngleEvent gyroRight = new GyroAngleEvent(175, false, GyroAngleEvent.AnglePolarity.kGreaterThan);  // gyro angle event for -90 deg
-		turnRightState.addAction(turnRightAction);
-		turnRightState.addEvent(gyroRight);
-		*/
-		
-		/*
-		AutoState driveState2 = new AutoState("<Drive State 2>");
-		DriveForwardAction driveForward2 = new DriveForwardAction("<Drive Forward Action 2>", 0.3, false, 180);
-		TimeEvent timer5 = new TimeEvent(2.0);  // drive forward timer event
-		driveState2.addAction(driveForward2);
-		driveState2.addEvent(timer5);
-		*/
-		
-		AutoState driveState2 = new AutoState("<Drive Magic State 2>");
-		DriveForwardMagicAction driveForwardMagic2 = new DriveForwardMagicAction("<Drive Forward Magic Action>", 60.0, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW, true, 0.0);
-		//TimeEvent timer5 = new TimeEvent(5.0);  // drive forward timer event
-		ClosedLoopPositionEvent pos2 = new ClosedLoopPositionEvent(60.0, 0.5, 1.0);
-		driveState2.addAction(driveForwardMagic2);
-		//driveState2.addEvent(timer5);
-		driveState2.addEvent(pos2);
-		
-		// turn left 180 degrees.  Do it in two 90 degree turns (for PID)
-		AutoState turnLeftState0 = new AutoState("<Turn left State 0>");
-		TurnPIDAction turnLeftPidAction0 = new TurnPIDAction("<Turn left PID action 0>", -90.0, 0.3, true);
-		//TimeEvent timer6 = new TimeEvent(5.0);  // allow PID time to settle
-		ClosedLoopAngleEvent angle3 = new ClosedLoopAngleEvent(-90.0,2.0,1.0);
-		turnLeftState0.addAction(turnLeftPidAction0);
-		//turnLeftState0.addEvent(timer6);
-		turnLeftState0.addEvent(angle3);
-
-		AutoState turnLeftState1 = new AutoState("<Turn left State 1>");
-		TurnPIDAction turnLeftPidAction1 = new TurnPIDAction("<Turn left PID action 1>", -90.0, 0.3, true);
-		//TimeEvent timer7 = new TimeEvent(5.0);  // allow PID time to settle
-		ClosedLoopAngleEvent angle4 = new ClosedLoopAngleEvent(-90.0,2.0,1.0);
-		turnLeftState1.addAction(turnLeftPidAction1);
-		//turnLeftState1.addEvent(timer7);
-		turnLeftState1.addEvent(angle4);
-		
-		/*
-		AutoState turnLeftState = new AutoState("<Turn to 0 deg>");
-		TurnAction turnLeftAction = new TurnAction("<Turn to 0 deg action>", 5, 0.3, false);
-		GyroAngleEvent gyroLeft = new GyroAngleEvent(5, false, GyroAngleEvent.AnglePolarity.kLessThan);  // gyro angle event for +90 deg
-		turnLeftState.addAction(turnLeftAction);
-		turnLeftState.addEvent(gyroLeft);
-		*/
-		
-		// connect each event with a state to move to
-		// last state loops back!
-		idleState.associateNextState(driveState1);
+		// connect the state sequence
 		driveState1.associateNextState(turnRightState0);
 		turnRightState0.associateNextState(turnRightState1);
 		turnRightState1.associateNextState(driveState2);
@@ -1288,7 +734,7 @@ public class AutoNetworkBuilder {
 		turnLeftState0.associateNextState(turnLeftState1);
 		turnLeftState1.associateNextState(driveState1);
 						
-		autoNet.addState(idleState);
+		// add states to the network list
 		autoNet.addState(driveState1);
 		autoNet.addState(turnRightState0);
 		autoNet.addState(turnRightState1);
@@ -1311,45 +757,19 @@ public class AutoNetworkBuilder {
 		
 		AutoNetwork autoNet = new AutoNetwork("<Lifting Forever Network>");
 		
-		AutoState idleState = new AutoState("<Idle State 1>");
-		IdleAction startIdle = new IdleAction("<Start Idle Action 1>");
-		TimeEvent timer1 = new TimeEvent(0.1);  // timer event
-		idleState.addAction(startIdle);
-		idleState.addEvent(timer1);
+		// create states
+		AutoState liftState1 = createLiftState("<Lift 1 State>", CubeManagement.SWITCH_LEVEL);
+		AutoState liftState2 = createLiftState("<Lift 2 State>", CubeManagement.SCALE_LEVEL);
+		AutoState liftState3 = createLiftState("<Lift 3 State>", CubeManagement.SWITCH_LEVEL);
+		AutoState liftState4 = createLiftState("<Lift 4 State>", CubeManagement.BASE_LEVEL);
 		
-		AutoState liftState1 = new AutoState("<Lift to SWITCH State 1>");
-		LiftAction lift1 = new LiftAction("<Lift to SWITCH Action>", CubeManagement.SWITCH_LEVEL);
-		TimeEvent timer2 = new TimeEvent(5.0);  // lift timer event
-		liftState1.addAction(lift1);
-		liftState1.addEvent(timer2);
-		
-		AutoState liftState2 = new AutoState("<Lift to SCALE State 2>");
-		LiftAction lift2 = new LiftAction("<Lift to SCALE Action>", CubeManagement.SCALE_LEVEL);
-		TimeEvent timer3 = new TimeEvent(5.0);  // lift timer event
-		liftState2.addAction(lift2);
-		liftState2.addEvent(timer3);
-						
-		AutoState liftState3 = new AutoState("<Lift to SWITCH State 3>");
-		LiftAction lift3 = new LiftAction("<Lift to SWITCH Action>", CubeManagement.SWITCH_LEVEL);
-		TimeEvent timer4 = new TimeEvent(5.0);  // lift timer event
-		liftState3.addAction(lift3);
-		liftState3.addEvent(timer4);
-
-		AutoState liftState4 = new AutoState("<Lift to BASE State 4>");
-		LiftAction lift4 = new LiftAction("<Lift to BASE Action>", CubeManagement.BASE_LEVEL);
-		TimeEvent timer5 = new TimeEvent(5.0);  // lift timer event
-		liftState4.addAction(lift4);
-		liftState4.addEvent(timer5);
-
-		// connect each event with a state to move to
-		// last state loops back!
-		idleState.associateNextState(liftState1);
+		// connect the state sequence
 		liftState1.associateNextState(liftState2);
 		liftState2.associateNextState(liftState3);
 		liftState3.associateNextState(liftState4);
 		liftState4.associateNextState(liftState1);
 						
-		autoNet.addState(idleState);
+		// add states to the network list
 		autoNet.addState(liftState1);
 		autoNet.addState(liftState2);
 		autoNet.addState(liftState3);
@@ -1359,334 +779,6 @@ public class AutoNetworkBuilder {
 	}
 	
 
-	// **** MOVE FORWARD Network - slow and steady ***** 
-	// 1) be idle for a number of sec
-	// 2) drive forward for a number of sec
-	// 3) go back to idle and stay there 
-	private static AutoNetwork createDriveForwardNetwork_Slow() {
-		
-		AutoNetwork autoNet = new AutoNetwork("<Drive Forward Network - Slow>");
-		
-		AutoState idleState = new AutoState("<Idle State 1>");
-		IdleAction startIdle = new IdleAction("<Start Idle Action 1>");
-		IdleAction doSomething2 = new IdleAction("<Placeholder Action 2>");
-		IdleAction doSomething3 = new IdleAction("<Placeholder Action 3>");
-		TimeEvent timer1 = new TimeEvent(0.5);  // timer event
-		idleState.addAction(startIdle);
-		idleState.addAction(doSomething2);
-		idleState.addAction(doSomething3);
-		idleState.addEvent(timer1);
-
-		AutoState driveState = new AutoState("<Drive State 1>");
-		DriveForwardAction driveForward = new DriveForwardAction("<Drive Forward Action - Slow>", 0.5, true, 0.0);
-		IdleAction doSomething4 = new IdleAction("<Placeholder Action 4>");
-		IdleAction doSomething5 = new IdleAction("<Placeholder Action 5>");
-		TimeEvent timer2 = new TimeEvent(3.0);  // drive forward timer event
-		driveState.addAction(driveForward);
-		idleState.addAction(doSomething4);
-		idleState.addAction(doSomething5);
-		driveState.addEvent(timer2);
-		
-		AutoState idleState2 = new AutoState("<Idle State 2>");
-		IdleAction deadEnd = new IdleAction("<Dead End Action>");
-		idleState2.addAction(deadEnd);
-				
-		// connect each event with a state to move to
-		idleState.associateNextState(driveState);
-		driveState.associateNextState(idleState2);
-						
-		autoNet.addState(idleState);
-		autoNet.addState(driveState);
-		autoNet.addState(idleState2);
-				
-		return autoNet;
-	}
-	
-	// **** MOVE FORWARD FOREVER Network - slow and steady ***** 
-	// 1) be idle for a number of sec
-	// 2) drive forward forever (never stop)
-	private static AutoNetwork createDriveForwardForeverNetwork() {
-		
-		AutoNetwork autoNet = new AutoNetwork("<Drive Forward Network - Slow>");
-		
-		AutoState idleState = new AutoState("<Idle State 1>");
-		IdleAction startIdle = new IdleAction("<Start Idle Action 1>");
-		IdleAction doSomething2 = new IdleAction("<Placeholder Action 2>");
-		IdleAction doSomething3 = new IdleAction("<Placeholder Action 3>");
-		TimeEvent timer1 = new TimeEvent(0.5);  // timer event
-		idleState.addAction(startIdle);
-		idleState.addAction(doSomething2);
-		idleState.addAction(doSomething3);
-		idleState.addEvent(timer1);
-
-		AutoState driveState = new AutoState("<Drive State 1>");
-		DriveForwardAction driveForward = new DriveForwardAction("<Drive Forward Action - Slow>", 0.5, true, 0.0);
-		IdleAction doSomething4 = new IdleAction("<Placeholder Action 4>");
-		IdleAction doSomething5 = new IdleAction("<Placeholder Action 5>");
-		driveState.addAction(driveForward);
-		idleState.addAction(doSomething4);
-		idleState.addAction(doSomething5);
-						
-		// connect each event with a state to move to
-		idleState.associateNextState(driveState);
-						
-		autoNet.addState(idleState);
-		autoNet.addState(driveState);
-				
-		return autoNet;
-	}
-	
-	// **** COMPLEX DRIVING Network - drive in L pattern and return to original spot ***** 
-	// 1) be idle for a number of sec
-	// 2) drive forward for a number of sec X
-	// 3) Turn 90 deg left
-	// 4) drive forward for a number of sec Y
-	// 5) Turn around (180 deg right)
-	// 6) drive forward for a number of sec Y
-	// 7) Turn 90 deg right
-	// 8) drive forward for a number of sec X
-	// 9) Turn around (180 deg left)
-	// 10) go back to idle and stay there 
-	private static AutoNetwork createComplexDrivingNetwork() {
-		
-		AutoNetwork autoNet = new AutoNetwork("<Complex Driving Network>");
-		
-		AutoState idleState = new AutoState("<Idle State 1>");
-		IdleAction startIdle = new IdleAction("<Start Idle Action 1>");
-		TimeEvent timer1 = new TimeEvent(0.5);  // timer event
-		idleState.addAction(startIdle);
-		idleState.addEvent(timer1);
-
-		AutoState driveState1 = new AutoState("<Drive State 1>");
-		DriveForwardAction driveForward1 = new DriveForwardAction("<Drive Forward Action 1>", 0.75, true, 0.0);
-		TimeEvent timer2 = new TimeEvent(1.5);  // drive forward timer event
-		driveState1.addAction(driveForward1);
-		driveState1.addEvent(timer2);
-		
-		AutoState turnLeftState = new AutoState("<Turn Left State -90 deg>");
-		TurnAction turnLeftAction = new TurnAction("<Turn left action>",-90, 0.5, true);
-		GyroAngleEvent gyroLeft = new GyroAngleEvent(-90, true, GyroAngleEvent.AnglePolarity.kLessThan);  // gyro angle event for -90 deg
-		turnLeftState.addAction(turnLeftAction);
-		turnLeftState.addEvent(gyroLeft);
-			
-		AutoState driveState2 = new AutoState("<Drive State 2>");
-		DriveForwardAction driveForward2 = new DriveForwardAction("<Drive Forward Action 2>", 0.75, true, 0.0);
-		TimeEvent timer3 = new TimeEvent(1.5);  // drive forward timer event
-		driveState2.addAction(driveForward2);
-		driveState2.addEvent(timer3);
-		
-		AutoState aboutFaceRightState = new AutoState("<About Face Right State +180 deg>");
-		TurnAction aboutFaceRightAction = new TurnAction("<About Face right action>",180, 0.5, true);
-		GyroAngleEvent gyroAboutFaceRight = new GyroAngleEvent(180, true, GyroAngleEvent.AnglePolarity.kGreaterThan);  // gyro angle event for +180 deg
-		aboutFaceRightState.addAction(aboutFaceRightAction);
-		aboutFaceRightState.addEvent(gyroAboutFaceRight);
-
-		AutoState driveState3 = new AutoState("<Drive State 3>");
-		DriveForwardAction driveForward3 = new DriveForwardAction("<Drive Forward Action 3>", 0.75, true, 0.0);
-		TimeEvent timer4 = new TimeEvent(1.5);  // drive forward timer event
-		driveState3.addAction(driveForward3);
-		driveState3.addEvent(timer4);
-
-		AutoState turnRightState = new AutoState("<Turn Right State +90 deg>");
-		TurnAction turnRightAction = new TurnAction("<Turn right action>",90, 0.5, true);
-		GyroAngleEvent gyroRight = new GyroAngleEvent(90, true, GyroAngleEvent.AnglePolarity.kGreaterThan);  // gyro angle event for +90 deg
-		turnRightState.addAction(turnRightAction);
-		turnRightState.addEvent(gyroRight);
-
-		AutoState driveState4 = new AutoState("<Drive State 4>");
-		DriveForwardAction driveForward4 = new DriveForwardAction("<Drive Forward Action 4>", 0.75, true, 0.0);
-		TimeEvent timer5 = new TimeEvent(1.5);  // drive forward timer event
-		driveState4.addAction(driveForward4);
-		driveState4.addEvent(timer5);
-
-		AutoState aboutFaceLeftState = new AutoState("<About Face Left State -180 deg>");
-		TurnAction aboutFaceLeftAction = new TurnAction("<About Face left action>",-180, 0.5, true);
-		GyroAngleEvent gyroAboutFaceLeft = new GyroAngleEvent(-180, true, GyroAngleEvent.AnglePolarity.kLessThan);  // gyro angle event for -180 deg
-		aboutFaceLeftState.addAction(aboutFaceLeftAction);
-		aboutFaceLeftState.addEvent(gyroAboutFaceLeft);
-
-		AutoState idleState2 = new AutoState("<Idle State 2>");
-		IdleAction deadEnd = new IdleAction("<Dead End Action>");
-		idleState2.addAction(deadEnd);
-				
-		// connect each event with a state to move to
-		idleState.associateNextState(driveState1);
-		driveState1.associateNextState(turnLeftState);
-		turnLeftState.associateNextState(driveState2);
-		driveState2.associateNextState(aboutFaceRightState);
-		aboutFaceRightState.associateNextState(driveState3);
-		driveState3.associateNextState(turnRightState);
-		turnRightState.associateNextState(driveState4);
-		driveState4.associateNextState(aboutFaceLeftState);
-		aboutFaceLeftState.associateNextState(idleState2);
-						
-		autoNet.addState(idleState);
-		autoNet.addState(driveState1);
-		autoNet.addState(turnLeftState);
-		autoNet.addState(driveState2);
-		autoNet.addState(aboutFaceRightState);
-		autoNet.addState(driveState3);
-		autoNet.addState(turnRightState);
-		autoNet.addState(driveState4);
-		autoNet.addState(aboutFaceLeftState);
-		autoNet.addState(idleState2);
-				
-		return autoNet;
-	}
-
-	// **** ABSOLUTE COMPLEX DRIVING Network - drive in L pattern and return to original spot ***** 
-	// Uses absolute angle headings instead of relative angles between states
-	// Note: this network does NOT reset the gyro!!
-	//
-	// 1) be idle for a number of sec
-	// 2) drive forward for a number of sec X
-	// 3) Turn to -90 deg heading
-	// 4) drive forward for a number of sec Y
-	// 5) Turn to +90 deg heading
-	// 6) drive forward for a number of sec Y
-	// 7) Turn to +180 deg heading
-	// 8) drive forward for a number of sec X
-	// 9) Turn to 0 deg heading
-	// 10) go back to idle and stay there 
-	private static AutoNetwork createAbsoluteComplexDrivingNetwork() {
-		
-		AutoNetwork autoNet = new AutoNetwork("<Absolute Complex Driving Network>");
-		
-		AutoState idleState = new AutoState("<Idle State 1>");
-		IdleAction startIdle = new IdleAction("<Start Idle Action 1>");
-		TimeEvent timer1 = new TimeEvent(0.5);  // timer event
-		idleState.addAction(startIdle);
-		idleState.addEvent(timer1);
-
-		AutoState driveState1 = new AutoState("<Drive State 1>");
-		DriveForwardAction driveForward1 = new DriveForwardAction("<Drive Forward Action 1>", 0.75, false, 0.0);
-		TimeEvent timer2 = new TimeEvent(1.5);  // drive forward timer event
-		driveState1.addAction(driveForward1);
-		driveState1.addEvent(timer2);
-		
-		AutoState turnLeftState = new AutoState("<Turn to -90 deg>");
-		TurnAction turnLeftAction = new TurnAction("<Turn to -90 deg action>",-90, 0.5, false);
-		GyroAngleEvent gyroLeft = new GyroAngleEvent(-90, false, GyroAngleEvent.AnglePolarity.kLessThan);  // gyro angle event for -90 deg
-		turnLeftState.addAction(turnLeftAction);
-		turnLeftState.addEvent(gyroLeft);
-			
-		AutoState driveState2 = new AutoState("<Drive State 2>");
-		DriveForwardAction driveForward2 = new DriveForwardAction("<Drive Forward Action 2>", 0.75, false, -90);
-		TimeEvent timer3 = new TimeEvent(1.5);  // drive forward timer event
-		driveState2.addAction(driveForward2);
-		driveState2.addEvent(timer3);
-		
-		AutoState aboutFaceRightState = new AutoState("<Turn to 90 deg>");
-		TurnAction aboutFaceRightAction = new TurnAction("<Turn to 90 deg action>", 90, 0.5, false);
-		GyroAngleEvent gyroAboutFaceRight = new GyroAngleEvent(90, false, GyroAngleEvent.AnglePolarity.kGreaterThan);  // gyro angle event for +180 deg
-		aboutFaceRightState.addAction(aboutFaceRightAction);
-		aboutFaceRightState.addEvent(gyroAboutFaceRight);
-
-		AutoState driveState3 = new AutoState("<Drive State 3>");
-		DriveForwardAction driveForward3 = new DriveForwardAction("<Drive Forward Action 3>", 0.75, false, 90);
-		TimeEvent timer4 = new TimeEvent(1.5);  // drive forward timer event
-		driveState3.addAction(driveForward3);
-		driveState3.addEvent(timer4);
-
-		AutoState turnRightState = new AutoState("<Turn to 180 deg>");
-		TurnAction turnRightAction = new TurnAction("<Turn to 180 deg action>",180, 0.5, false);
-		GyroAngleEvent gyroRight = new GyroAngleEvent(180, false, GyroAngleEvent.AnglePolarity.kGreaterThan);  // gyro angle event for +90 deg
-		turnRightState.addAction(turnRightAction);
-		turnRightState.addEvent(gyroRight);
-
-		AutoState driveState4 = new AutoState("<Drive State 4>");
-		DriveForwardAction driveForward4 = new DriveForwardAction("<Drive Forward Action 4>", 0.75, false, 180);
-		TimeEvent timer5 = new TimeEvent(1.5);  // drive forward timer event
-		driveState4.addAction(driveForward4);
-		driveState4.addEvent(timer5);
-
-		AutoState aboutFaceLeftState = new AutoState("<Turn to 0 deg>");
-		TurnAction aboutFaceLeftAction = new TurnAction("<Turn to 0 deg action>", 0, 0.5, false);
-		GyroAngleEvent gyroAboutFaceLeft = new GyroAngleEvent(0, false, GyroAngleEvent.AnglePolarity.kLessThan);  // gyro angle event for -180 deg
-		aboutFaceLeftState.addAction(aboutFaceLeftAction);
-		aboutFaceLeftState.addEvent(gyroAboutFaceLeft);
-
-		AutoState idleState2 = new AutoState("<Idle State 2>");
-		IdleAction deadEnd = new IdleAction("<Dead End Action>");
-		idleState2.addAction(deadEnd);
-				
-		// connect each event with a state to move to
-		idleState.associateNextState(driveState1);
-		driveState1.associateNextState(turnLeftState);
-		turnLeftState.associateNextState(driveState2);
-		driveState2.associateNextState(aboutFaceRightState);
-		aboutFaceRightState.associateNextState(driveState3);
-		driveState3.associateNextState(turnRightState);
-		turnRightState.associateNextState(driveState4);
-		driveState4.associateNextState(aboutFaceLeftState);
-		aboutFaceLeftState.associateNextState(idleState2);
-						
-		autoNet.addState(idleState);
-		autoNet.addState(driveState1);
-		autoNet.addState(turnLeftState);
-		autoNet.addState(driveState2);
-		autoNet.addState(aboutFaceRightState);
-		autoNet.addState(driveState3);
-		autoNet.addState(turnRightState);
-		autoNet.addState(driveState4);
-		autoNet.addState(aboutFaceLeftState);
-		autoNet.addState(idleState2);
-				
-		return autoNet;
-	}
-	
-	// **** SPINNY Network - Spin X revolutions in one direction, pause, Spin X revolutions back ***** 
-	// 1) be idle for a number of sec
-	// 2) Turn 1080 deg left (three turns)
-	// 3) be idle for a number of sec
-	// 4) Turn 1080 deg right (three turns)
-	// 5) go back to idle and stay there 
-	private static AutoNetwork createSpinnyNetwork() {
-		
-		AutoNetwork autoNet = new AutoNetwork("<Spinny Network>");
-		
-		AutoState idleState = new AutoState("<Idle State 1>");
-		IdleAction startIdle = new IdleAction("<Start Idle Action 1>");
-		TimeEvent timer1 = new TimeEvent(0.5);  // timer event
-		idleState.addAction(startIdle);
-		idleState.addEvent(timer1);
-		
-		AutoState turnLeftState = new AutoState("<Turn Left State -1080 deg>");
-		TurnAction turnLeftAction = new TurnAction("<Turn left action>",-1080, 0.5, true);
-		GyroAngleEvent gyroLeft = new GyroAngleEvent(-1080, true, GyroAngleEvent.AnglePolarity.kLessThan);  // gyro angle event for -90 deg
-		turnLeftState.addAction(turnLeftAction);
-		turnLeftState.addEvent(gyroLeft);
-	
-		AutoState idleState2 = new AutoState("<Idle State 2>");
-		IdleAction pauseAction = new IdleAction("<Pause Action>");
-		TimeEvent timer2 = new TimeEvent(5.0);  // timer event
-		idleState2.addAction(pauseAction);
-		idleState2.addEvent(timer2);
-		
-		AutoState turnRightState = new AutoState("<Turn Right State +1080 deg>");
-		TurnAction turnRightAction = new TurnAction("<Turn right action>",1080,  0.5, true);
-		GyroAngleEvent gyroRight = new GyroAngleEvent(1080, true, GyroAngleEvent.AnglePolarity.kGreaterThan);  // gyro angle event for +90 deg
-		turnRightState.addAction(turnRightAction);
-		turnRightState.addEvent(gyroRight);
-
-		AutoState idleState3 = new AutoState("<Idle State 3>");
-		IdleAction deadEnd = new IdleAction("<Dead End Action>");
-		idleState3.addAction(deadEnd);
-				
-		// connect each event with a state to move to
-		idleState.associateNextState(turnLeftState);
-		turnLeftState.associateNextState(idleState2);
-		idleState2.associateNextState(turnRightState);
-		turnRightState.associateNextState(idleState3);
-						
-		autoNet.addState(idleState);
-		autoNet.addState(turnLeftState);
-		autoNet.addState(idleState2);
-		autoNet.addState(turnRightState);
-		autoNet.addState(idleState3);
-				
-		return autoNet;
-	}
 	
 	// **** Test Network - does nothing except transitions states ***** 
 	private static AutoNetwork createTestNetwork() {
@@ -1739,5 +831,5 @@ public class AutoNetworkBuilder {
 				
 		return autoNet;
 	}
-	
+		
 }
