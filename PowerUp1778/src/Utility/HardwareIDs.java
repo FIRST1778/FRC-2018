@@ -24,7 +24,7 @@ public class HardwareIDs {
 	public static final int FLIPPER_DOWN_SOLENOID = 1;
 	
 	public static final int CLAMP_ON_SOLENOID = 2;
-	public static final int CLAMP_OFF_SOLENOID = 3;
+	public static final int CLAMP_OFF_SOLENOID = 7;
 	
 	public static final int BRAKE_ON_SOLENOID = 4;
 	public static final int BRAKE_OFF_SOLENOID = 5;

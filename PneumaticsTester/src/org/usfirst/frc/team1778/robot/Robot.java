@@ -25,20 +25,14 @@ public class Robot extends IterativeRobot {
 	private final int GAMEPAD_ID = 1;
 	private final int PISTON1_PNEUMATIC_BUTTON_1 = 1;
 	private final int PISTON1_PNEUMATIC_BUTTON_2 = 2;
-	
-	private final int PISTON2_PNEUMATIC_BUTTON_1 = 3;
-	private final int PISTON2_PNEUMATIC_BUTTON_2 = 4;
-	
+		
 	private final int PCM_ID = 2;	
 	
-	private final int PISTON1_FORWARD_CHANNEL = 0;
-	private final int PISTON1_REVERSE_CHANNEL = 1;
-
-	private final int PISTON2_FORWARD_CHANNEL = 2;
-	private final int PISTON2_REVERSE_CHANNEL = 3;
+	private final int PISTON1_FORWARD_CHANNEL = 2;
+	private final int PISTON1_REVERSE_CHANNEL = 7;
 	
 	private Compressor compress;
-	private DoubleSolenoid dSol1, dSol2;
+	private DoubleSolenoid dSol1;
 	
 	/**
 	 * This function is run when the robot is first started up and should be
@@ -50,10 +44,7 @@ public class Robot extends IterativeRobot {
 		compress = new Compressor(PCM_ID);	
 		
 		dSol1 = new DoubleSolenoid(PCM_ID, PISTON1_FORWARD_CHANNEL, PISTON1_REVERSE_CHANNEL);
-		dSol1.set(DoubleSolenoid.Value.kOff);	
-		
-		dSol2 = new DoubleSolenoid(PCM_ID, PISTON2_FORWARD_CHANNEL, PISTON2_REVERSE_CHANNEL);
-		dSol2.set(DoubleSolenoid.Value.kOff);	
+		dSol1.set(DoubleSolenoid.Value.kOff);			
 	}
 
 	/**
@@ -95,19 +86,7 @@ public class Robot extends IterativeRobot {
 		{
 			dSol1.set(DoubleSolenoid.Value.kReverse);
 		}
-		
-		// if gamepad button 1 pressed, piston 2 go forward
-		if (gamepad.getRawButton(PISTON2_PNEUMATIC_BUTTON_1))
-		{
-			dSol2.set(DoubleSolenoid.Value.kForward);
-		}
-		
-		// if gamepad button 2 pressed, piston2 go reverse 
-		if (gamepad.getRawButton(PISTON2_PNEUMATIC_BUTTON_2))
-		{
-			dSol2.set(DoubleSolenoid.Value.kReverse);
-		}
-		
+				
 	}
 
 	/**

@@ -8,7 +8,9 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 public class InputOutputComm {
 	
 	private static boolean initialized = false;
-	
+	static final String PI_ADDRESS = "10.17.78.10";
+	static final int PORT = 1181; // or whatever it ends up being
+
 	public static void initialize() {
 		if (initialized)
 			return;
@@ -17,6 +19,10 @@ public class InputOutputComm {
 		tableInstance = NetworkTableInstance.getDefault();
 		table = tableInstance.getTable("InputOutput1778/DataTable");		
    
+		// publish the address of the Raspberry Pi camera stream
+		tableInstance.getEntry("/CameraPublisher/PiCamera/streams")
+	    .setStringArray(new String[]{"mjpeg:http://" + PI_ADDRESS + ":" + PORT + "/?action=stream"});	
+
         initialized = true;
 	}
 			
