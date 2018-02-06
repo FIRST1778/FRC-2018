@@ -325,9 +325,10 @@ int main() {
 	//tableInstance.StartServer();          // DEBUG ONLY - use only if no roborio present
 	
 	// set location of the camera stream in the network table (will be picked up by DS)
-	std::string streamNames[1];
-	streamNames[0] = "mjpeg:http://10.0.0.179:1181/?action=stream";	
-	tableInstance.GetEntry("/CameraPublisher/ChillOutPiCam/streams").SetStringArray(streamNames);
+	// Not usually set by Pi - usually set directly by Roborio
+	//std::string streamNames[1];
+	//streamNames[0] = "mjpeg:http://10.0.0.179:1181/?action=stream";	
+	//tableInstance.GetEntry("/CameraPublisher/ChillOutPiCam/streams").SetStringArray(streamNames);
 	
 	//Initial state: set networktable clampOn state to TRUE and reset exposure to teleop level 
 	table = tableInstance.GetTable("RPIComm/Data_Table");
