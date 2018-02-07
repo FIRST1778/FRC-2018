@@ -144,9 +144,11 @@ public class AutoNetworkBuilder {
 	{
 		AutoState liftState = new AutoState(state_name);
 		LiftAction liftAction = new LiftAction("<Lift Action>", lift_level);
-		TimeEvent timer5b = new TimeEvent(1.0);  // lift timer event
+		//TimeEvent timer5b = new TimeEvent(1.0);  // lift timer event
+		ClosedLoopEncoderEvent enc = new ClosedLoopEncoderEvent(lift_level, 5.0, 1.0);
 		liftState.addAction(liftAction);
-		liftState.addEvent(timer5b);
+		//liftState.addEvent(timer5b);
+		liftState.addEvent(enc);
 		
 		return liftState;
 	}

@@ -70,6 +70,7 @@ public class Robot extends IterativeRobot {
     	InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"MainLog","autonomous mode...");
     	    	 	
     	DriveAssembly.autoInit(true, 0.0, false);
+    	CubeManagement.autoInit();
     	
     	// start the auto state machine
     	autoSM.start();

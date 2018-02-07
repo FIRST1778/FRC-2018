@@ -29,7 +29,7 @@ public class CubeManagement {
 	public static final int SWITCH_LEVEL = 1;
 	public static final int SCALE_LEVEL = 2;
 	
-	private static final int liftLevelPulses[] = {0, 100, 200};  // number of encoder pulses for each level  {upper, lower}
+	private static final int liftLevelPulses[] = {0, 1000, 2000};  // number of encoder pulses for each level  {base, lower, upper}
 	private static final int speedRpm = 900;
 	private static final int accelRpm = 450;
 	
@@ -41,7 +41,7 @@ public class CubeManagement {
 	public static final boolean ALIGNED_SENSOR = true; 
 
 	// PID coeffs
-	private static final double kP = 7.0;
+	private static final double kP = 1.0;
 	private static final double kI = 0.0;
 	private static final double kD = 0.0;
 	private static final double kF = 0.0;
@@ -70,6 +70,8 @@ public class CubeManagement {
 	
 	// lift motors
 	private static TalonSRX upperLiftMotor, lowerLiftMotor;
+	private static final boolean UPPER_REVERSE_MOTOR = false;
+	private static final boolean LOWER_REVERSE_MOTOR = false;
 		
 	// pneumatics objects
 	private static Compressor compress;
@@ -106,12 +108,10 @@ public class CubeManagement {
 		brakeStartTimer = 0;
 
         // create pneumatics objects
-		/*
 		compress = new Compressor(HardwareIDs.PCM_ID);
 		flipperSolenoid = new DoubleSolenoid(HardwareIDs.PCM_ID, HardwareIDs.FLIPPER_UP_SOLENOID, HardwareIDs.FLIPPER_DOWN_SOLENOID);
 		clampSolenoid = new DoubleSolenoid(HardwareIDs.PCM_ID, HardwareIDs.CLAMP_ON_SOLENOID, HardwareIDs.CLAMP_OFF_SOLENOID);
 		liftBrakeSolenoid = new DoubleSolenoid(HardwareIDs.PCM_ID, HardwareIDs.BRAKE_ON_SOLENOID, HardwareIDs.BRAKE_OFF_SOLENOID);
-        */
 		
 		// create and initialize collector motors (open-loop)
 		leftCollectorMotor = new Spark(HardwareIDs.LEFT_COLLECTOR_PWM_ID);
@@ -119,13 +119,11 @@ public class CubeManagement {
 		rightCollectorMotor = new Spark(HardwareIDs.RIGHT_COLLECTOR_PWM_ID);
 		rightCollectorMotor.setInverted(RIGHT_COLLECTOR_INVERTED);
 
-		/*
 		// create and initialize upper lift motor (closed-loop)
 		upperLiftMotor = configureMotor(HardwareIDs.UPPER_LIFT_TALON_ID, UPPER_REVERSE_MOTOR, ALIGNED_SENSOR, kP, kI, kD, kF);
 
 		// create and initialize lower lift motor (follows upper motor)
 		lowerLiftMotor = configureMotor(HardwareIDs.LOWER_LIFT_TALON_ID, LOWER_REVERSE_MOTOR, HardwareIDs.UPPER_LIFT_TALON_ID);
-		*/	
 				
 		// make sure all motors are off
 		resetMotors();
@@ -154,7 +152,7 @@ public class CubeManagement {
 		rightCollectorMotor.set(0);	
 		
 		// reset upper lift motor (lower lift follows)
-		//upperLiftMotor.set(ControlMode.PercentOutput, 0);
+		upperLiftMotor.set(ControlMode.PercentOutput, 0);
 		
 		// set lift brake
 		liftBrakeOn();
@@ -165,7 +163,7 @@ public class CubeManagement {
 	public static void resetPos()
 	{		
 		// reset upper lift motor encoder pulses to zero
-		//upperLiftMotor.setSelectedSensorPosition(0, PIDLOOP_IDX, TIMEOUT_MS);
+		upperLiftMotor.setSelectedSensorPosition(0, PIDLOOP_IDX, TIMEOUT_MS);
 	}	 	
 
     // open-loop motor configuration (and possibly follower)
@@ -196,8 +194,8 @@ public class CubeManagement {
     	_talon.setSensorPhase(alignSensor); 
     	
     	// set up limit switches
-		//_talon.configForwardLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen, 0);
-		//_talon.configReverseLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen, 0);
+		_talon.configForwardLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen, 0);
+		_talon.configReverseLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen, 0);
    	
     	// set up closed loop control
     	_talon.selectProfileSlot(PROFILE_SLOT, PIDLOOP_IDX);
@@ -223,7 +221,7 @@ public class CubeManagement {
 			return;
 
 		flipperUp = true;
-		//flipperSolenoid.set(DoubleSolenoid.Value.kForward);	
+		flipperSolenoid.set(DoubleSolenoid.Value.kForward);	
 		InputOutputComm.putBoolean(InputOutputComm.LogTable.kMainLog,"CubeMgmt/Flipper", flipperUp);
 	}
 	
@@ -233,7 +231,7 @@ public class CubeManagement {
 			return;
 		
 		flipperUp = false;
-		//flipperSolenoid.set(DoubleSolenoid.Value.kReverse);		
+		flipperSolenoid.set(DoubleSolenoid.Value.kReverse);		
 		InputOutputComm.putBoolean(InputOutputComm.LogTable.kMainLog,"CubeMgmt/Flipper", flipperUp);
 	}
 
@@ -244,7 +242,7 @@ public class CubeManagement {
 			return;
 		
 		clampOn = true;		
-		//clampSolenoid.set(DoubleSolenoid.Value.kForward);		
+		clampSolenoid.set(DoubleSolenoid.Value.kForward);		
 		InputOutputComm.putBoolean(InputOutputComm.LogTable.kMainLog,"CubeMgmt/Clamp", clampOn);
 		RPIComm.setBoolean("clampOn", clampOn);
 	}
@@ -256,7 +254,7 @@ public class CubeManagement {
 			return;
 		
 		clampOn = false;
-		//clampSolenoid.set(DoubleSolenoid.Value.kReverse);		
+		clampSolenoid.set(DoubleSolenoid.Value.kReverse);		
 		InputOutputComm.putBoolean(InputOutputComm.LogTable.kMainLog,"CubeMgmt/Clamp", clampOn);
 		RPIComm.setBoolean("clampOn", clampOn);
 
@@ -268,7 +266,7 @@ public class CubeManagement {
 			return;
 
 		liftBrakeOn = true;
-		//liftBrakeSolenoid.set(DoubleSolenoid.Value.kForward);		
+		liftBrakeSolenoid.set(DoubleSolenoid.Value.kForward);		
 		InputOutputComm.putBoolean(InputOutputComm.LogTable.kMainLog,"CubeMgmt/LiftBrake", liftBrakeOn);
 		RPIComm.setBoolean("brakeOn", liftBrakeOn);
 	}
@@ -279,7 +277,7 @@ public class CubeManagement {
 			return;
 
 		liftBrakeOn = false;
-		//liftBrakeSolenoid.set(DoubleSolenoid.Value.kReverse);		
+		liftBrakeSolenoid.set(DoubleSolenoid.Value.kReverse);		
 		InputOutputComm.putBoolean(InputOutputComm.LogTable.kMainLog,"CubeMgmt/LiftBrake", liftBrakeOn);
 		RPIComm.setBoolean("brakeOn", liftBrakeOn);
 	}
@@ -388,7 +386,7 @@ public class CubeManagement {
 	
 		// apply lift motor gain value
 		InputOutputComm.putDouble(InputOutputComm.LogTable.kMainLog,"CubeMgmt/LiftStrength", liftStrength);
-		//upperLiftMotor.set(ControlMode.PercentOutput, liftStrength);
+		upperLiftMotor.set(ControlMode.PercentOutput, liftStrength);
 	}
 	
 	private static void checkFlipperControls() {
@@ -401,9 +399,10 @@ public class CubeManagement {
 			flipperUp();
 		}			
 	}
-	
+		
 	public static void autoInit() {				
 		resetMotors();
+		resetPos();
 		flipperUp();
 		clampOn();
 		liftBrakeOn();		
@@ -433,8 +432,7 @@ public class CubeManagement {
 	public static int getLiftPos() {
 		
 		// Encoders now read only raw encoder values - convert raw to inches directly
-		//int upperPulses = upperLiftMotor.getSelectedSensorPosition(0);
-		int upperPulses = 0;
+		int upperPulses = upperLiftMotor.getSelectedSensorPosition(0);
 				
 		String posStr = String.format("%d", upperPulses);
 		InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"Auto/LiftUpper", posStr);

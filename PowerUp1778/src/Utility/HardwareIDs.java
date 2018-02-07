@@ -11,24 +11,24 @@ public class HardwareIDs {
 	public static final int RIGHT_REAR_TALON_ID = 4;
 
 	public static final int LOWER_LIFT_TALON_ID = 5;
-	public static final int UPPER_LIFT_TALON_ID = 6;
+	public static final int UPPER_LIFT_TALON_ID = 9;
 	
-	public static final int CLIMBER_TALON_ID = 9;
+	public static final int CLIMBER_TALON_ID = 6;
 	
 	// Collector and Climber Sparks (PWM)
-	public static final int LEFT_COLLECTOR_PWM_ID = 2;
-	public static final int RIGHT_COLLECTOR_PWM_ID = 3;
+	public static final int LEFT_COLLECTOR_PWM_ID = 0;
+	public static final int RIGHT_COLLECTOR_PWM_ID = 1;
 	
 	// Solenoids (pneumatics)
 	public static final int FLIPPER_UP_SOLENOID = 0;
-	public static final int FLIPPER_DOWN_SOLENOID = 1;
+	public static final int FLIPPER_DOWN_SOLENOID = 5;
+	
+	public static final int BRAKE_ON_SOLENOID = 1;
+	public static final int BRAKE_OFF_SOLENOID = 6;
 	
 	public static final int CLAMP_ON_SOLENOID = 2;
 	public static final int CLAMP_OFF_SOLENOID = 7;
 	
-	public static final int BRAKE_ON_SOLENOID = 4;
-	public static final int BRAKE_OFF_SOLENOID = 5;
-
 	// input control IDs
 	public static final int DRIVER_CONTROL_ID = 0;
 	public static final int GAMEPAD_ID = 1;
