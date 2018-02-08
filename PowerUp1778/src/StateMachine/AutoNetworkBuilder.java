@@ -145,7 +145,7 @@ public class AutoNetworkBuilder {
 		AutoState liftState = new AutoState(state_name);
 		LiftAction liftAction = new LiftAction("<Lift Action>", lift_level);
 		//TimeEvent timer5b = new TimeEvent(1.0);  // lift timer event
-		ClosedLoopEncoderEvent enc = new ClosedLoopEncoderEvent(lift_level, 5.0, 1.0);
+		ClosedLoopEncoderEvent enc = new ClosedLoopEncoderEvent(lift_level, 10, 1.0);
 		liftState.addAction(liftAction);
 		//liftState.addEvent(timer5b);
 		liftState.addEvent(enc);
@@ -760,10 +760,10 @@ public class AutoNetworkBuilder {
 		AutoNetwork autoNet = new AutoNetwork("<Lifting Forever Network>");
 		
 		// create states
-		AutoState liftState1 = createLiftState("<Lift 1 State>", CubeManagement.SWITCH_LEVEL);
-		AutoState liftState2 = createLiftState("<Lift 2 State>", CubeManagement.SCALE_LEVEL);
-		AutoState liftState3 = createLiftState("<Lift 3 State>", CubeManagement.SWITCH_LEVEL);
-		AutoState liftState4 = createLiftState("<Lift 4 State>", CubeManagement.BASE_LEVEL);
+		AutoState liftState1 = createLiftState("<Lift 1 State>", CubeManagement.liftLevelPulses[CubeManagement.SWITCH_LEVEL]);
+		AutoState liftState2 = createLiftState("<Lift 2 State>", CubeManagement.liftLevelPulses[CubeManagement.SCALE_LEVEL]);
+		AutoState liftState3 = createLiftState("<Lift 3 State>", CubeManagement.liftLevelPulses[CubeManagement.SWITCH_LEVEL]);
+		AutoState liftState4 = createLiftState("<Lift 4 State>", CubeManagement.liftLevelPulses[CubeManagement.BASE_LEVEL]);
 		
 		// connect the state sequence
 		liftState1.associateNextState(liftState2);

@@ -37,7 +37,7 @@ public class LiftAction extends Action {
 		Timer.delay(0.2);
 		
 		// do some lift initialization, start the lift
-		CubeManagement.goToHeight(targetliftLevel);
+		CubeManagement.goToTarget(targetliftLevel);
 				
 		super.initialize();
 	}

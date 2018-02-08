@@ -29,7 +29,7 @@ public class CubeManagement {
 	public static final int SWITCH_LEVEL = 1;
 	public static final int SCALE_LEVEL = 2;
 	
-	private static final int liftLevelPulses[] = {0, 1000, 2000};  // number of encoder pulses for each level  {base, lower, upper}
+	public static final int liftLevelPulses[] = {0, 1000, 2000};  // number of encoder pulses for each level  {base, lower, upper}
 	private static final int speedRpm = 900;
 	private static final int accelRpm = 450;
 	
@@ -292,9 +292,9 @@ public class CubeManagement {
 	
 	/************************* lift control functions **********************************/
 		
-	public static void goToHeight(int level)
+	public static void goToTarget(int pulses)
 	{		
-		int targetPulses = liftLevelPulses[level];
+		int targetPulses = pulses;
 
 		String posStr = String.format("%d", targetPulses);
 		InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"Auto/liftTargetPulses", posStr);

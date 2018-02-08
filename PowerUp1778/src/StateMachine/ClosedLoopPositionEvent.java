@@ -1,9 +1,7 @@
 package StateMachine;
 
-import java.util.prefs.Preferences;
 import Systems.DriveAssembly;
-
-import edu.wpi.first.wpilibj.Utility;
+import edu.wpi.first.wpilibj.RobotController;
 
 // event triggered when closed loop position control gets to within an error range of target for a time period
 public class ClosedLoopPositionEvent extends Event {
@@ -36,7 +34,8 @@ public class ClosedLoopPositionEvent extends Event {
 	public void initialize()
 	{
 		//System.out.println("ClosedLoopPositionEvent initialized!");
-		startTimeUs = Utility.getFPGATime();
+		//startTimeUs = Utility.getFPGATime();   // deprecated
+		startTimeUs = RobotController.getFPGATime();
 		
 		super.initialize();
 	}
@@ -51,11 +50,13 @@ public class ClosedLoopPositionEvent extends Event {
 		{
 			// outside error range...
 			// reset timer
-			startTimeUs = Utility.getFPGATime();
+			//startTimeUs = Utility.getFPGATime();    // deprecated
+			startTimeUs = RobotController.getFPGATime();
 			return false;
 		}
 	
-		long currentTimeUs = Utility.getFPGATime();
+		//long currentTimeUs = Utility.getFPGATime();    // deprecated
+		long currentTimeUs = RobotController.getFPGATime();
 		double delta = (currentTimeUs - startTimeUs)/1e6;
 		//System.out.println("delta = " + delta + " duration = " + durationSec);
 		
@@ -68,15 +69,5 @@ public class ClosedLoopPositionEvent extends Event {
 		// within error range for enough time
 		System.out.println("ClosedLoopPositionEvent triggered!");
 		return true;
-	}
-	
-	public void persistWrite(int counter, Preferences prefs) {
-
-		// create node for event
-		Preferences eventPrefs = prefs.node(counter + "_" + this.name);
-	
-		// store event details
-		eventPrefs.put("class",this.getClass().toString());
-		eventPrefs.putDouble("durationSec",this.durationSec);		
-	}
+	}	
 }
