@@ -1,0 +1,127 @@
+{
+  "dividerPosition": 0.0053285968028419185,
+  "tabPane": [
+    {
+      "title": "ChillOutDS",
+      "autoPopulate": false,
+      "autoPopulatePrefix": "",
+      "widgetPane": {
+        "gridSize": 128.0,
+        "hgap": 16.0,
+        "vgap": 16.0,
+        "tiles": {
+          "0,1": {
+            "size": [
+              2,
+              1
+            ],
+            "content": {
+              "_type": "ComboBox Chooser",
+              "_source0": "network_table:///SmartDashboard/AutoChooser_Action",
+              "_title": "SmartDashboard/AutoChooser_Action"
+            }
+          },
+          "0,0": {
+            "size": [
+              2,
+              1
+            ],
+            "content": {
+              "_type": "ComboBox Chooser",
+              "_source0": "network_table:///SmartDashboard/AutoChooser_Position",
+              "_title": "SmartDashboard/AutoChooser_Position"
+            }
+          },
+          "0,3": {
+            "size": [
+              2,
+              1
+            ],
+            "content": {
+              "_type": "ComboBox Chooser",
+              "_source0": "network_table:///SmartDashboard/AutoChooser_Remote_Scale_Action",
+              "_title": "SmartDashboard/AutoChooser_Remote_Scale_Action"
+            }
+          },
+          "0,2": {
+            "size": [
+              2,
+              1
+            ],
+            "content": {
+              "_type": "ComboBox Chooser",
+              "_source0": "network_table:///SmartDashboard/AutoChooser_Right_Left_Priority",
+              "_title": "SmartDashboard/AutoChooser_Right_Left_Priority"
+            }
+          },
+          "4,4": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///InputOutput1778/DataTable/Auto/GyroAngle",
+              "_title": "InputOutput1778/DataTable/Auto/GyroAngle"
+            }
+          },
+          "3,4": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///InputOutput1778/DataTable/Auto/EncoderLeft",
+              "_title": "InputOutput1778/DataTable/Auto/EncoderLeft"
+            }
+          },
+          "5,4": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///InputOutput1778/DataTable/Auto/EncoderRight",
+              "_title": "InputOutput1778/DataTable/Auto/EncoderRight"
+            }
+          },
+          "0,4": {
+            "size": [
+              2,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///InputOutput1778/DataTable/Auto/AutoSM_currentState",
+              "_title": "/InputOutput1778/DataTable/Auto/AutoSM_currentState"
+            }
+          },
+          "2,0": {
+            "size": [
+              5,
+              4
+            ],
+            "content": {
+              "_type": "Camera Stream",
+              "_source0": "camera_server://PiCamera",
+              "_title": "PiCamera"
+            }
+          },
+          "6,4": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///InputOutput1778/DataTable/Auto/LiftUpper",
+              "_title": "/InputOutput1778/DataTable/Auto/LiftUpper"
+            }
+          }
+        }
+      }
+    }
+  ]
+}
