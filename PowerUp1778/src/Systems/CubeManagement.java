@@ -289,7 +289,15 @@ public class CubeManagement {
 		rightCollectorMotor.set(COLLECTOR_OUT_STRENGTH);
 			
 	}
-	
+
+	public static void collectCube()
+	{
+		InputOutputComm.putDouble(InputOutputComm.LogTable.kMainLog,"CubeMgmt/CollectorLevel", COLLECTOR_IN_STRENGTH);
+		leftCollectorMotor.set(COLLECTOR_IN_STRENGTH);
+		rightCollectorMotor.set(COLLECTOR_IN_STRENGTH);
+			
+	}
+
 	/************************* lift control functions **********************************/
 		
 	public static void goToTarget(int pulses)
