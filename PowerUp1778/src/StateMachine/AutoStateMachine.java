@@ -99,10 +99,10 @@ public class AutoStateMachine {
 		
 		int netIndex = AutoNetworkBuilder.DO_NOTHING;
 		
-		if (action == AutoChooser.DO_NOTHING)
+		if ((action == AutoChooser.DO_NOTHING) || (position == AutoChooser.POS_UNDEFINED))
 		{
-			// auto state machine operation disabled
-			autoNetworkEnable = false;
+			autoNetworkEnable = true;
+			netIndex = AutoNetworkBuilder.DO_NOTHING;
 		}
 		else if (action == AutoChooser.DRIVE_FORWARD)
 		{
@@ -153,7 +153,14 @@ public class AutoStateMachine {
 			autoNetworkEnable = true;
 			netIndex = AutoNetworkBuilder.TURN_ONCE;
 		}
+		else if (action == AutoChooser.LIFT_TURN_FOREVER)
+		{
+			// debug network
+			autoNetworkEnable = true;
+			netIndex = AutoNetworkBuilder.LIFT_TURN_FOREVER;
+		}
 		else {
+			// auto state machine operation disabled
 			autoNetworkEnable = false;
 		}
 		

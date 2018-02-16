@@ -10,6 +10,7 @@ public class AutoState {
 	public String name;
 	protected AutoState nextState;
 	protected Preferences statePrefs;
+	protected boolean allEventsTrigger = false;  // default is any event triggers
 	
 	public AutoState() {
 		this.name = "AutoState";
@@ -17,6 +18,7 @@ public class AutoState {
 		actionList = new ArrayList<Action>();
 		eventList = new ArrayList<Event>();
 		this.nextState = null;
+		this.allEventsTrigger = false;
 	}
 	
 	public AutoState(String name) {
@@ -24,6 +26,7 @@ public class AutoState {
 		actionList = new ArrayList<Action>();
 		eventList = new ArrayList<Event>();
 		this.nextState = null;
+		this.allEventsTrigger = false;
 	}
 	
 	// create auto state from preferences
@@ -42,6 +45,11 @@ public class AutoState {
 	
 	public void addEvent(Event newEvent) {
 		eventList.add(newEvent);
+	}
+	
+	public void setAllEventsTrigger(boolean value)
+	{
+		allEventsTrigger = value;
 	}
 	
 	public void associateNextState(AutoState nextState) {
@@ -73,13 +81,30 @@ public class AutoState {
 			a.process();
 		}
 		
-		// for all the events this state has, check each
-		for (Event e: eventList) {
-			// if any event is triggered
-			if (e.isTriggered()) {
+		if (allEventsTrigger)
+		{
+			// all events must trigger to move to next state
+			for (Event e: eventList) {
+				// if any event is NOT triggered, return this state
+				if (!e.isTriggered()) {
+					return this;
+				}
+			}
+			
+			// all events are triggered, move to next state
+			return this.nextState;
+		}
+		else
+		{
+			// for all the events this state has, check each
+			for (Event e: eventList) {
 				
-				// query for its next state, and go there
-				return this.nextState;
+				// if any event is triggered
+				if (e.isTriggered()) {
+					
+					// move to next state
+					return this.nextState;
+				}
 			}
 		}
 		
