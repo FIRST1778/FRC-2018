@@ -226,11 +226,13 @@ public class AutoStateMachine {
 		
 		if (fieldAllianceColors[SWITCH] == LEFT) {
 			// first priority - turn to left side of switch
-			netIndex = AutoNetworkBuilder.DEPOSIT_CUBE_SWITCH_CENTER_LEFT;
+			//netIndex = AutoNetworkBuilder.DEPOSIT_CUBE_SWITCH_CENTER_LEFT;
+			netIndex = AutoNetworkBuilder.DEPOSIT_CUBE_SWITCH_CENTER_LEFT_TWO_CUBES;
 		}
 		else {
 			// second priority - turn to right side of switch
-			netIndex = AutoNetworkBuilder.DEPOSIT_CUBE_SWITCH_CENTER_RIGHT;
+			//netIndex = AutoNetworkBuilder.DEPOSIT_CUBE_SWITCH_CENTER_RIGHT;
+			netIndex = AutoNetworkBuilder.DEPOSIT_CUBE_SWITCH_CENTER_RIGHT_TWO_CUBES;
 		}
 
 		return netIndex;

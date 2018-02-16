@@ -29,7 +29,7 @@ public class CubeManagement {
 	public static final int SWITCH_LEVEL = 1;
 	public static final int SCALE_LEVEL = 2;
 	
-	public static final int liftLevelPulses[] = {0, 1000, 2000};  // number of encoder pulses for each level  {base, lower, upper}
+	public static final int liftLevelPulses[] = {0, 140, 280};  // number of encoder pulses for each level  {base, lower, upper}
 	private static final int speedRpm = 900;
 	private static final int accelRpm = 450;
 	
