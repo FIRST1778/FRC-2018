@@ -109,6 +109,19 @@ public class AutoNetworkBuilder {
 		
 		return idleState;
 	}
+	
+	private static AutoState createTimerState(String state_name, double timer_sec)
+	{
+		AutoState timerState = new AutoState(state_name);
+		IdleAction deadEnd = new IdleAction("<Dead End Action>");
+		DriveForwardAction driveForwardReset = new DriveForwardAction("<Drive Forward Action -reset>", 0.0, true, 0.0);  // reset gyro
+		TimeEvent timer = new TimeEvent(timer_sec);
+		timerState.addAction(deadEnd);
+		timerState.addAction(driveForwardReset);
+		timerState.addEvent(timer);
+		
+		return timerState;
+	}
 		
 	private static AutoState createMagicDriveState(String state_name, double dist_inches, double error_inches, int max_vel_rpm, int max_accel_rpm) 
 	{		
@@ -167,7 +180,7 @@ public class AutoNetworkBuilder {
 	{
 		AutoState liftState = new AutoState(state_name);
 		LiftAction liftAction = new LiftAction("<Lift Action>", lift_level);
-		TimeEvent timer = new TimeEvent(1.0);  // lift timer event
+		TimeEvent timer = new TimeEvent(10.0);  // lift timer event - artificially large for debug
 		//ClosedLoopEncoderEvent enc = new ClosedLoopEncoderEvent(lift_level, 10, 1.0);
 		liftState.addAction(liftAction);
 		liftState.addEvent(timer);
@@ -197,7 +210,7 @@ public class AutoNetworkBuilder {
 		AutoState liftAndTurnState = new AutoState(state_name);
 		
 		LiftAction liftAction = new LiftAction("<Lift Action>", lift_level);	
-		TimeEvent timer = new TimeEvent(1.0);  // lift timer event
+		TimeEvent timer = new TimeEvent(10.0);  // lift timer event - artificially large for test
 		//ClosedLoopEncoderEvent enc = new ClosedLoopEncoderEvent(lift_level, 10, 1.0);
 		
 		TurnPIDAction turnPidAction = new TurnPIDAction("<Turn PID action>", angle_deg, percent_vbus, true);
@@ -880,7 +893,7 @@ public class AutoNetworkBuilder {
 		AutoNetwork autoNet = new AutoNetwork("<Turning ONCE Network>");
 		
 		// create the states
-		AutoState turnState1 = createMagicTurnState("<Turn 1 State>", 90.0, 5.0, 0.6);
+		AutoState turnState1 = createMagicTurnState("<Turn 1 State>", 90.0, 5.0, 0.3);
 		AutoState idleState = createIdleState("Idle State");
 		
 		// connect the state sequence
@@ -947,21 +960,33 @@ public class AutoNetworkBuilder {
 		
 		// create states
 		AutoState liftState1 = createLiftState("<Lift 1 State>", CubeManagement.liftLevelPulses[CubeManagement.SWITCH_LEVEL]);
+		AutoState timerState1 = createTimerState("<Timer 1 State>", 10.0);
 		AutoState liftState2 = createLiftState("<Lift 2 State>", CubeManagement.liftLevelPulses[CubeManagement.SCALE_LEVEL]);
+		AutoState timerState2 = createTimerState("<Timer 2 State>", 10.0);
 		AutoState liftState3 = createLiftState("<Lift 3 State>", CubeManagement.liftLevelPulses[CubeManagement.SWITCH_LEVEL]);
+		AutoState timerState3 = createTimerState("<Timer 3 State>", 10.0);
 		AutoState liftState4 = createLiftState("<Lift 4 State>", CubeManagement.liftLevelPulses[CubeManagement.BASE_LEVEL]);
+		AutoState timerState4 = createTimerState("<Timer 4 State>", 10.0);
 		
 		// connect the state sequence
-		liftState1.associateNextState(liftState2);
-		liftState2.associateNextState(liftState3);
-		liftState3.associateNextState(liftState4);
-		liftState4.associateNextState(liftState1);
+		liftState1.associateNextState(timerState1);
+		timerState1.associateNextState(liftState2);		
+		liftState2.associateNextState(timerState2);
+		timerState2.associateNextState(liftState3);		
+		liftState3.associateNextState(timerState3);
+		timerState3.associateNextState(liftState4);		
+		liftState4.associateNextState(timerState4);
+		timerState4.associateNextState(liftState1);		
 						
 		// add states to the network list
 		autoNet.addState(liftState1);
+		autoNet.addState(timerState1);
 		autoNet.addState(liftState2);
+		autoNet.addState(timerState2);
 		autoNet.addState(liftState3);
+		autoNet.addState(timerState3);
 		autoNet.addState(liftState4);
+		autoNet.addState(timerState4);
 				
 		return autoNet;
 	}
@@ -979,10 +1004,10 @@ public class AutoNetworkBuilder {
 		AutoNetwork autoNet = new AutoNetwork("<Lifting & Turning Forever Network>");
 		
 		// create states
-		AutoState liftandTurnState1 = createLiftAndTurnState("<Lift and Turn 1 State>", CubeManagement.liftLevelPulses[CubeManagement.SWITCH_LEVEL], 90.0, 5.0, 0.6);
-		AutoState liftandTurnState2 = createLiftAndTurnState("<Lift and Turn 2 State>", CubeManagement.liftLevelPulses[CubeManagement.SCALE_LEVEL], 90.0, 5.0, 0.6);
-		AutoState liftandTurnState3 = createLiftAndTurnState("<Lift and Turn 3 State>", CubeManagement.liftLevelPulses[CubeManagement.SWITCH_LEVEL], 90.0, 5.0, 0.6);
-		AutoState liftandTurnState4 = createLiftAndTurnState("<Lift and Turn 4 State>", CubeManagement.liftLevelPulses[CubeManagement.BASE_LEVEL], 90.0, 5.0, 0.6);
+		AutoState liftandTurnState1 = createLiftAndTurnState("<Lift and Turn 1 State>", CubeManagement.liftLevelPulses[CubeManagement.SWITCH_LEVEL], 90.0, 5.0, 0.3);
+		AutoState liftandTurnState2 = createLiftAndTurnState("<Lift and Turn 2 State>", CubeManagement.liftLevelPulses[CubeManagement.SCALE_LEVEL], 90.0, 5.0, 0.3);
+		AutoState liftandTurnState3 = createLiftAndTurnState("<Lift and Turn 3 State>", CubeManagement.liftLevelPulses[CubeManagement.SWITCH_LEVEL], -90.0, 5.0, 0.3);
+		AutoState liftandTurnState4 = createLiftAndTurnState("<Lift and Turn 4 State>", CubeManagement.liftLevelPulses[CubeManagement.BASE_LEVEL], -90.0, 5.0, 0.3);
 		
 		// connect the state sequence
 		liftandTurnState1.associateNextState(liftandTurnState2);
