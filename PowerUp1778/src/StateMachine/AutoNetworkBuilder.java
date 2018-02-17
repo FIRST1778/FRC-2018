@@ -483,7 +483,7 @@ public class AutoNetworkBuilder {
 		AutoState driveState2 = createMagicDriveState("<Drive State 2>", 75.0, 3.0, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST);
 		AutoState flipperDownState = createFlipperState("<Flipper Down State>", false);
 		AutoState liftUpAndTurnRightState = createLiftAndTurnState("<Lift Up and Turn Right State>", CubeManagement.liftLevelPulses[CubeManagement.SWITCH_LEVEL], 45.0, 20.0, 0.5);
-		AutoState driveState3 = createMagicDriveState("<Drive State 3>", 33.0, 3.0, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW);
+		AutoState driveState3 = createMagicDriveState("<Drive State 3>", 28.0, 3.0, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW);
 		AutoState depositCubeState = createCubeDepositState("<Cube Deposit State>", 1.0);
 		AutoState liftDownAndTurnRightState = createLiftAndTurnState("<Lift Down and Turn Right State>", CubeManagement.liftLevelPulses[CubeManagement.BASE_LEVEL], 80.0, 20.0, 0.5);
 		AutoState driveState4 = createCollectorDriveState("<Drive State 4>", 48.0, 3.0, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW);
@@ -548,7 +548,7 @@ public class AutoNetworkBuilder {
 		AutoState driveState2 = createMagicDriveState("<Drive State 2>", 80.0, 3.0, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST);
 		AutoState flipperDownState = createFlipperState("<Flipper Down State>", false);
 		AutoState liftUpAndTurnLeftState = createLiftAndTurnState("<Lift Up and Turn Left State>", CubeManagement.liftLevelPulses[CubeManagement.SWITCH_LEVEL], -45.0, 20.0, 0.5);
-		AutoState driveState3 = createMagicDriveState("<Drive State 3>", 28.0, 3.0, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW);
+		AutoState driveState3 = createMagicDriveState("<Drive State 3>", 21.0, 3.0, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW);
 		AutoState depositCubeState = createCubeDepositState("<Cube Deposit State>", 1.0);
 		AutoState liftDownAndTurnLeftState = createLiftAndTurnState("<Lift Down and Turn Left State>", CubeManagement.liftLevelPulses[CubeManagement.BASE_LEVEL], -80.0, 20.0, 0.5);
 		AutoState driveState4 = createCollectorDriveState("<Drive State 4>", 48.0, 3.0, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW);
