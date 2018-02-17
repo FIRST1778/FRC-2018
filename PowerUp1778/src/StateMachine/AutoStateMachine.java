@@ -13,7 +13,6 @@ public class AutoStateMachine {
 
 	private final int SWITCH = 0;
 	private final int SCALE = 1;
-	private final int OPP_SWITCH = 2;
 	
 	private final int UNDEFINED = 0;
 	private final int LEFT = 1;
@@ -175,20 +174,13 @@ public class AutoStateMachine {
 		int netIndex = AutoNetworkBuilder.DO_NOTHING;
 		
 		// check local scale priority over local switch
-		if ((right_left_priority == AutoChooser.SCALE_ONE_CUBE) ||
-		   (right_left_priority == AutoChooser.SCALE_TWO_CUBES))
+		if (right_left_priority == AutoChooser.SCALE)
 		{
 			// check local scale over local switch
 			if (fieldAllianceColors[SCALE] == LEFT) 
 			{
-				if (right_left_priority == AutoChooser.SCALE_ONE_CUBE) {
-					// first priority - deposit one cube on scale (same side)
-					netIndex = AutoNetworkBuilder.DEPOSIT_CUBE_SCALE_LEFT;
-				}
-				else {
-					// next priority - deposit TWO cubes on scale (same side)
-					netIndex = AutoNetworkBuilder.DEPOSIT_CUBE_SCALE_LEFT_TWO_CUBES;
-				}
+				// first priority - deposit one cube on scale (same side)
+				netIndex = AutoNetworkBuilder.DEPOSIT_CUBE_SCALE_LEFT;
 			}
 			else // (fieldAllianceColors[SCALE] == RIGHT) 
 			{
@@ -226,13 +218,11 @@ public class AutoStateMachine {
 		
 		if (fieldAllianceColors[SWITCH] == LEFT) {
 			// first priority - turn to left side of switch
-			//netIndex = AutoNetworkBuilder.DEPOSIT_CUBE_SWITCH_CENTER_LEFT;
-			netIndex = AutoNetworkBuilder.DEPOSIT_CUBE_SWITCH_CENTER_LEFT_TWO_CUBES;
+			netIndex = AutoNetworkBuilder.DEPOSIT_CUBE_SWITCH_CENTER_LEFT;
 		}
 		else {
 			// second priority - turn to right side of switch
-			//netIndex = AutoNetworkBuilder.DEPOSIT_CUBE_SWITCH_CENTER_RIGHT;
-			netIndex = AutoNetworkBuilder.DEPOSIT_CUBE_SWITCH_CENTER_RIGHT_TWO_CUBES;
+			netIndex = AutoNetworkBuilder.DEPOSIT_CUBE_SWITCH_CENTER_RIGHT;
 		}
 
 		return netIndex;
@@ -244,20 +234,13 @@ public class AutoStateMachine {
 		int netIndex = AutoNetworkBuilder.DO_NOTHING;
 		
 		// check local scale priority over local switch
-		if ((right_left_priority == AutoChooser.SCALE_ONE_CUBE) ||
-			(right_left_priority == AutoChooser.SCALE_TWO_CUBES))
+		if (right_left_priority == AutoChooser.SCALE)
 		{
 			// check local scale over local switch
 			if (fieldAllianceColors[SCALE] == RIGHT) 
 			{
-				if (right_left_priority == AutoChooser.SCALE_ONE_CUBE) {
-					// first priority - deposit one cube on scale (same side)
-					netIndex = AutoNetworkBuilder.DEPOSIT_CUBE_SCALE_RIGHT;
-				}
-				else {
-					// next priority - deposit TWO cubes on scale (same side)
-					netIndex = AutoNetworkBuilder.DEPOSIT_CUBE_SCALE_RIGHT_TWO_CUBES;					
-				}
+				// first priority - deposit one cube on scale (same side)
+				netIndex = AutoNetworkBuilder.DEPOSIT_CUBE_SCALE_RIGHT;
 			}
 			else // (fieldAllianceColors[SCALE] == LEFT) 
 			{

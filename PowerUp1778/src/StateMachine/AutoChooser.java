@@ -22,9 +22,8 @@ public class AutoChooser {
 	public static final int LIFT_TURN_FOREVER = 7;
 	
 	//  action priority type selection (left or right position only)
-	public static final int SWITCH_ONE_CUBE = 0;
-	public static final int SCALE_ONE_CUBE = 1;
-	public static final int SCALE_TWO_CUBES = 2;
+	public static final int SWITCH = 0;
+	public static final int SCALE = 1;
 
 	//  priority type selection (remote scale actions only)
 	public static final int REMOTE_SCALE_CUBE_DROP = 0;
@@ -69,9 +68,8 @@ public class AutoChooser {
 		
 		// strategy chooser setup - switch or scale (for left or right only)
 		chooser_right_left_priority = new SendableChooser<ModeSelection>();
-		chooser_right_left_priority.addObject("SWITCH_ONE_CUBE", new ModeSelection(SWITCH_ONE_CUBE));
-		chooser_right_left_priority.addDefault("SCALE_ONE_CUBE", new ModeSelection(SCALE_ONE_CUBE));
-		chooser_right_left_priority.addObject("SCALE_TWO_CUBES", new ModeSelection(SCALE_TWO_CUBES));
+		chooser_right_left_priority.addObject("SWITCH", new ModeSelection(SWITCH));
+		chooser_right_left_priority.addDefault("SCALE", new ModeSelection(SCALE));
 		SmartDashboard.putData("AutoChooser_Right_Left_Priority", chooser_right_left_priority);
 				
 		// strategy chooser setup - remote cube drop or remote standby (remote scale only)
@@ -105,11 +103,11 @@ public class AutoChooser {
 	public int getRightLeftPriority() {
 		// check right-left priority chooser
 		ModeSelection right_left_priority_selection = chooser_right_left_priority.getSelected();
-		if (right_left_priority_selection.mode != SCALE_ONE_CUBE)
+		if (right_left_priority_selection.mode != SCALE)
 			return right_left_priority_selection.mode;	
 
-		// default - one cube on scale is top priority
-		return SCALE_ONE_CUBE;		
+		// default - cube on scale is top priority
+		return SCALE;		
 	}
 
 	public int getRemoteScaleAction() {
