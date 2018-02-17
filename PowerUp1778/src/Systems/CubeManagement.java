@@ -13,6 +13,7 @@ import Utility.HardwareIDs;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.Relay;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.wpilibj.Timer;
@@ -47,7 +48,7 @@ public class CubeManagement {
 	private static final double kF = 0.0;
 	
 	// collector strength (%VBus - max is 1.0)
-	private static final double COLLECTOR_IN_STRENGTH = 1.00;
+	private static final double COLLECTOR_IN_STRENGTH = 0.75;
 	private static final double COLLECTOR_OUT_STRENGTH = -1.00;
 	private static final boolean LEFT_COLLECTOR_INVERTED = true;
 	private static final boolean RIGHT_COLLECTOR_INVERTED = false;
@@ -57,6 +58,9 @@ public class CubeManagement {
 	private static final double LIFT_DOWN_STRENGTH = 0.25;
 	private static final double LIFT_MOTOR_FACTOR = 1.0;
 	private static final double LIFT_MOTOR_DEAD_ZONE = 0.1;
+		
+	// brake motor strength (%VBus - max is 1.0)
+	private static final double BRAKE_ON_STRENGTH = 0.5;
 	
 	// control dead zone threshold
 	private static final double DEAD_ZONE_THRESHOLD = 0.05;
@@ -72,20 +76,14 @@ public class CubeManagement {
 	private static TalonSRX upperLiftMotor, lowerLiftMotor;
 	private static final boolean UPPER_REVERSE_MOTOR = false;
 	private static final boolean LOWER_REVERSE_MOTOR = false;
-		
-	// pneumatics objects
-	private static Compressor compress;
 	
-	private static DoubleSolenoid flipperSolenoid;
-	private static boolean flipperUp;
+	private static Relay flipperRelay;
+	private static boolean flipperDeployed = false;
+	private static boolean liftBrakeOn = false;
+	private static final boolean BRAKE_MOTOR_INVERTED = false;
 	
-	private static DoubleSolenoid clampSolenoid;
-	private static boolean clampOn;
-	private static double clampStartTimer = 0;
-	private static final double CLAMP_LIMIT_USEC = 500000;
-	
-	private static DoubleSolenoid liftBrakeSolenoid;
-	private static boolean liftBrakeOn;
+	// brake motor
+	private static Spark brakeMotor;
 	private static double brakeStartTimer = 0;
 	private static final double BRAKE_LIMIT_USEC = 500000;
 	
@@ -104,14 +102,7 @@ public class CubeManagement {
 		
 		// reset timers
 		initTriggerTime = 0;
-		clampStartTimer = 0;
 		brakeStartTimer = 0;
-
-        // create pneumatics objects
-		compress = new Compressor(HardwareIDs.PCM_ID);
-		flipperSolenoid = new DoubleSolenoid(HardwareIDs.PCM_ID, HardwareIDs.FLIPPER_UP_SOLENOID, HardwareIDs.FLIPPER_DOWN_SOLENOID);
-		clampSolenoid = new DoubleSolenoid(HardwareIDs.PCM_ID, HardwareIDs.CLAMP_ON_SOLENOID, HardwareIDs.CLAMP_OFF_SOLENOID);
-		liftBrakeSolenoid = new DoubleSolenoid(HardwareIDs.PCM_ID, HardwareIDs.BRAKE_ON_SOLENOID, HardwareIDs.BRAKE_OFF_SOLENOID);
 		
 		// create and initialize collector motors (open-loop)
 		leftCollectorMotor = new Spark(HardwareIDs.LEFT_COLLECTOR_PWM_ID);
@@ -119,6 +110,14 @@ public class CubeManagement {
 		rightCollectorMotor = new Spark(HardwareIDs.RIGHT_COLLECTOR_PWM_ID);
 		rightCollectorMotor.setInverted(RIGHT_COLLECTOR_INVERTED);
 
+		// create and initialize flipper relay
+        flipperRelay = new Relay(HardwareIDs.FLIPPER_RELAY_CHANNEL,Relay.Direction.kForward);
+        flipperRelay.set(Relay.Value.kOff);
+        
+		// create and initialize brake motor (open-loop)
+		brakeMotor = new Spark(HardwareIDs.BRAKE_MOTOR_PWM_ID);
+		brakeMotor.setInverted(BRAKE_MOTOR_INVERTED);
+		
 		// create and initialize upper lift motor (closed-loop)
 		upperLiftMotor = configureMotor(HardwareIDs.UPPER_LIFT_TALON_ID, UPPER_REVERSE_MOTOR, ALIGNED_SENSOR, kP, kI, kD, kF);
 
@@ -130,12 +129,6 @@ public class CubeManagement {
 		
 		// reset position of encoders
 		resetPos();
-		
-		// lift up flipper
-		flipperUp();
-		
-		// clamp on
-		clampOn();
 		
 		// turn on brake
 		liftBrakeOn();
@@ -215,58 +208,27 @@ public class CubeManagement {
 	
 	/************************* flipper, lift brake & collector control functions **********************************/
 	
-	public static void flipperUp()
+	public static void flipperDeploy()
 	{
-		if (flipperUp)
+		if (flipperDeployed)
 			return;
 
-		flipperUp = true;
-		flipperSolenoid.set(DoubleSolenoid.Value.kForward);	
-		InputOutputComm.putBoolean(InputOutputComm.LogTable.kMainLog,"CubeMgmt/Flipper", flipperUp);
+		flipperDeployed = true;
+		
+		// actuate deployment relay
+		flipperRelay.set(Relay.Value.kOn);
+		
+		InputOutputComm.putBoolean(InputOutputComm.LogTable.kMainLog,"CubeMgmt/Flipper", flipperDeployed);
 	}
 	
-	public static void flipperDown()
-	{
-		if (!flipperUp)
-			return;
-		
-		flipperUp = false;
-		flipperSolenoid.set(DoubleSolenoid.Value.kReverse);		
-		InputOutputComm.putBoolean(InputOutputComm.LogTable.kMainLog,"CubeMgmt/Flipper", flipperUp);
-	}
-
-	public static void clampOn()
-	{			
-		// if clamp is already on, return
-		if (clampOn)
-			return;
-		
-		clampOn = true;		
-		clampSolenoid.set(DoubleSolenoid.Value.kForward);		
-		InputOutputComm.putBoolean(InputOutputComm.LogTable.kMainLog,"CubeMgmt/Clamp", clampOn);
-		RPIComm.setBoolean("clampOn", clampOn);
-	}
-
-	public static void clampOff()
-	{
-		// if clamp is already off, return
-		if (!clampOn)
-			return;
-		
-		clampOn = false;
-		clampSolenoid.set(DoubleSolenoid.Value.kReverse);		
-		InputOutputComm.putBoolean(InputOutputComm.LogTable.kMainLog,"CubeMgmt/Clamp", clampOn);
-		RPIComm.setBoolean("clampOn", clampOn);
-
-	}
-
 	public static void liftBrakeOn()
 	{
 		if (liftBrakeOn)
 			return;
 
 		liftBrakeOn = true;
-		liftBrakeSolenoid.set(DoubleSolenoid.Value.kForward);		
+		brakeMotor.set(BRAKE_ON_STRENGTH);
+		
 		InputOutputComm.putBoolean(InputOutputComm.LogTable.kMainLog,"CubeMgmt/LiftBrake", liftBrakeOn);
 		RPIComm.setBoolean("brakeOn", liftBrakeOn);
 	}
@@ -276,8 +238,9 @@ public class CubeManagement {
 		if (!liftBrakeOn)
 			return;
 
-		liftBrakeOn = false;
-		liftBrakeSolenoid.set(DoubleSolenoid.Value.kReverse);		
+		liftBrakeOn = false;	
+		brakeMotor.set(0.0);   // brake caliper spring will disengage if no motor power
+		
 		InputOutputComm.putBoolean(InputOutputComm.LogTable.kMainLog,"CubeMgmt/LiftBrake", liftBrakeOn);
 		RPIComm.setBoolean("brakeOn", liftBrakeOn);
 	}
@@ -339,26 +302,7 @@ public class CubeManagement {
 		leftCollectorMotor.set(collectorStrength);
 		rightCollectorMotor.set(collectorStrength);
 	}
-	
-	private static void checkClampControls() {
-
-		//if (gamepad.getRawButton(HardwareIDs.CLAMP_TOGGLE_BUTTON)) {
-		if (gamepad.getPOV() == 0)
-		{	
-			// not enough time between clamp control events, return
-			if ((RobotController.getFPGATime() - clampStartTimer) > CLAMP_LIMIT_USEC)
-			{				
-				if (clampOn)
-					clampOff();
-				else
-					clampOn();
-			
-				// reset clamp timer
-				clampStartTimer = RobotController.getFPGATime();				
-			}
-		}		
-	}
-	
+		
 	private static void checkBrakeControls() {
 
 		if (gamepad.getRawButton(HardwareIDs.BRAKE_TOGGLE_BUTTON)) {
@@ -399,21 +343,16 @@ public class CubeManagement {
 	
 	private static void checkFlipperControls() {
 	
-		double flipperInput = gamepad.getRawAxis(HardwareIDs.FLIPPER_DOWN_AXIS);
-		if ((Math.abs(flipperInput) > DEAD_ZONE_THRESHOLD) && (flipperUp)) {
-			flipperDown();	
-		}
-		else if (gamepad.getRawButton(HardwareIDs.FLIPPER_UP_BUTTON) && (!flipperUp)) {
-			flipperUp();
+		if (gamepad.getRawButton(HardwareIDs.FLIPPER_DEPLOY_BUTTON) && (!flipperDeployed)) {
+			flipperDeploy();
 		}			
 	}
 		
 	public static void autoInit() {				
 		resetMotors();
 		resetPos();
-		flipperUp();
-		clampOn();
-		liftBrakeOn();		
+		liftBrakeOn();
+		flipperDeploy();
 	}
 
 	public static void autoStop() {
@@ -429,13 +368,11 @@ public class CubeManagement {
 		resetMotors();
 				
 		liftIdleTimerStart = RobotController.getFPGATime();      
-		clampStartTimer = RobotController.getFPGATime();      
 	}
 	
 	public static void teleopPeriodic() {
 		
 		checkCollectorControls();
-		checkClampControls();
 		checkBrakeControls();
 		checkLiftControls();
 		checkFlipperControls();

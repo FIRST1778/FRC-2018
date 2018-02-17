@@ -6,21 +6,18 @@ import Systems.CubeManagement;
 public class FlipperAction extends Action {
 	
 	private String name;
-	private boolean goUp = true;    // assumes lift starts up
 	
-	public FlipperAction(boolean goUp)
+	public FlipperAction()
 	{
-		this.name = "<Flipper Action>";	
-		this.goUp = goUp;
+		this.name = "<Flipper Deploy Action>";	
 
 		CubeManagement.initialize();
 		InputOutputComm.initialize();
 	}
 	
-	public FlipperAction(String name, boolean goUp)
+	public FlipperAction(String name)
 	{
 		this.name = name;
-		this.goUp = goUp;
 		
 		CubeManagement.initialize();		
 		InputOutputComm.initialize();
@@ -29,11 +26,7 @@ public class FlipperAction extends Action {
 	// action entry
 	public void initialize() {
 		
-		// do some lift initialization, start the lift
-		if (goUp)
-			CubeManagement.flipperUp();
-		else
-			CubeManagement.flipperDown();
+		CubeManagement.flipperDeploy();
 				
 		super.initialize();
 	}

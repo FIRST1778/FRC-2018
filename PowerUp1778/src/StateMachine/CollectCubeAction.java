@@ -27,7 +27,6 @@ public class CollectCubeAction extends Action {
 	public void initialize() {
 		
 		// do some clamp initialization, start the collector motors to collect the cube
-		CubeManagement.clampOff();
 		CubeManagement.collectCube();
 		
 		super.initialize();
@@ -45,7 +44,6 @@ public class CollectCubeAction extends Action {
 		// do some drivey cleanup
 					
 		CubeManagement.autoStop();
-		CubeManagement.clampOn();  // assume cube in collector, turn clamp on
 		
 		// cleanup base class
 		super.cleanup();

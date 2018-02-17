@@ -18,17 +18,11 @@ public class HardwareIDs {
 	// Collector and Climber Sparks (PWM)
 	public static final int LEFT_COLLECTOR_PWM_ID = 0;
 	public static final int RIGHT_COLLECTOR_PWM_ID = 1;
+	public static final int BRAKE_MOTOR_PWM_ID = 2;
 	
-	// Solenoids (pneumatics)
-	public static final int FLIPPER_UP_SOLENOID = 0;
-	public static final int FLIPPER_DOWN_SOLENOID = 5;
-	
-	public static final int BRAKE_ON_SOLENOID = 1;
-	public static final int BRAKE_OFF_SOLENOID = 6;
-	
-	public static final int CLAMP_ON_SOLENOID = 2;
-	public static final int CLAMP_OFF_SOLENOID = 7;
-	
+	// Flipper relay channel
+	public static final int FLIPPER_RELAY_CHANNEL = 0;
+		
 	// input control IDs
 	public static final int DRIVER_CONTROL_ID = 0;
 	public static final int GAMEPAD_ID = 1;
@@ -37,8 +31,7 @@ public class HardwareIDs {
 	public static final int COLLECTOR_IN_AXIS = 2;
 	public static final int COLLECTOR_OUT_BUTTON = 5;
 		
-	public static final int FLIPPER_DOWN_AXIS = 3;
-	public static final int FLIPPER_UP_BUTTON = 6;
+	public static final int FLIPPER_DEPLOY_BUTTON = 6;
 
 	public static final int BRAKE_TOGGLE_BUTTON = 10;
 
