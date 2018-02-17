@@ -141,6 +141,7 @@ public class Robot extends IterativeRobot {
     public void disabledInit() {
 
     	DriveAssembly.disabledInit();
+    	CubeManagement.disabledInit();
 
     }
 

@@ -420,6 +420,10 @@ public class CubeManagement {
 		resetMotors();
 	}
 	
+	public static void disabledInit() {		
+		resetMotors();
+	}
+	
 	public static void teleopInit() {
 				
 		resetMotors();

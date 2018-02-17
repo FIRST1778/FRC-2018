@@ -41,6 +41,9 @@ public class DriveAssembly {
 	private static final double kD = 0.0;
 	private static final double kF = 0.0;  // Feedforward not used for closed loop position control
 
+	// speed factor - reduced when lift is raised
+	private static double speedFactor = 1.0;
+	
 	public static void initialize() {
 		
 		if (initialized)
@@ -199,6 +202,16 @@ public class DriveAssembly {
 		// left and right back motors are following front motors
 	}
 	
+	private static void checkSpeedFactor()
+	{
+		int liftEncoderTicks = CubeManagement.getLiftPos();
+		
+		if (liftEncoderTicks > CubeManagement.liftLevelPulses[CubeManagement.SWITCH_LEVEL])
+			speedFactor = 0.5;  // half-power when lift above switch level
+		else
+			speedFactor = 1.0;  // full-power when lift down
+	}
+	
 	public static void autoStop() {
 		resetMotors();
 	}
@@ -235,15 +248,23 @@ public class DriveAssembly {
 	// Assumes parameters are PercentVbus (0.0 to 1.0)
 	public static void drive(double leftValue, double rightValue) {
 		
-		String leftSpeedStr = String.format("%.2f", leftValue);
-		String rightSpeedStr = String.format("%.2f", rightValue);
-		String myString2 = new String("leftSpeed = " + leftSpeedStr + " rightSpeed = " + rightSpeedStr);
+		// check lift position, adjust speedFactor accordingly
+		checkSpeedFactor();
+		
+		double adjLeftVal = leftValue * speedFactor;
+		double adjRightVal = rightValue * speedFactor;
+		
+		//String leftSpeedStr = String.format("%.2f", adjLeftVal);
+		//String rightSpeedStr = String.format("%.2f", adjRightVal);
+		//String myString2 = new String("leftSpeed = " + leftSpeedStr + " rightSpeed = " + rightSpeedStr);
 		//System.out.println(myString2);
 		//ioComm.putString(InputOutputComm.LogTable.kMainLog,"Auto/AutoDrive", myString2);
 
-		// set motor values directly
-		mFrontLeft.set(ControlMode.PercentOutput, leftValue);
-		mFrontRight.set(ControlMode.PercentOutput, rightValue);
+		// set front motor values directly
+		mFrontLeft.set(ControlMode.PercentOutput, adjLeftVal);
+		mFrontRight.set(ControlMode.PercentOutput, adjRightVal);
+		
+		// back motors now follow front motors
 		//mBackLeft.set(ControlMode.PercentOutput, leftValue);
 		//mBackRight.set(ControlMode.PercentOutput, rightValue);		
 	}
