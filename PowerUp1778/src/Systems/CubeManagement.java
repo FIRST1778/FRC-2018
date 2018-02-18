@@ -61,6 +61,7 @@ public class CubeManagement {
 		
 	// brake motor strength (%VBus - max is 1.0)
 	private static final double BRAKE_ON_STRENGTH = 0.5;
+	private static final double BRAKE_OFF_STRENGTH = -0.5;
 	
 	// control dead zone threshold
 	private static final double DEAD_ZONE_THRESHOLD = 0.05;
@@ -81,6 +82,8 @@ public class CubeManagement {
 	private static Spark flipperRelay;
 	private static final boolean FLIPPER_RELAY_INVERTED = false;
 	private static boolean flipperDeployed = false;
+	private static double flipperStartTimer = 0;
+	private static final double FLIPPER_LIMIT_USEC = 500000;
 		
 	// brake motor
 	private static boolean liftBrakeOn = false;
@@ -105,6 +108,7 @@ public class CubeManagement {
 		// reset timers
 		initTriggerTime = 0;
 		brakeStartTimer = 0;
+		flipperStartTimer = 0;
 		
 		// create and initialize collector motors (open-loop)
 		leftCollectorMotor = new Spark(HardwareIDs.LEFT_COLLECTOR_PWM_ID);
@@ -220,21 +224,26 @@ public class CubeManagement {
 		// actuate deployment relay
 		flipperRelay.set(1.0);
 		
+		spawnFlipperRelayOffThread();  // turn flipper relay off after a time period
+		
 		InputOutputComm.putBoolean(InputOutputComm.LogTable.kMainLog,"CubeMgmt/Flipper", flipperDeployed);
 	}
-
-	// debug only
-	public static void flipperReset()
+	
+	private static void spawnFlipperRelayOffThread()
 	{
-		if (!flipperDeployed)
-			return;
-
-		flipperDeployed = false;
-		
-		// actuate deployment relay
-		flipperRelay.set(0.0);
-		
-		InputOutputComm.putBoolean(InputOutputComm.LogTable.kMainLog,"CubeMgmt/Flipper", flipperDeployed);
+		// spawn a wait thread to ensure flipper relay turned off only AFTER a certain period
+		new Thread() {
+			public void run() {
+				try {
+					Thread.sleep(1000);    // wait one second before disengaging flipper motor
+					flipperRelay.set(0.0);   // turn off flipper relay
+					flipperDeployed = false;
+					InputOutputComm.putBoolean(InputOutputComm.LogTable.kMainLog,"CubeMgmt/Flipper", flipperDeployed);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}.start();		
 	}
 
 	public static void liftBrakeOn()
@@ -244,6 +253,8 @@ public class CubeManagement {
 
 		liftBrakeOn = true;
 		brakeMotor.set(BRAKE_ON_STRENGTH);
+
+		spawnBrakeMotorOffThread();  // turn brake motor off after a time period
 		
 		InputOutputComm.putBoolean(InputOutputComm.LogTable.kMainLog,"CubeMgmt/LiftBrake", liftBrakeOn);
 		RPIComm.setBoolean("brakeOn", liftBrakeOn);
@@ -255,10 +266,27 @@ public class CubeManagement {
 			return;
 
 		liftBrakeOn = false;	
-		brakeMotor.set(0.0);   // brake caliper spring will disengage if no motor power
+		brakeMotor.set(BRAKE_OFF_STRENGTH);  
+
+		spawnBrakeMotorOffThread();   // turn brake motor off after a time period
 		
 		InputOutputComm.putBoolean(InputOutputComm.LogTable.kMainLog,"CubeMgmt/LiftBrake", liftBrakeOn);
 		RPIComm.setBoolean("brakeOn", liftBrakeOn);
+	}
+	
+	private static void spawnBrakeMotorOffThread()
+	{
+		// spawn a wait thread to ensure brake motor turned off only AFTER a certain period
+		new Thread() {
+			public void run() {
+				try {
+					Thread.sleep(500);    // wait half second before disengaging brake motor
+					brakeMotor.set(0.0);   // turn off brake motor
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}.start();		
 	}
 
 	public static void depositCube()
@@ -323,7 +351,7 @@ public class CubeManagement {
 
 		if (gamepad.getRawButton(HardwareIDs.BRAKE_TOGGLE_BUTTON)) {
 			
-			// not enough time between brake control events, return
+			// only act if enough time has passed between brake control events
 			if ((RobotController.getFPGATime() - brakeStartTimer) > BRAKE_LIMIT_USEC)
 			{				
 				if (liftBrakeOn)
@@ -331,7 +359,7 @@ public class CubeManagement {
 				else
 					liftBrakeOn();
 			
-				// reset clamp timer
+				// reset brake timer
 				brakeStartTimer = RobotController.getFPGATime();				
 			}
 		}		
@@ -361,13 +389,14 @@ public class CubeManagement {
 	
 		if (gamepad.getRawButton(HardwareIDs.FLIPPER_DEPLOY_BUTTON))
 		{			
-			if (!flipperDeployed)
-			{
-				flipperDeploy();
-			}		
-			else 
-			{
-				flipperReset();
+			// only act if enough time has passed between flipper control events
+			if ((RobotController.getFPGATime() - flipperStartTimer) > FLIPPER_LIMIT_USEC)
+			{				
+				if (!flipperDeployed)
+					flipperDeploy();	
+				
+				// reset flipper timer
+				flipperStartTimer = RobotController.getFPGATime();				
 			}
 		}
 	}
@@ -376,7 +405,7 @@ public class CubeManagement {
 		resetMotors();
 		resetPos();
 		liftBrakeOn();
-		flipperDeploy();
+		//flipperDeploy();  // may want to wait on this, after movement in auto
 	}
 
 	public static void autoStop() {
