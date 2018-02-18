@@ -77,12 +77,14 @@ public class CubeManagement {
 	private static final boolean UPPER_REVERSE_MOTOR = false;
 	private static final boolean LOWER_REVERSE_MOTOR = false;
 	
-	private static Relay flipperRelay;
+	// flipper
+	private static Spark flipperRelay;
+	private static final boolean FLIPPER_RELAY_INVERTED = false;
 	private static boolean flipperDeployed = false;
+		
+	// brake motor
 	private static boolean liftBrakeOn = false;
 	private static final boolean BRAKE_MOTOR_INVERTED = false;
-	
-	// brake motor
 	private static Spark brakeMotor;
 	private static double brakeStartTimer = 0;
 	private static final double BRAKE_LIMIT_USEC = 500000;
@@ -111,8 +113,8 @@ public class CubeManagement {
 		rightCollectorMotor.setInverted(RIGHT_COLLECTOR_INVERTED);
 
 		// create and initialize flipper relay
-        flipperRelay = new Relay(HardwareIDs.FLIPPER_RELAY_CHANNEL,Relay.Direction.kForward);
-        flipperRelay.set(Relay.Value.kOff);
+        flipperRelay = new Spark(HardwareIDs.FLIPPER_RELAY_PWM_ID);
+        flipperRelay.setInverted(FLIPPER_RELAY_INVERTED);
         
 		// create and initialize brake motor (open-loop)
 		brakeMotor = new Spark(HardwareIDs.BRAKE_MOTOR_PWM_ID);
@@ -216,11 +218,25 @@ public class CubeManagement {
 		flipperDeployed = true;
 		
 		// actuate deployment relay
-		flipperRelay.set(Relay.Value.kOn);
+		flipperRelay.set(1.0);
 		
 		InputOutputComm.putBoolean(InputOutputComm.LogTable.kMainLog,"CubeMgmt/Flipper", flipperDeployed);
 	}
-	
+
+	// debug only
+	public static void flipperReset()
+	{
+		if (!flipperDeployed)
+			return;
+
+		flipperDeployed = false;
+		
+		// actuate deployment relay
+		flipperRelay.set(0.0);
+		
+		InputOutputComm.putBoolean(InputOutputComm.LogTable.kMainLog,"CubeMgmt/Flipper", flipperDeployed);
+	}
+
 	public static void liftBrakeOn()
 	{
 		if (liftBrakeOn)
@@ -307,7 +323,7 @@ public class CubeManagement {
 
 		if (gamepad.getRawButton(HardwareIDs.BRAKE_TOGGLE_BUTTON)) {
 			
-			// not enough time between clamp control events, return
+			// not enough time between brake control events, return
 			if ((RobotController.getFPGATime() - brakeStartTimer) > BRAKE_LIMIT_USEC)
 			{				
 				if (liftBrakeOn)
@@ -343,9 +359,17 @@ public class CubeManagement {
 	
 	private static void checkFlipperControls() {
 	
-		if (gamepad.getRawButton(HardwareIDs.FLIPPER_DEPLOY_BUTTON) && (!flipperDeployed)) {
-			flipperDeploy();
-		}			
+		if (gamepad.getRawButton(HardwareIDs.FLIPPER_DEPLOY_BUTTON))
+		{			
+			if (!flipperDeployed)
+			{
+				flipperDeploy();
+			}		
+			else 
+			{
+				flipperReset();
+			}
+		}
 	}
 		
 	public static void autoInit() {				

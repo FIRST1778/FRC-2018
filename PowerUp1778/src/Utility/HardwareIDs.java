@@ -15,13 +15,11 @@ public class HardwareIDs {
 	
 	public static final int CLIMBER_TALON_ID = 6;
 	
-	// Collector and Climber Sparks (PWM)
+	// Collector, Climber and Flipper Sparks (PWM)
 	public static final int LEFT_COLLECTOR_PWM_ID = 0;
 	public static final int RIGHT_COLLECTOR_PWM_ID = 1;
 	public static final int BRAKE_MOTOR_PWM_ID = 2;
-	
-	// Flipper relay channel
-	public static final int FLIPPER_RELAY_CHANNEL = 0;
+	public static final int FLIPPER_RELAY_PWM_ID = 3;
 		
 	// input control IDs
 	public static final int DRIVER_CONTROL_ID = 0;
