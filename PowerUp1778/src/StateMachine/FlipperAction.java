@@ -26,7 +26,7 @@ public class FlipperAction extends Action {
 	// action entry
 	public void initialize() {
 		
-		CubeManagement.flipperDeploy();
+		//CubeManagement.flipperDeploy();
 				
 		super.initialize();
 	}

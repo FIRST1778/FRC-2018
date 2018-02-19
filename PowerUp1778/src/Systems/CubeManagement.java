@@ -10,13 +10,9 @@ import com.ctre.phoenix.motorcontrol.NeutralMode;
 import NetworkComm.InputOutputComm;
 import NetworkComm.RPIComm;
 import Utility.HardwareIDs;
-import edu.wpi.first.wpilibj.Compressor;
-import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.Relay;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Spark;
-import edu.wpi.first.wpilibj.Timer;
 
 public class CubeManagement {
 	
@@ -39,7 +35,7 @@ public class CubeManagement {
 	public static final boolean LEFT_COLLECTOR_REVERSE_MOTOR = false; 
 			
 	// grayhill encoder polarity
-	public static final boolean ALIGNED_SENSOR = true; 
+	public static final boolean ALIGNED_SENSOR = false; 
 
 	// PID coeffs
 	private static final double kP = 1.0;
@@ -54,7 +50,7 @@ public class CubeManagement {
 	private static final boolean RIGHT_COLLECTOR_INVERTED = false;
 
 	// teleop lift strength (%VBus - max is 1.0)
-	private static final double LIFT_MOTOR_FACTOR = 0.25;
+	private static final double LIFT_MOTOR_FACTOR = 0.50;
 	private static final double LIFT_MOTOR_DEAD_ZONE = 0.1;
 		
 	// brake motor strength (%VBus - max is 1.0)
@@ -64,10 +60,6 @@ public class CubeManagement {
 	// control dead zone threshold
 	private static final double DEAD_ZONE_THRESHOLD = 0.05;
 	
-	// idle time beyond which lift brake is applied
-	private static final double LIFT_IDLE_BRAKE_SECONDS = 0.25;
-	private static double liftIdleTimerStart = 0;
-		    					
 	// collector intake motors
 	private static Spark leftCollectorMotor, rightCollectorMotor; 
 	
@@ -75,14 +67,7 @@ public class CubeManagement {
 	private static TalonSRX upperLiftMotor, lowerLiftMotor;
 	private static final boolean UPPER_REVERSE_MOTOR = false;
 	private static final boolean LOWER_REVERSE_MOTOR = false;
-	
-	// flipper
-	private static Spark flipperRelay;
-	private static final boolean FLIPPER_RELAY_INVERTED = false;
-	private static boolean flipperDeployed = false;
-	private static double flipperStartTimer = 0;
-	private static final double FLIPPER_LIMIT_USEC = 500000;
-		
+			
 	// brake motor
 	private static boolean liftBrakeOn = false;
 	private static final boolean BRAKE_MOTOR_INVERTED = false;
@@ -106,17 +91,12 @@ public class CubeManagement {
 		// reset timers
 		initTriggerTime = 0;
 		brakeStartTimer = 0;
-		flipperStartTimer = 0;
 		
 		// create and initialize collector motors (open-loop)
 		leftCollectorMotor = new Spark(HardwareIDs.LEFT_COLLECTOR_PWM_ID);
 		leftCollectorMotor.setInverted(LEFT_COLLECTOR_INVERTED);
 		rightCollectorMotor = new Spark(HardwareIDs.RIGHT_COLLECTOR_PWM_ID);
 		rightCollectorMotor.setInverted(RIGHT_COLLECTOR_INVERTED);
-
-		// create and initialize flipper relay
-        flipperRelay = new Spark(HardwareIDs.FLIPPER_RELAY_PWM_ID);
-        flipperRelay.setInverted(FLIPPER_RELAY_INVERTED);
         
 		// create and initialize brake motor (open-loop)
 		brakeMotor = new Spark(HardwareIDs.BRAKE_MOTOR_PWM_ID);
@@ -189,9 +169,10 @@ public class CubeManagement {
     	// set up sensor
     	_talon.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, PIDLOOP_IDX, TIMEOUT_MS);
     	_talon.setSensorPhase(alignSensor); 
-    	
-    	// set up limit switches
+    	    	
+    	// forward limit switch is for up motion
 		_talon.configForwardLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen, 0);
+		// reverse limit switch is for down action
 		_talon.configReverseLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen, 0);
    	
     	// set up closed loop control
@@ -210,40 +191,8 @@ public class CubeManagement {
     }
     
 	
-	/************************* flipper, lift brake & collector control functions **********************************/
+	/************************* lift brake & collector control functions **********************************/
 	
-	public static void flipperDeploy()
-	{
-		if (flipperDeployed)
-			return;
-
-		flipperDeployed = true;
-		
-		// actuate deployment relay
-		flipperRelay.set(1.0);
-		
-		spawnFlipperRelayOffThread();  // turn flipper relay off after a time period
-		
-		InputOutputComm.putBoolean(InputOutputComm.LogTable.kMainLog,"CubeMgmt/Flipper", flipperDeployed);
-	}
-	
-	private static void spawnFlipperRelayOffThread()
-	{
-		// spawn a wait thread to ensure flipper relay turned off only AFTER a certain period
-		new Thread() {
-			public void run() {
-				try {
-					Thread.sleep(1000);    // wait one second before disengaging flipper motor
-					flipperRelay.set(0.0);   // turn off flipper relay
-					flipperDeployed = false;
-					InputOutputComm.putBoolean(InputOutputComm.LogTable.kMainLog,"CubeMgmt/Flipper", flipperDeployed);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		}.start();		
-	}
-
 	public static void liftBrakeOn()
 	{
 		if (liftBrakeOn)
@@ -313,7 +262,7 @@ public class CubeManagement {
 		InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"Auto/liftTargetPulses", posStr);
 		
         // configure upper lift motor (lower lift motor follows)
-		//configureMotionMagic(upperLiftMotor, targetPulses);
+		configureMotionMagic(upperLiftMotor, targetPulses);
 	}
 	
 	private static void configureMotionMagic(TalonSRX _talon, int targetPulses)
@@ -382,28 +331,11 @@ public class CubeManagement {
 		InputOutputComm.putDouble(InputOutputComm.LogTable.kMainLog,"CubeMgmt/LiftStrength", liftStrength);
 		upperLiftMotor.set(ControlMode.PercentOutput, liftStrength);
 	}
-	
-	private static void checkFlipperControls() {
-	
-		if (gamepad.getRawButton(HardwareIDs.FLIPPER_DEPLOY_BUTTON))
-		{			
-			// only act if enough time has passed between flipper control events
-			if ((RobotController.getFPGATime() - flipperStartTimer) > FLIPPER_LIMIT_USEC)
-			{				
-				if (!flipperDeployed)
-					flipperDeploy();	
-				
-				// reset flipper timer
-				flipperStartTimer = RobotController.getFPGATime();				
-			}
-		}
-	}
-		
+			
 	public static void autoInit() {				
 		resetMotors();
 		resetPos();
 		liftBrakeOn();
-		//flipperDeploy();  // may want to wait on this, after movement in auto
 	}
 
 	public static void autoStop() {
@@ -417,8 +349,6 @@ public class CubeManagement {
 	public static void teleopInit() {
 				
 		resetMotors();
-				
-		liftIdleTimerStart = RobotController.getFPGATime();      
 	}
 	
 	public static void teleopPeriodic() {
@@ -426,7 +356,6 @@ public class CubeManagement {
 		checkCollectorControls();
 		checkBrakeControls();
 		checkLiftControls();
-		checkFlipperControls();
 	}
 	
 	public static int getLiftPos() {

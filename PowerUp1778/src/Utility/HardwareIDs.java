@@ -2,18 +2,16 @@ package Utility;
 
 public class HardwareIDs {
 	
-	// CAN Bus Hardware IDs (note: never use ID=1, it is factory default)
-	public static final int PCM_ID = 2;
-	
+	// CAN Bus Hardware IDs (note: never use ID=1, it is factory default)	
 	public static final int LEFT_FRONT_TALON_ID = 3;
 	public static final int LEFT_REAR_TALON_ID = 7;
 	public static final int RIGHT_FRONT_TALON_ID = 8;
 	public static final int RIGHT_REAR_TALON_ID = 4;
 
-	public static final int LOWER_LIFT_TALON_ID = 5;
-	public static final int UPPER_LIFT_TALON_ID = 9;
+	public static final int LOWER_LIFT_TALON_ID = 5;   // slave lift motor (follows master lift motor)
+	public static final int UPPER_LIFT_TALON_ID = 6;   // master lift motor
 	
-	public static final int CLIMBER_TALON_ID = 6;
+	public static final int CLIMBER_TALON_ID = 9;
 	
 	// Collector, Climber and Flipper Sparks (PWM)
 	public static final int LEFT_COLLECTOR_PWM_ID = 0;
