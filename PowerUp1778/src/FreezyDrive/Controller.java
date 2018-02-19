@@ -34,7 +34,11 @@ public class Controller {
     }
     
     public static double Driver_Throttle (){
-		return -1.0*Driver.getRawAxis(InterLinkElite.Axis.LEFT_Y);
+    	// New (2018) Interlink
+		return Driver.getRawAxis(InterLinkElite.Axis.LEFT_Y);
+    
+    	// Legacy (2017) Interlink
+		//return -1.0*Driver.getRawAxis(InterLinkElite.Axis.LEFT_Y);
     }
 
     public static double Driver_Steering (){
