@@ -270,7 +270,7 @@ public class AutoNetworkBuilder {
 		AutoNetwork autoNet = new AutoNetwork("<Drive Forward Network>");
 			
 		// create states
-		AutoState driveState = createMagicDriveState("<Drive State 1>", 84.0, 3.0, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST);
+		AutoState driveState = createMagicDriveState("<Drive State 1>", 60.0, 3.0, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST);
 		AutoState idleState = createIdleState("<Idle State>");
 
 		// connect the state sequence
