@@ -40,9 +40,6 @@ public class DriveAssembly {
 	private static final double kI = 0.0005;  
 	private static final double kD = 0.0;
 	private static final double kF = 0.0;  // Feedforward not used for closed loop position control
-
-	// speed factor - reduced when lift is raised
-	private static double speedFactor = 1.0;
 	
 	public static void initialize() {
 		
@@ -201,17 +198,7 @@ public class DriveAssembly {
 				
 		// left and right back motors are following front motors
 	}
-	
-	private static void checkSpeedFactor()
-	{
-		int liftEncoderTicks = CubeManagement.getLiftPos();
 		
-		if (liftEncoderTicks > CubeManagement.liftLevelPulses[CubeManagement.SWITCH_LEVEL])
-			speedFactor = 0.5;  // half-power when lift above switch level
-		else
-			speedFactor = 1.0;  // full-power when lift down
-	}
-	
 	public static void autoStop() {
 		resetMotors();
 	}
@@ -247,12 +234,9 @@ public class DriveAssembly {
 	// CORE DRIVE METHOD
 	// Assumes parameters are PercentVbus (0.0 to 1.0)
 	public static void drive(double leftValue, double rightValue) {
-		
-		// check lift position, adjust speedFactor accordingly
-		checkSpeedFactor();
-		
-		double adjLeftVal = leftValue * speedFactor;
-		double adjRightVal = rightValue * speedFactor;
+				
+		double adjLeftVal = leftValue;
+		double adjRightVal = rightValue;
 		
 		//String leftSpeedStr = String.format("%.2f", adjLeftVal);
 		//String rightSpeedStr = String.format("%.2f", adjRightVal);

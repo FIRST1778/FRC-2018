@@ -86,9 +86,7 @@ public class Robot extends IterativeRobot {
  
     	// debug only (read position sensors)
     	DriveAssembly.getDistanceInches();
-    	getGyroAngle();
-    	CubeManagement.getLiftPos();
-   	
+    	getGyroAngle();   	
 	}
 
 	public void teleopInit() {

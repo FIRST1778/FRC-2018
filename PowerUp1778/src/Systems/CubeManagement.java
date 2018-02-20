@@ -22,6 +22,7 @@ public class CubeManagement {
 	private static final int PROFILE_SLOT = 0;
 
 	// auto lift levels
+	/*
 	public static final int BASE_LEVEL = 0;
 	public static final int SWITCH_LEVEL = 1;
 	public static final int SCALE_LEVEL = 2;
@@ -29,19 +30,22 @@ public class CubeManagement {
 	public static final int liftLevelPulses[] = {30, 140, 280};  // number of encoder pulses for each level  {base, lower, upper}
 	private static final int speedRpm = 900;
 	private static final int accelRpm = 450;
+	*/
 	
 	// motor polarity
 	public static final boolean RIGHT_COLLECTOR_REVERSE_MOTOR = false; 
 	public static final boolean LEFT_COLLECTOR_REVERSE_MOTOR = false; 
 			
 	// grayhill encoder polarity
-	public static final boolean ALIGNED_SENSOR = false; 
+	//public static final boolean ALIGNED_SENSOR = false; 
 
 	// PID coeffs
+	/*
 	private static final double kP = 1.0;
 	private static final double kI = 0.0;
 	private static final double kD = 0.0;
 	private static final double kF = 0.0;
+	*/
 	
 	// collector strength (%VBus - max is 1.0)
 	private static final double COLLECTOR_IN_STRENGTH = 0.75;
@@ -103,7 +107,8 @@ public class CubeManagement {
 		brakeMotor.setInverted(BRAKE_MOTOR_INVERTED);
 		
 		// create and initialize upper lift motor (closed-loop)
-		upperLiftMotor = configureMotor(HardwareIDs.UPPER_LIFT_TALON_ID, UPPER_REVERSE_MOTOR, ALIGNED_SENSOR, kP, kI, kD, kF);
+		//upperLiftMotor = configureMotor(HardwareIDs.UPPER_LIFT_TALON_ID, UPPER_REVERSE_MOTOR, ALIGNED_SENSOR, kP, kI, kD, kF);
+		upperLiftMotor = configureMotor(HardwareIDs.UPPER_LIFT_TALON_ID, UPPER_REVERSE_MOTOR);
 
 		// create and initialize lower lift motor (follows upper motor)
 		lowerLiftMotor = configureMotor(HardwareIDs.LOWER_LIFT_TALON_ID, LOWER_REVERSE_MOTOR, HardwareIDs.UPPER_LIFT_TALON_ID);
@@ -143,7 +148,7 @@ public class CubeManagement {
 		upperLiftMotor.setSelectedSensorPosition(0, PIDLOOP_IDX, TIMEOUT_MS);
 	}	 	
 
-    // open-loop motor configuration (and possibly follower)
+    // slave motor configuration
     private static TalonSRX configureMotor(int talonID, boolean revMotor, int talonIDToFollow)
     {
     	TalonSRX _talon;
@@ -158,7 +163,24 @@ public class CubeManagement {
     	return _talon;
     }
     
-    // closed-loop motor configuration
+    // master motor configuration
+    private static TalonSRX configureMotor(int talonID, boolean revMotor)
+    {
+		TalonSRX _talon;
+		_talon = new TalonSRX(talonID);
+		_talon.setInverted(revMotor);
+		
+		// forward limit switch is for up motion
+		_talon.configForwardLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen, 0);
+		// reverse limit switch is for down action
+		_talon.configReverseLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen, 0);
+				
+		_talon.setNeutralMode(NeutralMode.Brake);
+		
+		return _talon;
+    }
+
+    /*
     private static TalonSRX configureMotor(int talonID, boolean revMotor, boolean alignSensor,
     									double pCoeff, double iCoeff, double dCoeff, double fCoeff)
     {
@@ -183,13 +205,14 @@ public class CubeManagement {
     	_talon.config_kF(PROFILE_SLOT, fCoeff, TIMEOUT_MS);
     	_talon.configMotionCruiseVelocity(0, TIMEOUT_MS);
     	_talon.configMotionAcceleration(0, TIMEOUT_MS);
+    	
     	_talon.setSelectedSensorPosition(0, PIDLOOP_IDX, TIMEOUT_MS);
- 
+ 	
     	_talon.setNeutralMode(NeutralMode.Brake);
 
     	return _talon;
     }
-    
+    */
 	
 	/************************* lift brake & collector control functions **********************************/
 	
@@ -254,6 +277,7 @@ public class CubeManagement {
 
 	/************************* lift control functions **********************************/
 		
+	/*
 	public static void goToTarget(int pulses)
 	{		
 		int targetPulses = pulses;
@@ -274,6 +298,7 @@ public class CubeManagement {
 		_talon.configMotionAcceleration(accelNativeUnits, TIMEOUT_MS);
 		_talon.set(ControlMode.MotionMagic, targetPulses);
 	}
+	*/
 	
 	public static void runLift(double liftStrength)
 	{
@@ -363,6 +388,7 @@ public class CubeManagement {
 		checkLiftControls();
 	}
 	
+	/*
 	public static int getLiftPos() {
 		
 		// Encoders now read only raw encoder values - convert raw to inches directly
@@ -373,5 +399,6 @@ public class CubeManagement {
 		
 		return upperPulses;
 	}
+	*/
 	
 }
