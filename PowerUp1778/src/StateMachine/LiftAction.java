@@ -7,21 +7,21 @@ import edu.wpi.first.wpilibj.Timer;
 public class LiftAction extends Action {
 	
 	private String name;
-	private int targetliftLevel = CubeManagement.BASE_LEVEL;
+	private double liftStrength = 0;
 	
-	public LiftAction(int targetLiftLevel)
+	public LiftAction(double liftStrength)
 	{
 		this.name = "<Lift Action>";		
-		this.targetliftLevel = targetLiftLevel;
+		this.liftStrength = liftStrength;
 
 		CubeManagement.initialize();
 		InputOutputComm.initialize();
 	}
 	
-	public LiftAction(String name, int targetliftLevel)
+	public LiftAction(String name, double liftStrength)
 	{
 		this.name =  name;
-		this.targetliftLevel = targetliftLevel;
+		this.liftStrength = liftStrength;
 		
 		CubeManagement.initialize();		
 		InputOutputComm.initialize();
@@ -37,7 +37,7 @@ public class LiftAction extends Action {
 		Timer.delay(0.2);
 		
 		// do some lift initialization, start the lift
-		CubeManagement.goToTarget(targetliftLevel);
+		CubeManagement.runLift(liftStrength);
 				
 		super.initialize();
 	}
@@ -51,6 +51,9 @@ public class LiftAction extends Action {
 	
 	// state cleanup and exit
 	public void cleanup() {
+		
+		// turn off lift motors
+		CubeManagement.runLift(0);
 		
 		// turn brake back on
 		CubeManagement.liftBrakeOn();

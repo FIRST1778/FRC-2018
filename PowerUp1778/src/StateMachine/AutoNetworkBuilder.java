@@ -172,15 +172,13 @@ public class AutoNetworkBuilder {
 		return flipperState;
 	}
 
-	private static AutoState createLiftState(String state_name, int lift_level)
+	private static AutoState createLiftState(String state_name, double lift_strength, double lift_timer_sec)
 	{
 		AutoState liftState = new AutoState(state_name);
-		LiftAction liftAction = new LiftAction("<Lift Action>", lift_level);
-		//TimeEvent timer = new TimeEvent(10.0);  // lift timer event - artificially large for debug
-		ClosedLoopEncoderEvent enc = new ClosedLoopEncoderEvent(lift_level, 10, 1.0);
+		LiftAction liftAction = new LiftAction("<Lift Action>", lift_strength);
+		TimeEvent liftTimer = new TimeEvent(lift_timer_sec); 
 		liftState.addAction(liftAction);
-		//liftState.addEvent(timer);
-		liftState.addEvent(enc);
+		liftState.addEvent(liftTimer);
 		
 		return liftState;
 	}
@@ -201,13 +199,12 @@ public class AutoNetworkBuilder {
 	/*            Multi (combo) Action States                */
 	/*            (These are used repeatedly)                */
 	///////////////////////////////////////////////////////////
-	private static AutoState createLiftAndTurnState(String state_name, int lift_level, double angle_deg, double error_deg, double percent_vbus)
+	private static AutoState createLiftAndTurnState(String state_name, double lift_strength, double lift_timer_sec, double angle_deg, double error_deg, double percent_vbus)
 	{
 		AutoState liftAndTurnState = new AutoState(state_name);
 		
-		LiftAction liftAction = new LiftAction("<Lift Action>", lift_level);	
-		TimeEvent timer = new TimeEvent(10.0);  // lift timer event - artificially large for test
-		//ClosedLoopEncoderEvent enc = new ClosedLoopEncoderEvent(lift_level, 10, 1.0);
+		LiftAction liftAction = new LiftAction("<Lift Action>", lift_strength);	
+		TimeEvent liftTimer = new TimeEvent(lift_timer_sec); 
 		
 		TurnPIDAction turnPidAction = new TurnPIDAction("<Turn PID action>", angle_deg, percent_vbus, true);
 		ClosedLoopAngleEvent angle = new ClosedLoopAngleEvent(angle_deg,error_deg, 0.5);
@@ -215,21 +212,19 @@ public class AutoNetworkBuilder {
 		liftAndTurnState.addAction(liftAction);
 		liftAndTurnState.addAction(turnPidAction);
 		
-		liftAndTurnState.addEvent(timer);
-		//liftAndTurnState.addEvent(enc);
+		liftAndTurnState.addEvent(liftTimer);
 		liftAndTurnState.addEvent(angle);
 		liftAndTurnState.setAllEventsTrigger(true);  // BOTH must trigger to leave state
 		
 		return liftAndTurnState;
 	}
 
-	private static AutoState createLiftAndDriveState(String state_name, int lift_level, double dist_inches, double error_inches, int max_vel_rpm, int max_accel_rpm)
+	private static AutoState createLiftAndDriveState(String state_name, double lift_strength, double lift_timer_sec, double dist_inches, double error_inches, int max_vel_rpm, int max_accel_rpm)
 	{
 		AutoState liftAndDriveState = new AutoState(state_name);
 		
-		LiftAction liftAction = new LiftAction("<Lift Action>", lift_level);	
-		TimeEvent timer = new TimeEvent(1.0);  // lift timer event
-		//ClosedLoopEncoderEvent enc = new ClosedLoopEncoderEvent(lift_level, 10, 1.0);
+		LiftAction liftAction = new LiftAction("<Lift Action>", lift_strength);	
+		TimeEvent liftTimer = new TimeEvent(lift_timer_sec);  // lift timer event
 		
 		DriveForwardMagicAction driveForwardMagicAction = new DriveForwardMagicAction("<Drive Forward Magic Action>", dist_inches, max_vel_rpm, max_accel_rpm, true, 0.0);
 		ClosedLoopPositionEvent pos = new ClosedLoopPositionEvent(dist_inches, error_inches, 0.6);
@@ -237,8 +232,7 @@ public class AutoNetworkBuilder {
 		liftAndDriveState.addAction(liftAction);
 		liftAndDriveState.addAction(driveForwardMagicAction);
 		
-		liftAndDriveState.addEvent(timer);
-		//liftAndDriveState.addEvent(enc);
+		liftAndDriveState.addEvent(liftTimer);
 		liftAndDriveState.addEvent(pos);
 		liftAndDriveState.setAllEventsTrigger(true);  // BOTH must trigger to leave state
 		
@@ -295,7 +289,7 @@ public class AutoNetworkBuilder {
 			
 		// create states
 		AutoState driveState = createMagicDriveState("<Drive State 1>", 144.0, 3.0, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST);
-		AutoState liftUpTurnRightState = createLiftAndTurnState("<Lift Up & Turn Right State>", CubeManagement.liftLevelPulses[CubeManagement.SWITCH_LEVEL], 90.0, 10.0, 0.5);
+		AutoState liftUpTurnRightState = createLiftAndTurnState("<Lift Up & Turn Right State>", -0.25, 1.0 , 90.0, 10.0, 0.5);
 		AutoState driveState2 = createMagicDriveState("<Drive State 2>", 36.0, 3.0, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW);
 		AutoState depositCubeState = createCubeDepositState("<Deposit Cube State>", 3.0);
 		AutoState idleState = createIdleState("<Idle State>");
@@ -333,12 +327,12 @@ public class AutoNetworkBuilder {
 		
 		// create states
 		AutoState driveState = createMagicDriveState("<Drive State 1>", 246.0, 3.0, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST);
-		AutoState liftUpTurnRightState = createLiftAndTurnState("<Lift Up Turn Right State>", CubeManagement.liftLevelPulses[CubeManagement.SCALE_LEVEL], 45.0, 5.0, 0.5);
+		AutoState liftUpTurnRightState = createLiftAndTurnState("<Lift Up Turn Right State>", -0.25, 2.0 , 45.0, 5.0, 0.5);
 		AutoState driveState2 = createMagicDriveState("<Drive State 2>", 20.0, 3.0, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW);
 		AutoState depositCubeState = createCubeDepositState("<Deposit Cube State>", 1.0);
-		AutoState liftDownTurnRightState = createLiftAndTurnState("<Lift Down and Turn Right State>", CubeManagement.liftLevelPulses[CubeManagement.BASE_LEVEL], 113.0, 5.0, 0.5);
+		AutoState liftDownTurnRightState = createLiftAndTurnState("<Lift Down and Turn Right State>", 0.25, 2.0, 113.0, 5.0, 0.5);
 		AutoState driveState3 = createCollectorDriveState("<Drive State 3>", 90.0, 3.0, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW);
-		AutoState liftUpDriveBackState = createLiftAndDriveState("<Lift Up and Drive Back State>", CubeManagement.liftLevelPulses[CubeManagement.SCALE_LEVEL],-90.0, 3.0, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW);
+		AutoState liftUpDriveBackState = createLiftAndDriveState("<Lift Up and Drive Back State>", -0.25, 2.0, -90.0, 3.0, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW);
 		AutoState turnLeftState = createMagicTurnState("<Turn Left State>", -113.0, 5.0, 0.6);
 		AutoState depositCubeState2 = createCubeDepositState("<Deposit Cube State 2>", 2.0);
 		AutoState idleState = createIdleState("<Idle State>");
@@ -385,7 +379,7 @@ public class AutoNetworkBuilder {
 		AutoState driveState = createMagicDriveState("<Drive State 1>", 215.0, 3.0, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST);
 		AutoState turnRightState = createMagicTurnState("<Turn Right State>", 90.0, 2.0, 0.6);
 		AutoState driveState2 = createMagicDriveState("<Drive State 2>", 230.0, 3.0, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST);
-		AutoState liftUpAndTurnLeftState = createLiftAndTurnState("<Lift Up & Turn Left State>", CubeManagement.liftLevelPulses[CubeManagement.SCALE_LEVEL], -120.0, 5.0, 0.5);
+		AutoState liftUpAndTurnLeftState = createLiftAndTurnState("<Lift Up & Turn Left State>", -0.25, 2.0, -120.0, 5.0, 0.5);
 		AutoState driveState3 = createMagicDriveState("<Drive State 3>", 48.0, 3.0, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW);
 		AutoState depositCubeState = createCubeDepositState("<Deposit Cube State>", 3.0);
 		AutoState idleState = createIdleState("<Idle State>");
@@ -424,7 +418,7 @@ public class AutoNetworkBuilder {
 		AutoState driveState = createMagicDriveState("<Drive State 1>", 215.0, 3.0, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST);
 		AutoState turnRightState = createMagicTurnState("<Turn Right State>", 90.0, 5.0, 0.6);
 		AutoState driveState2 = createMagicDriveState("<Drive State 2>", 160.0, 3.0, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST);
-		AutoState liftUpState = createLiftState("<Lift Up State>", CubeManagement.liftLevelPulses[CubeManagement.SCALE_LEVEL]);
+		AutoState liftUpState = createLiftState("<Lift Up State>", -0.25, 2.0);
 		AutoState idleState = createIdleState("<Idle State>");
 		
 		// connect the state sequence
@@ -464,12 +458,12 @@ public class AutoNetworkBuilder {
 		AutoState driveState = createMagicDriveState("<Drive State 1>", 18.0, 3.0, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST);
 		AutoState turnLeftState = createMagicTurnState("<Turn Left State>", -45.0, 20.0, 0.6);
 		AutoState driveState2 = createMagicDriveState("<Drive State 2>", 75.0, 3.0, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST);
-		AutoState liftUpAndTurnRightState = createLiftAndTurnState("<Lift Up and Turn Right State>", CubeManagement.liftLevelPulses[CubeManagement.SWITCH_LEVEL], 45.0, 20.0, 0.5);
+		AutoState liftUpAndTurnRightState = createLiftAndTurnState("<Lift Up and Turn Right State>", -0.25, 1.0, 45.0, 20.0, 0.5);
 		AutoState driveState3 = createMagicDriveState("<Drive State 3>", 28.0, 3.0, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW);
 		AutoState depositCubeState = createCubeDepositState("<Cube Deposit State>", 1.0);
-		AutoState liftDownAndTurnRightState = createLiftAndTurnState("<Lift Down and Turn Right State>", CubeManagement.liftLevelPulses[CubeManagement.BASE_LEVEL], 80.0, 20.0, 0.5);
+		AutoState liftDownAndTurnRightState = createLiftAndTurnState("<Lift Down and Turn Right State>", 0.25, 1.0, 80.0, 20.0, 0.5);
 		AutoState driveState4 = createCollectorDriveState("<Drive State 4>", 48.0, 3.0, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW);
-		AutoState liftUpDriveBackState = createLiftAndDriveState("<Lift Up and Drive Back State>", CubeManagement.liftLevelPulses[CubeManagement.SWITCH_LEVEL],-48.0, 3.0, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW);
+		AutoState liftUpDriveBackState = createLiftAndDriveState("<Lift Up and Drive Back State>", -0.25, 1.0, -48.0, 3.0, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW);
 		AutoState turnLeftState2 = createMagicTurnState("<Turn Left State 2>", -80.0, 20.0, 0.6);
 		AutoState depositCubeState2 = createCubeDepositState("<Cube Deposit State 2>", 2.0);
 		AutoState idleState = createIdleState("<Idle State>");
@@ -525,12 +519,12 @@ public class AutoNetworkBuilder {
 		AutoState driveState = createMagicDriveState("<Drive State 1>", 18.0, 3.0, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST);
 		AutoState turnRightState = createMagicTurnState("<Turn Right State>", 45.0, 20.0, 0.6);
 		AutoState driveState2 = createMagicDriveState("<Drive State 2>", 80.0, 3.0, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST);
-		AutoState liftUpAndTurnLeftState = createLiftAndTurnState("<Lift Up and Turn Left State>", CubeManagement.liftLevelPulses[CubeManagement.SWITCH_LEVEL], -45.0, 20.0, 0.5);
+		AutoState liftUpAndTurnLeftState = createLiftAndTurnState("<Lift Up and Turn Left State>", -0.25, 1.0, -45.0, 20.0, 0.5);
 		AutoState driveState3 = createMagicDriveState("<Drive State 3>", 21.0, 3.0, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW);
 		AutoState depositCubeState = createCubeDepositState("<Cube Deposit State>", 1.0);
-		AutoState liftDownAndTurnLeftState = createLiftAndTurnState("<Lift Down and Turn Left State>", CubeManagement.liftLevelPulses[CubeManagement.BASE_LEVEL], -80.0, 20.0, 0.5);
+		AutoState liftDownAndTurnLeftState = createLiftAndTurnState("<Lift Down and Turn Left State>", 0.25, 1.0, -80.0, 20.0, 0.5);
 		AutoState driveState4 = createCollectorDriveState("<Drive State 4>", 48.0, 3.0, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW);
-		AutoState liftUpDriveBackState = createLiftAndDriveState("<Lift Up and Drive Back State>", CubeManagement.liftLevelPulses[CubeManagement.SWITCH_LEVEL],-48.0, 3.0, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW);
+		AutoState liftUpDriveBackState = createLiftAndDriveState("<Lift Up and Drive Back State>", -0.25, 1.0, -48.0, 3.0, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW);
 		AutoState turnRightState2 = createMagicTurnState("<Turn Right State 2>", 80.0, 20.0, 0.6);
 		AutoState depositCubeState2 = createCubeDepositState("<Cube Deposit State 2>", 2.0);
 		AutoState idleState = createIdleState("<Idle State>");
@@ -578,7 +572,7 @@ public class AutoNetworkBuilder {
 		
 		// create states
 		AutoState driveState = createMagicDriveState("<Drive State 1>", 144.0, 3.0, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST);
-		AutoState liftUpAndTurnLeftState = createLiftAndTurnState("<Lift Up & Turn Left State>", CubeManagement.liftLevelPulses[CubeManagement.SWITCH_LEVEL], -90.0, 10.0, 0.5);
+		AutoState liftUpAndTurnLeftState = createLiftAndTurnState("<Lift Up & Turn Left State>", -0.25, 1.0, -90.0, 10.0, 0.5);
 		AutoState driveState2 = createMagicDriveState("<Drive State 2>", 36.0, 3.0, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW);
 		AutoState depositCubeState = createCubeDepositState("<Deposit Cube State>", 3.0);
 		AutoState idleState = createIdleState("<Idle State>");
@@ -616,12 +610,12 @@ public class AutoNetworkBuilder {
 					
 		// create states
 		AutoState driveState = createMagicDriveState("<Drive State 1>", 246.0, 3.0, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST);
-		AutoState liftUpTurnLeftState = createLiftAndTurnState("<Lift Up Turn Lefts State>", CubeManagement.liftLevelPulses[CubeManagement.SCALE_LEVEL], -45.0, 10.0, 0.5);
+		AutoState liftUpTurnLeftState = createLiftAndTurnState("<Lift Up Turn Lefts State>", -0.25, 2.0, -45.0, 10.0, 0.5);
 		AutoState driveState2 = createMagicDriveState("<Drive State 2>", 20.0, 3.0, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW);
 		AutoState depositCubeState = createCubeDepositState("<Deposit Cube State>", 1.0);
-		AutoState liftDownTurnLeftState = createLiftAndTurnState("<Lift Down and Turn Left State>", CubeManagement.liftLevelPulses[CubeManagement.BASE_LEVEL], -113.0, 5.0, 0.5);
+		AutoState liftDownTurnLeftState = createLiftAndTurnState("<Lift Down and Turn Left State>", -0.25, 2.0, -113.0, 5.0, 0.5);
 		AutoState driveState3 = createCollectorDriveState("<Drive State 3>", 90.0, 3.0, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW);
-		AutoState liftUpDriveBackState = createLiftAndDriveState("<Lift Up and Drive Back State>", CubeManagement.liftLevelPulses[CubeManagement.SCALE_LEVEL],-90.0, 3.0, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW);
+		AutoState liftUpDriveBackState = createLiftAndDriveState("<Lift Up and Drive Back State>", -0.25, 2.0, -90.0, 3.0, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW);
 		AutoState turnRightState = createMagicTurnState("<Turn Right State>", 113.0, 5.0, 0.6);
 		AutoState depositCubeState2 = createCubeDepositState("<Deposit Cube State 2>", 2.0);
 		AutoState idleState = createIdleState("<Idle State>");
@@ -668,7 +662,7 @@ public class AutoNetworkBuilder {
 		AutoState driveState = createMagicDriveState("<Drive State 1>", 215.0, 3.0, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST);
 		AutoState turnLeftState = createMagicTurnState("<Turn Left State>", -90.0, 2.0, 0.6);
 		AutoState driveState2 = createMagicDriveState("<Drive State 2>", 230.0, 3.0, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST);
-		AutoState liftUpAndTurnRightState = createLiftAndTurnState("<Lift Up & Turn Right State>",CubeManagement.liftLevelPulses[CubeManagement.SCALE_LEVEL], 120.0, 5.0, 0.5);
+		AutoState liftUpAndTurnRightState = createLiftAndTurnState("<Lift Up & Turn Right State>",-0.25, 2.0, 120.0, 5.0, 0.5);
 		AutoState driveState3 = createMagicDriveState("<Drive State 3>", 48.0, 3.0, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW);
 		AutoState depositCubeState = createCubeDepositState("<Deposit Cube State>", 3.0);
 		AutoState idleState = createIdleState("<Idle State>");
@@ -707,7 +701,7 @@ public class AutoNetworkBuilder {
 		AutoState driveState = createMagicDriveState("<Drive State 1>", 215.0, 3.0, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST);
 		AutoState turnLeftState = createMagicTurnState("<Turn Left State>", -90.0, 2.0, 0.6);
 		AutoState driveState2 = createMagicDriveState("<Drive State 2>", 160.0, 3.0, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST);
-		AutoState liftUpState = createLiftState("<Lift Up State>", CubeManagement.liftLevelPulses[CubeManagement.SCALE_LEVEL]);
+		AutoState liftUpState = createLiftState("<Lift Up State>", -0.25, 2.0);
 		AutoState idleState = createIdleState("<Idle State>");
 			
 		// connect the state sequence
@@ -849,13 +843,13 @@ public class AutoNetworkBuilder {
 		AutoNetwork autoNet = new AutoNetwork("<Lifting Forever Network>");
 		
 		// create states
-		AutoState liftState1 = createLiftState("<Lift 1 State>", CubeManagement.liftLevelPulses[CubeManagement.SWITCH_LEVEL]);
+		AutoState liftState1 = createLiftState("<Lift 1 State>", -0.25, 1.0);
 		AutoState timerState1 = createTimerState("<Timer 1 State>", 10.0);
-		AutoState liftState2 = createLiftState("<Lift 2 State>", CubeManagement.liftLevelPulses[CubeManagement.SCALE_LEVEL]);
+		AutoState liftState2 = createLiftState("<Lift 2 State>", -0.25, 1.0);
 		AutoState timerState2 = createTimerState("<Timer 2 State>", 10.0);
-		AutoState liftState3 = createLiftState("<Lift 3 State>", CubeManagement.liftLevelPulses[CubeManagement.SWITCH_LEVEL]);
+		AutoState liftState3 = createLiftState("<Lift 3 State>", 0.25, 1.0);
 		AutoState timerState3 = createTimerState("<Timer 3 State>", 10.0);
-		AutoState liftState4 = createLiftState("<Lift 4 State>", CubeManagement.liftLevelPulses[CubeManagement.BASE_LEVEL]);
+		AutoState liftState4 = createLiftState("<Lift 4 State>", 0.25, 1.0);
 		AutoState timerState4 = createTimerState("<Timer 4 State>", 10.0);
 		
 		// connect the state sequence
@@ -894,10 +888,10 @@ public class AutoNetworkBuilder {
 		AutoNetwork autoNet = new AutoNetwork("<Lifting & Turning Forever Network>");
 		
 		// create states
-		AutoState liftandTurnState1 = createLiftAndTurnState("<Lift and Turn 1 State>", CubeManagement.liftLevelPulses[CubeManagement.SWITCH_LEVEL], 90.0, 5.0, 0.3);
-		AutoState liftandTurnState2 = createLiftAndTurnState("<Lift and Turn 2 State>", CubeManagement.liftLevelPulses[CubeManagement.SCALE_LEVEL], 90.0, 5.0, 0.3);
-		AutoState liftandTurnState3 = createLiftAndTurnState("<Lift and Turn 3 State>", CubeManagement.liftLevelPulses[CubeManagement.SWITCH_LEVEL], -90.0, 5.0, 0.3);
-		AutoState liftandTurnState4 = createLiftAndTurnState("<Lift and Turn 4 State>", CubeManagement.liftLevelPulses[CubeManagement.BASE_LEVEL], -90.0, 5.0, 0.3);
+		AutoState liftandTurnState1 = createLiftAndTurnState("<Lift and Turn 1 State>", -0.25, 1.0, 90.0, 5.0, 0.3);
+		AutoState liftandTurnState2 = createLiftAndTurnState("<Lift and Turn 2 State>", -0.25, 1.0, 90.0, 5.0, 0.3);
+		AutoState liftandTurnState3 = createLiftAndTurnState("<Lift and Turn 3 State>", 0.25, 1.0, -90.0, 5.0, 0.3);
+		AutoState liftandTurnState4 = createLiftAndTurnState("<Lift and Turn 4 State>", 0.25, 1.0, -90.0, 5.0, 0.3);
 		
 		// connect the state sequence
 		liftandTurnState1.associateNextState(liftandTurnState2);

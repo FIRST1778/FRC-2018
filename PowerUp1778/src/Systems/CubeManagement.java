@@ -275,6 +275,12 @@ public class CubeManagement {
 		_talon.set(ControlMode.MotionMagic, targetPulses);
 	}
 	
+	public static void runLift(double liftStrength)
+	{
+		InputOutputComm.putDouble(InputOutputComm.LogTable.kMainLog,"CubeMgmt/LiftStrength", liftStrength);
+		upperLiftMotor.set(ControlMode.PercentOutput, liftStrength);		
+	}
+	
 	/************************* UI input functions **********************************/
 	
 	private static void checkCollectorControls() {			
@@ -328,8 +334,7 @@ public class CubeManagement {
 			return;		
 	
 		// apply lift motor gain value
-		InputOutputComm.putDouble(InputOutputComm.LogTable.kMainLog,"CubeMgmt/LiftStrength", liftStrength);
-		upperLiftMotor.set(ControlMode.PercentOutput, liftStrength);
+		runLift(liftStrength);
 	}
 			
 	public static void autoInit() {				
