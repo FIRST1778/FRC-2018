@@ -45,7 +45,7 @@ public class CubeManagement {
 	
 	// collector strength (%VBus - max is 1.0)
 	private static final double COLLECTOR_IN_STRENGTH = 0.75;
-	private static final double COLLECTOR_OUT_STRENGTH = -1.00;
+	private static final double COLLECTOR_OUT_STRENGTH = -0.75;
 	private static final boolean LEFT_COLLECTOR_INVERTED = true;
 	private static final boolean RIGHT_COLLECTOR_INVERTED = false;
 
