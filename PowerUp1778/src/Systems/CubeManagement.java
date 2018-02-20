@@ -21,32 +21,10 @@ public class CubeManagement {
 	private static final int PIDLOOP_IDX = 0;  // set to zero if primary loop
 	private static final int PROFILE_SLOT = 0;
 
-	// auto lift levels
-	/*
-	public static final int BASE_LEVEL = 0;
-	public static final int SWITCH_LEVEL = 1;
-	public static final int SCALE_LEVEL = 2;
-	
-	public static final int liftLevelPulses[] = {30, 140, 280};  // number of encoder pulses for each level  {base, lower, upper}
-	private static final int speedRpm = 900;
-	private static final int accelRpm = 450;
-	*/
-	
 	// motor polarity
 	public static final boolean RIGHT_COLLECTOR_REVERSE_MOTOR = false; 
 	public static final boolean LEFT_COLLECTOR_REVERSE_MOTOR = false; 
 			
-	// grayhill encoder polarity
-	//public static final boolean ALIGNED_SENSOR = false; 
-
-	// PID coeffs
-	/*
-	private static final double kP = 1.0;
-	private static final double kI = 0.0;
-	private static final double kD = 0.0;
-	private static final double kF = 0.0;
-	*/
-	
 	// collector strength (%VBus - max is 1.0)
 	private static final double COLLECTOR_IN_STRENGTH = 0.75;
 	private static final double COLLECTOR_OUT_STRENGTH = -0.75;
@@ -180,40 +158,6 @@ public class CubeManagement {
 		return _talon;
     }
 
-    /*
-    private static TalonSRX configureMotor(int talonID, boolean revMotor, boolean alignSensor,
-    									double pCoeff, double iCoeff, double dCoeff, double fCoeff)
-    {
-    	TalonSRX _talon;
-    	_talon = new TalonSRX(talonID);
-    	_talon.setInverted(revMotor);
-    	
-    	// set up sensor
-    	_talon.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, PIDLOOP_IDX, TIMEOUT_MS);
-    	_talon.setSensorPhase(alignSensor); 
-    	    	
-    	// forward limit switch is for up motion
-		_talon.configForwardLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen, 0);
-		// reverse limit switch is for down action
-		_talon.configReverseLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen, 0);
-   	
-    	// set up closed loop control
-    	_talon.selectProfileSlot(PROFILE_SLOT, PIDLOOP_IDX);
-    	_talon.config_kP(PROFILE_SLOT, pCoeff, TIMEOUT_MS);
-    	_talon.config_kI(PROFILE_SLOT, iCoeff, TIMEOUT_MS);
-    	_talon.config_kD(PROFILE_SLOT, dCoeff, TIMEOUT_MS);
-    	_talon.config_kF(PROFILE_SLOT, fCoeff, TIMEOUT_MS);
-    	_talon.configMotionCruiseVelocity(0, TIMEOUT_MS);
-    	_talon.configMotionAcceleration(0, TIMEOUT_MS);
-    	
-    	_talon.setSelectedSensorPosition(0, PIDLOOP_IDX, TIMEOUT_MS);
- 	
-    	_talon.setNeutralMode(NeutralMode.Brake);
-
-    	return _talon;
-    }
-    */
-	
 	/************************* lift brake & collector control functions **********************************/
 	
 	public static void liftBrakeOn()
@@ -277,29 +221,6 @@ public class CubeManagement {
 
 	/************************* lift control functions **********************************/
 		
-	/*
-	public static void goToTarget(int pulses)
-	{		
-		int targetPulses = pulses;
-
-		String posStr = String.format("%d", targetPulses);
-		InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"Auto/liftTargetPulses", posStr);
-		
-        // configure upper lift motor (lower lift motor follows)
-		configureMotionMagic(upperLiftMotor, targetPulses);
-	}
-	
-	private static void configureMotionMagic(TalonSRX _talon, int targetPulses)
-	{
-		int nativeUnitsPer100ms = (int) ((double)speedRpm * HardwareIDs.RPM_TO_UNIT_PER_100MS);
-		int accelNativeUnits = (int) ((double)accelRpm * HardwareIDs.RPM_TO_UNIT_PER_100MS);
-
-		_talon.configMotionCruiseVelocity(nativeUnitsPer100ms, TIMEOUT_MS);
-		_talon.configMotionAcceleration(accelNativeUnits, TIMEOUT_MS);
-		_talon.set(ControlMode.MotionMagic, targetPulses);
-	}
-	*/
-	
 	public static void runLift(double liftStrength)
 	{
 		InputOutputComm.putDouble(InputOutputComm.LogTable.kMainLog,"CubeMgmt/LiftStrength", liftStrength);
@@ -387,18 +308,5 @@ public class CubeManagement {
 		checkBrakeControls();
 		checkLiftControls();
 	}
-	
-	/*
-	public static int getLiftPos() {
 		
-		// Encoders now read only raw encoder values - convert raw to inches directly
-		int upperPulses = upperLiftMotor.getSelectedSensorPosition(0);
-				
-		String posStr = String.format("%d", upperPulses);
-		InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"Auto/LiftUpper", posStr);
-		
-		return upperPulses;
-	}
-	*/
-	
 }

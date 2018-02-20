@@ -161,17 +161,6 @@ public class AutoNetworkBuilder {
 		return turnState;
 	}
 	
-	private static AutoState createFlipperState(String state_name)
-	{
-		AutoState flipperState = new AutoState(state_name);
-		FlipperAction flipperAction = new FlipperAction("<Flipper Deploy Action>");
-		TimeEvent timer = new TimeEvent(0.1);  // flipper timer event
-		flipperState.addAction(flipperAction);
-		flipperState.addEvent(timer);
-		
-		return flipperState;
-	}
-
 	private static AutoState createLiftState(String state_name, double lift_strength, double lift_timer_sec)
 	{
 		AutoState liftState = new AutoState(state_name);
