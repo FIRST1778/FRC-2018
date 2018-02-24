@@ -27,7 +27,10 @@ public class CubeManagement {
 			
 	// collector strength (%VBus - max is 1.0)
 	private static final double COLLECTOR_IN_STRENGTH = 0.75;
-	private static final double COLLECTOR_OUT_STRENGTH = -0.75;
+	private static final double COLLECTOR_OUT_STRENGTH_LOW = -0.25;
+	private static final double COLLECTOR_OUT_STRENGTH_MED = -0.50;
+	private static final double COLLECTOR_OUT_STRENGTH_HIGH = -0.75;
+	
 	private static final boolean LEFT_COLLECTOR_INVERTED = true;
 	private static final boolean RIGHT_COLLECTOR_INVERTED = false;
 
@@ -205,9 +208,9 @@ public class CubeManagement {
 
 	public static void depositCube()
 	{
-		InputOutputComm.putDouble(InputOutputComm.LogTable.kMainLog,"CubeMgmt/CollectorLevel", COLLECTOR_OUT_STRENGTH);
-		leftCollectorMotor.set(COLLECTOR_OUT_STRENGTH);
-		rightCollectorMotor.set(COLLECTOR_OUT_STRENGTH);
+		InputOutputComm.putDouble(InputOutputComm.LogTable.kMainLog,"CubeMgmt/CollectorLevel", COLLECTOR_OUT_STRENGTH_MED);
+		leftCollectorMotor.set(COLLECTOR_OUT_STRENGTH_MED);
+		rightCollectorMotor.set(COLLECTOR_OUT_STRENGTH_MED);
 			
 	}
 
@@ -234,8 +237,12 @@ public class CubeManagement {
 		double collectorStrength = gamepad.getRawAxis(HardwareIDs.COLLECTOR_IN_AXIS);
 		if (Math.abs(collectorStrength) > DEAD_ZONE_THRESHOLD)
 			collectorStrength = COLLECTOR_IN_STRENGTH;
-		else if (gamepad.getRawButton(HardwareIDs.COLLECTOR_OUT_BUTTON))
-			collectorStrength = COLLECTOR_OUT_STRENGTH;
+		else if (gamepad.getRawButton(HardwareIDs.COLLECTOR_OUT_BUTTON_LOW))
+			collectorStrength = COLLECTOR_OUT_STRENGTH_LOW;
+		else if (gamepad.getRawButton(HardwareIDs.COLLECTOR_OUT_BUTTON_MED))
+			collectorStrength = COLLECTOR_OUT_STRENGTH_MED;
+		else if (gamepad.getRawButton(HardwareIDs.COLLECTOR_OUT_BUTTON_HIGH))
+			collectorStrength = COLLECTOR_OUT_STRENGTH_HIGH;
 		else
 			collectorStrength = 0.0;
 		
