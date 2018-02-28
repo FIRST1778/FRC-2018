@@ -46,7 +46,11 @@ public class Controller {
     }
     
     public static boolean Driver_isQuickTurn(){
-    	return !Driver.getRawButton(InterLinkElite.RIGHT_SWITCH);
+    	// New (2018) Interlink
+    	return Driver.getRawButton(InterLinkElite.RIGHT_SWITCH);
+    	
+    	// Legacy (2017) Interlink
+    	//return !Driver.getRawButton(InterLinkElite.RIGHT_SWITCH);
     }
     
     public static boolean Driver_isLowSensitivity(){
