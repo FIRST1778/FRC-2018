@@ -42,7 +42,7 @@ public class Controller {
     }
 
     public static double Driver_Steering (){
-    	return -1.0*Driver.getRawAxis(InterLinkElite.Axis.RIGHT_X);
+    	return -1*Driver.getRawAxis(InterLinkElite.Axis.RIGHT_X);
     }
     
     public static boolean Driver_isQuickTurn(){

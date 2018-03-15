@@ -24,7 +24,7 @@ public class DriveControl {
         
 		throttle = throttle / 0.6;
 		
-        if(throttle > 0)
+		if(throttle < 0)
         	wheel = -wheel;
         
         InputOutputComm.putDouble(InputOutputComm.LogTable.kDriveLog,"Teleop/Throttle", throttle);		
@@ -76,6 +76,8 @@ public class DriveControl {
         }
         linearPower = throttle;
         
+        // linearPower += .01;
+        
         double rightPower,leftPower,overPower;
         
         sensitivity = .85;        
@@ -89,11 +91,11 @@ public class DriveControl {
             }
             overPower = 1.0;
             sensitivity = 1.0;
-            angularPower = wheel; // -wheel; for old controller
+            angularPower = -wheel; // for old controller
         } else {
             overPower = 0.0;
-            angularPower = Math.abs(throttle) * wheel * sensitivity
-                    - quickStopAccumulator;
+            angularPower = -1*(Math.abs(throttle) * wheel * sensitivity
+                    - quickStopAccumulator);
             if (quickStopAccumulator > 1) {
                 quickStopAccumulator -= 1;
             } else if (quickStopAccumulator < -1) {
