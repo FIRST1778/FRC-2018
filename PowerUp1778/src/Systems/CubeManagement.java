@@ -285,8 +285,9 @@ public class CubeManagement {
 			liftStrength = 0.0;
 		
 		// abort if lift brake is still on (don't fight the brake)
-		if (liftBrakeOn)
-			return;		
+		//**** TURNED OFF: currently brake is not installed
+		//if (liftBrakeOn)
+		//	return;		
 	
 		// apply lift motor gain value
 		runLift(liftStrength);
