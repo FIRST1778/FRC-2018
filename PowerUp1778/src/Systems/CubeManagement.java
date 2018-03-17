@@ -35,7 +35,7 @@ public class CubeManagement {
 	private static final boolean RIGHT_COLLECTOR_INVERTED = false;
 
 	// teleop lift strength (%VBus - max is 1.0)
-	private static final double LIFT_MOTOR_FACTOR = 0.50;
+	private static final double LIFT_MOTOR_FACTOR = 0.30;
 	private static final double LIFT_MOTOR_DEAD_ZONE = 0.1;
 		
 	// brake motor strength (%VBus - max is 1.0)
@@ -50,8 +50,10 @@ public class CubeManagement {
 	
 	// lift motors
 	private static TalonSRX upperLiftMotor, lowerLiftMotor;
-	private static final boolean UPPER_REVERSE_MOTOR = false;
-	private static final boolean LOWER_REVERSE_MOTOR = false;
+	//private static final boolean UPPER_REVERSE_MOTOR = false;
+	//private static final boolean LOWER_REVERSE_MOTOR = false;
+	private static final boolean UPPER_REVERSE_MOTOR = true;      // may need this - tested at Auburn 3-16
+	private static final boolean LOWER_REVERSE_MOTOR = true;
 			
 	// brake motor
 	private static boolean liftBrakeOn = false;
