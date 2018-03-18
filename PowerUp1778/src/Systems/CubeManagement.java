@@ -26,7 +26,12 @@ public class CubeManagement {
 	public static final boolean LEFT_COLLECTOR_REVERSE_MOTOR = false; 
 			
 	// collector strength (%VBus - max is 1.0)
-	private static final double COLLECTOR_IN_STRENGTH = 0.75;
+	private static final double COLLECTOR_IN_STRENGTH = 0.75;  // teleop
+	private static final double COLLECTOR_OUT_STRENGTH = -0.75;  // telop
+	
+	private static final double COLLECTOR_IN_AUTO_STRENGTH = 0.5;  // auto
+	private static final double COLLECTOR_OUT_AUTO_STRENGTH = -0.75;  // auto
+	
 	private static final double COLLECTOR_OUT_STRENGTH_LOW = -0.25;
 	private static final double COLLECTOR_OUT_STRENGTH_MED = -0.50;
 	private static final double COLLECTOR_OUT_STRENGTH_HIGH = -0.75;
@@ -35,7 +40,8 @@ public class CubeManagement {
 	private static final boolean RIGHT_COLLECTOR_INVERTED = false;
 
 	// teleop lift strength (%VBus - max is 1.0)
-	private static final double LIFT_MOTOR_FACTOR = 0.30;
+	private static final double LIFT_MOTOR_UP_FACTOR = 0.65;
+	private static final double LIFT_MOTOR_DOWN_FACTOR = 0.10;
 	private static final double LIFT_MOTOR_DEAD_ZONE = 0.1;
 		
 	// brake motor strength (%VBus - max is 1.0)
@@ -210,20 +216,19 @@ public class CubeManagement {
 
 	public static void depositCube()
 	{
-		InputOutputComm.putDouble(InputOutputComm.LogTable.kMainLog,"CubeMgmt/CollectorLevel", COLLECTOR_OUT_STRENGTH_MED);
-		leftCollectorMotor.set(COLLECTOR_OUT_STRENGTH_MED);
-		rightCollectorMotor.set(COLLECTOR_OUT_STRENGTH_MED);
+		InputOutputComm.putDouble(InputOutputComm.LogTable.kMainLog,"CubeMgmt/CollectorLevel", COLLECTOR_OUT_AUTO_STRENGTH);
+		leftCollectorMotor.set(COLLECTOR_OUT_AUTO_STRENGTH);
+		rightCollectorMotor.set(COLLECTOR_OUT_AUTO_STRENGTH);
 			
 	}
 
 	public static void collectCube()
 	{
-		InputOutputComm.putDouble(InputOutputComm.LogTable.kMainLog,"CubeMgmt/CollectorLevel", COLLECTOR_IN_STRENGTH);
-		leftCollectorMotor.set(COLLECTOR_IN_STRENGTH);
-		rightCollectorMotor.set(COLLECTOR_IN_STRENGTH);
-			
+		InputOutputComm.putDouble(InputOutputComm.LogTable.kMainLog,"CubeMgmt/CollectorLevel", COLLECTOR_IN_AUTO_STRENGTH);
+		leftCollectorMotor.set(COLLECTOR_IN_AUTO_STRENGTH);
+		rightCollectorMotor.set(COLLECTOR_IN_AUTO_STRENGTH);
 	}
-
+	
 	/************************* lift control functions **********************************/
 		
 	public static void runLift(double liftStrength)
@@ -234,25 +239,32 @@ public class CubeManagement {
 	
 	/************************* UI input functions **********************************/
 	
-	private static void checkCollectorControls() {			
-		// collector control
-		double collectorStrength = gamepad.getRawAxis(HardwareIDs.COLLECTOR_IN_AXIS);
-		if (Math.abs(collectorStrength) > DEAD_ZONE_THRESHOLD)
-			collectorStrength = COLLECTOR_IN_STRENGTH;
+	private static void checkCollectorControls() {	
+		double collectorMotorStrength = 0.0;
+		
+		// collector controls
+		double collectorInStrength = gamepad.getRawAxis(HardwareIDs.COLLECTOR_IN_AXIS);
+		double collectorOutStrength = gamepad.getRawAxis(HardwareIDs.COLLECTOR_OUT_AXIS);
+		if (Math.abs(collectorInStrength) > DEAD_ZONE_THRESHOLD)
+			collectorMotorStrength = collectorInStrength * COLLECTOR_IN_STRENGTH;
+		else if (Math.abs(collectorOutStrength) > DEAD_ZONE_THRESHOLD) 
+			collectorMotorStrength = collectorOutStrength * COLLECTOR_OUT_STRENGTH;
+		/*
 		else if (gamepad.getRawButton(HardwareIDs.COLLECTOR_OUT_BUTTON_LOW))
 			collectorStrength = COLLECTOR_OUT_STRENGTH_LOW;
 		else if (gamepad.getRawButton(HardwareIDs.COLLECTOR_OUT_BUTTON_MED))
 			collectorStrength = COLLECTOR_OUT_STRENGTH_MED;
 		else if (gamepad.getRawButton(HardwareIDs.COLLECTOR_OUT_BUTTON_HIGH))
 			collectorStrength = COLLECTOR_OUT_STRENGTH_HIGH;
+		*/
 		else
-			collectorStrength = 0.0;
+			collectorMotorStrength = 0.0;
 		
-		InputOutputComm.putDouble(InputOutputComm.LogTable.kMainLog,"CubeMgmt/CollectorStrength", collectorStrength);
-		RPIComm.setDouble("collectorStrength", collectorStrength);
+		InputOutputComm.putDouble(InputOutputComm.LogTable.kMainLog,"CubeMgmt/CollectorStrength", collectorMotorStrength);
+		RPIComm.setDouble("collectorStrength", collectorMotorStrength);
 
-		leftCollectorMotor.set(collectorStrength);
-		rightCollectorMotor.set(collectorStrength);
+		leftCollectorMotor.set(collectorMotorStrength);
+		rightCollectorMotor.set(collectorMotorStrength);
 	}
 		
 	private static void checkBrakeControls() {
@@ -280,7 +292,10 @@ public class CubeManagement {
 				
 		// convert joystick value into motor speed value
 		if (Math.abs(liftStrength) >= LIFT_MOTOR_DEAD_ZONE)
-			liftStrength *= LIFT_MOTOR_FACTOR; 
+			if (liftStrength < 0)
+				liftStrength *= LIFT_MOTOR_UP_FACTOR;
+			else
+				liftStrength *= LIFT_MOTOR_DOWN_FACTOR; 
 		else 
 			liftStrength = 0.0;
 		

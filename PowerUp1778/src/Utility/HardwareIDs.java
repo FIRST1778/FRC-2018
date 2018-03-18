@@ -25,10 +25,12 @@ public class HardwareIDs {
 	
 	// copilot (gamepad) controls
 	public static final int COLLECTOR_IN_AXIS = 2;
+	public static final int COLLECTOR_OUT_AXIS = 3;
+	
 	//public static final int COLLECTOR_OUT_BUTTON = 5;
-	public static final int COLLECTOR_OUT_BUTTON_LOW = 1;
-	public static final int COLLECTOR_OUT_BUTTON_MED = 2;
-	public static final int COLLECTOR_OUT_BUTTON_HIGH = 4;
+	//public static final int COLLECTOR_OUT_BUTTON_LOW = 1;
+	//public static final int COLLECTOR_OUT_BUTTON_MED = 2;
+	//public static final int COLLECTOR_OUT_BUTTON_HIGH = 4;
 		
 	public static final int FLIPPER_DEPLOY_BUTTON = 6;
 

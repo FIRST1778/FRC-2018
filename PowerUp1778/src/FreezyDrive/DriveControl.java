@@ -22,7 +22,7 @@ public class DriveControl {
 		wheel = handleDeadband(wheel, wheelDeadband);
         throttle = handleDeadband(throttle, throttleDeadband);
         
-		throttle = throttle / 0.6;
+		//throttle = throttle / 0.6;
 		
 		if(throttle < 0)
         	wheel = -wheel;

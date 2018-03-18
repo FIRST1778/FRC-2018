@@ -180,12 +180,14 @@ public class AutoStateMachine {
 			if (fieldAllianceColors[SCALE] == LEFT) 
 			{
 				// first priority - deposit one cube on scale (same side)
-				netIndex = AutoNetworkBuilder.DEPOSIT_CUBE_SCALE_LEFT;
+				//netIndex = AutoNetworkBuilder.DEPOSIT_CUBE_SCALE_LEFT;  // not yet used
+				netIndex = AutoNetworkBuilder.DRIVE_FORWARD; 
 			}
 			else // (fieldAllianceColors[SCALE] == RIGHT) 
 			{
 				// first priority - move on scale (remote side)
-				netIndex = remoteScaleAction(LEFT,remote_scale_action);
+				//netIndex = remoteScaleAction(LEFT,remote_scale_action);   // not yet used
+				netIndex = AutoNetworkBuilder.DRIVE_FORWARD; 
 			}
 		}
 		else // (right_left_priority == AutoChooser.SWITCH)
@@ -199,12 +201,14 @@ public class AutoStateMachine {
 			else if (fieldAllianceColors[SCALE] == LEFT) 
 			{
 				// second priority - deposit one cube on scale (same side)
-				netIndex = AutoNetworkBuilder.DEPOSIT_CUBE_SCALE_LEFT;
+				//netIndex = AutoNetworkBuilder.DEPOSIT_CUBE_SCALE_LEFT;   // not yet used
+				netIndex = AutoNetworkBuilder.DRIVE_FORWARD; 
 			}
 			else // (fieldAllianceColors[SCALE] == RIGHT) 
 			{
 				// first priority - move on scale (remote side)
-				netIndex = remoteScaleAction(LEFT,remote_scale_action);
+				// netIndex = remoteScaleAction(LEFT,remote_scale_action);  // not yet used
+				netIndex = AutoNetworkBuilder.DRIVE_FORWARD; 
 			}
 		}
 						
@@ -240,12 +244,14 @@ public class AutoStateMachine {
 			if (fieldAllianceColors[SCALE] == RIGHT) 
 			{
 				// first priority - deposit one cube on scale (same side)
-				netIndex = AutoNetworkBuilder.DEPOSIT_CUBE_SCALE_RIGHT;
+				//netIndex = AutoNetworkBuilder.DEPOSIT_CUBE_SCALE_RIGHT;     // not yet used
+				netIndex = AutoNetworkBuilder.DRIVE_FORWARD; 
 			}
 			else // (fieldAllianceColors[SCALE] == LEFT) 
 			{
 				// first priority - move on scale (remote side)
-				netIndex = remoteScaleAction(RIGHT,remote_scale_action);
+				//netIndex = remoteScaleAction(RIGHT,remote_scale_action);    // not yet used
+				netIndex = AutoNetworkBuilder.DRIVE_FORWARD; 
 			}
 		}
 		else // (right_left_priority == AutoChooser.SWITCH)
@@ -259,18 +265,21 @@ public class AutoStateMachine {
 			else if (fieldAllianceColors[SCALE] == RIGHT) 
 			{
 				// second priority - deposit one cube on scale (same side)
-				netIndex = AutoNetworkBuilder.DEPOSIT_CUBE_SCALE_RIGHT;
+				// netIndex = AutoNetworkBuilder.DEPOSIT_CUBE_SCALE_RIGHT;   // not yet used
+				netIndex = AutoNetworkBuilder.DRIVE_FORWARD; 
 			}
 			else // (fieldAllianceColors[SCALE] == LEFT) 
 			{
 				// first priority - move on scale (remote side)
-				netIndex = remoteScaleAction(RIGHT,remote_scale_action);
+				//netIndex = remoteScaleAction(RIGHT,remote_scale_action);    // not yet used
+				netIndex = AutoNetworkBuilder.DRIVE_FORWARD;   
 			}
 		}
 						
 		return netIndex;
 	}
 	
+	/*
 	private int remoteScaleAction(int fromPos, int remote_scale_action)
 	{
 		int netIndex;
@@ -304,6 +313,7 @@ public class AutoStateMachine {
 		
 		return netIndex;
 	}
+	*/
 	
 	// retrieves color configuration of field elements relative to alliance side
 	private void getFieldColorConfig()
