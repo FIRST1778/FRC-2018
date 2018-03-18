@@ -128,6 +128,7 @@ public class AutoStateMachine {
 				autoNetworkEnable = false;
 			}
 		}
+		/*
 		else if (action == AutoChooser.LIFT_FOREVER)
 		{
 			// debug network
@@ -158,6 +159,7 @@ public class AutoStateMachine {
 			autoNetworkEnable = true;
 			netIndex = AutoNetworkBuilder.LIFT_TURN_FOREVER;
 		}
+		*/
 		else {
 			// auto state machine operation disabled
 			autoNetworkEnable = false;

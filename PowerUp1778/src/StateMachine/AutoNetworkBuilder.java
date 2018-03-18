@@ -26,11 +26,13 @@ public class AutoNetworkBuilder {
 	public final static int MOVE_TO_SCALE_LEFT_FROM_RIGHT = 11;
 
 	// debug networks
+	/*
 	public final static int LIFT_FOREVER = 12;
 	public final static int TURN_FOREVER = 13;
 	public final static int PACE_FOREVER = 14;
 	public final static int TURN_ONCE = 15;
 	public final static int LIFT_TURN_FOREVER = 16;
+	*/
 
 	// closed-loop position cruise velocity and acceleration (used for all closed-loop position control)
 	// units are RPM
@@ -80,11 +82,13 @@ public class AutoNetworkBuilder {
 		autoNets.add(DEPOSIT_CUBE_SCALE_LEFT_FROM_RIGHT, createDepositCubeScaleLeftFromRight());	
 		autoNets.add(MOVE_TO_SCALE_LEFT_FROM_RIGHT, createMoveToScaleLeftFromRight());	
 
+		/*
 		autoNets.add(LIFT_FOREVER, createLiftingForeverNetwork());	
 		autoNets.add(TURN_FOREVER, createTurningForeverNetwork());	
 		autoNets.add(PACE_FOREVER, createPacingForeverNetwork());	
 		autoNets.add(TURN_ONCE, createTurningOnceNetwork());	
 		autoNets.add(LIFT_TURN_FOREVER, createLiftingTurningForeverNetwork());	
+		*/
 
 		return autoNets;
 	}
