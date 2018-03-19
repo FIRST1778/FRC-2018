@@ -26,14 +26,12 @@ public class CubeManagement {
 	public static final boolean LEFT_COLLECTOR_REVERSE_MOTOR = false; 
 			
 	// collector strength (%VBus - max is 1.0)
-	private static final double COLLECTOR_MAX_STRENGTH = 0.75;  // teleop
-	private static final double COLLECTOR_AUTO_STRENGTH = 0.5;  // auto
-	//private static final double COLLECTOR_OUT_STRENGTH = -0.75;
-	private static final double COLLECTOR_IN_POLARITY = 1.0;
-	private static final double COLLECTOR_OUT_POLARITY = -1.0;
+	private static final double COLLECTOR_MAX_STRENGTH = 1.0;   // joystick max limit
+	private static final double COLLECTOR_IN_FACTOR = 1.0;
+	private static final double COLLECTOR_OUT_FACTOR = -0.7;
 	
-	private static final double COLLECTOR_IN_AUTO_STRENGTH = 0.5;  // auto
-	private static final double COLLECTOR_OUT_AUTO_STRENGTH = -0.75;  // auto
+	private static final double COLLECTOR_IN_AUTO_STRENGTH = 0.7;  // auto
+	private static final double COLLECTOR_OUT_AUTO_STRENGTH = -0.7;  // auto
 		
 	private static final boolean LEFT_COLLECTOR_INVERTED = true;
 	private static final boolean RIGHT_COLLECTOR_INVERTED = false;
@@ -67,7 +65,7 @@ public class CubeManagement {
 	
 	private static Joystick gamepad;
 		
-	// wait 0.25 s between button pushes on shooter
+	// wait 0.25 s between button pushes
     private static final int TRIGGER_CYCLE_WAIT_US = 250000;
     private static double initTriggerTime;
 
@@ -92,8 +90,7 @@ public class CubeManagement {
 		brakeMotor = new Spark(HardwareIDs.BRAKE_MOTOR_PWM_ID);
 		brakeMotor.setInverted(BRAKE_MOTOR_INVERTED);
 		
-		// create and initialize upper lift motor (closed-loop)
-		//upperLiftMotor = configureMotor(HardwareIDs.UPPER_LIFT_TALON_ID, UPPER_REVERSE_MOTOR, ALIGNED_SENSOR, kP, kI, kD, kF);
+		// create and initialize upper lift motor
 		upperLiftMotor = configureMotor(HardwareIDs.UPPER_LIFT_TALON_ID, UPPER_REVERSE_MOTOR);
 
 		// create and initialize lower lift motor (follows upper motor)
@@ -215,7 +212,7 @@ public class CubeManagement {
 
 	public static void depositCube()
 	{
-		InputOutputComm.putDouble(InputOutputComm.LogTable.kMainLog,"CubeMgmt/CollectorLevel", COLLECTOR_OUT_AUTO_STRENGTH);
+		InputOutputComm.putDouble(InputOutputComm.LogTable.kMainLog,"CubeMgmt/CollectorStrength", COLLECTOR_OUT_AUTO_STRENGTH);
 		leftCollectorMotor.set(COLLECTOR_OUT_AUTO_STRENGTH);
 		rightCollectorMotor.set(COLLECTOR_OUT_AUTO_STRENGTH);
 			
@@ -223,7 +220,7 @@ public class CubeManagement {
 
 	public static void collectCube()
 	{
-		InputOutputComm.putDouble(InputOutputComm.LogTable.kMainLog,"CubeMgmt/CollectorLevel", COLLECTOR_IN_AUTO_STRENGTH);
+		InputOutputComm.putDouble(InputOutputComm.LogTable.kMainLog,"CubeMgmt/CollectorStrength", COLLECTOR_IN_AUTO_STRENGTH);
 		leftCollectorMotor.set(COLLECTOR_IN_AUTO_STRENGTH);
 		rightCollectorMotor.set(COLLECTOR_IN_AUTO_STRENGTH);
 	}
@@ -239,18 +236,18 @@ public class CubeManagement {
 	/************************* UI input functions **********************************/
 	
 	private static void checkCollectorControls() {	
-		double collectorMotorStrength = 0.0;
+		double collectorMotorStrength = COLLECTOR_IN_AUTO_STRENGTH;
 		
 		// collector controls
 		double collectorInStrength = gamepad.getRawAxis(HardwareIDs.COLLECTOR_IN_AXIS);
 		double collectorOutStrength = gamepad.getRawAxis(HardwareIDs.COLLECTOR_OUT_AXIS);
 		
-		if ((collectorInStrength > DEAD_ZONE_THRESHOLD)  && (collectorInStrength < COLLECTOR_MAX_STRENGTH))
-			collectorMotorStrength = collectorInStrength * COLLECTOR_IN_POLARITY;
-		else if ((collectorOutStrength > DEAD_ZONE_THRESHOLD) && (collectorOutStrength < COLLECTOR_MAX_STRENGTH))
-			collectorMotorStrength = collectorOutStrength * COLLECTOR_OUT_POLARITY;
+		if ((collectorInStrength > DEAD_ZONE_THRESHOLD)  && (collectorInStrength <= COLLECTOR_MAX_STRENGTH))
+			collectorMotorStrength = collectorInStrength * COLLECTOR_IN_FACTOR;
+		else if ((collectorOutStrength > DEAD_ZONE_THRESHOLD) && (collectorOutStrength <= COLLECTOR_MAX_STRENGTH))
+			collectorMotorStrength = collectorOutStrength * COLLECTOR_OUT_FACTOR;
 		else
-			collectorMotorStrength = COLLECTOR_AUTO_STRENGTH * COLLECTOR_IN_POLARITY;  // default auto motor rate
+			collectorMotorStrength = COLLECTOR_IN_AUTO_STRENGTH;  // default auto motor rate in (for cube retention)
 		
 		InputOutputComm.putDouble(InputOutputComm.LogTable.kMainLog,"CubeMgmt/CollectorStrength", collectorMotorStrength);
 		RPIComm.setDouble("collectorStrength", collectorMotorStrength);
