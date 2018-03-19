@@ -293,8 +293,10 @@ public class AutoNetworkBuilder {
 		AutoNetwork autoNet = new AutoNetwork("<Deposit Cube Switch (left side) Network>");
 			
 		// create states
-		AutoState driveState = createMagicDriveState("<Drive State 1>", 144.0, 3.0, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW);
-		AutoState liftUpTurnRightState = createLiftAndTurnState("<Lift Up & Turn Right State>", -0.6, 3.0 , 90.0, 10.0, 0.4);
+		//AutoState driveState = createMagicDriveState("<Drive State 1>", 144.0, 3.0, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW);
+		//AutoState liftUpTurnRightState = createLiftAndTurnState("<Lift Up & Turn Right State>", -0.6, 3.0 , 90.0, 10.0, 0.4);
+		AutoState driveState = createMagicDriveState("<Drive State 1>", 120.0, 3.0, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW);
+		AutoState liftUpTurnRightState = createLiftAndTurnState("<Lift Up & Turn Right State>", -0.6, 3.0 , 45.0, 10.0, 0.35);
 		AutoState depositCubeState = createCubeDepositState("<Deposit Cube State>", 3.0);
 		AutoState idleState = createIdleState("<Idle State>");
 		
@@ -429,7 +431,7 @@ public class AutoNetworkBuilder {
 		// create states
 		AutoState driveState = createMagicDriveState("<Drive State 1>", 30.0, 3.0, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW);
 		AutoState turnLeftState = createMagicTurnState("<Turn Left State>", -50.0, 10.0, 0.4);
-		AutoState driveState2 = createMagicDriveState("<Drive State 2>", 95.0, 3.0, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW);
+		AutoState driveState2 = createMagicDriveState("<Drive State 2>", 92.0, 3.0, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW);
 		AutoState liftUpAndTurnRightState = createLiftAndTurnState("<Lift Up and Turn Right State>", -0.6, 3.0, 50.0, 10.0, 0.4);
 		AutoState depositCubeState = createCubeDepositState("<Cube Deposit State>", 3.0);
 		AutoState idleState = createIdleState("<Idle State>");
@@ -466,7 +468,7 @@ public class AutoNetworkBuilder {
 		// create states
 		AutoState driveState = createMagicDriveState("<Drive State 1>", 30.0, 3.0, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW);
 		AutoState turnRightState = createMagicTurnState("<Turn Right State>", 40.0, 10.0, 0.4);
-		AutoState driveState2 = createMagicDriveState("<Drive State 2>", 83.0, 3.0, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW);
+		AutoState driveState2 = createMagicDriveState("<Drive State 2>", 80.0, 3.0, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW);
 		AutoState liftUpAndTurnLeftState = createLiftAndTurnState("<Lift Up and Turn Left State>", -0.6, 3.0, -40.0, 10.0, 0.4);
 		AutoState depositCubeState = createCubeDepositState("<Cube Deposit State>", 3.0);
 		AutoState idleState = createIdleState("<Idle State>");
