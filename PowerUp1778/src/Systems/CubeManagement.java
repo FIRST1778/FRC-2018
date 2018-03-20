@@ -110,15 +110,24 @@ public class CubeManagement {
 		initialized = true;
 	}
 	
+	public static void stopMotors()
+	{
+		// stop collector motors
+		leftCollectorMotor.set(0);
+		rightCollectorMotor.set(0);	
+		
+		// stop upper lift motor (lower lift follows)
+		upperLiftMotor.set(ControlMode.PercentOutput, 0);
+		
+	}
+	
 	public static void resetMotors()
 	{	
 		// reset collector motors
-		//leftCollectorMotor.set(0);
-		//rightCollectorMotor.set(0);	
 		leftCollectorMotor.set(COLLECTOR_IN_AUTO_STRENGTH);      // low-level default collection
 		rightCollectorMotor.set(COLLECTOR_IN_AUTO_STRENGTH);	
 		
-		// reset upper lift motor (lower lift follows)
+		// stop upper lift motor (lower lift follows)
 		upperLiftMotor.set(ControlMode.PercentOutput, 0);
 		
 		// set lift brake
@@ -304,11 +313,13 @@ public class CubeManagement {
 	}
 
 	public static void autoStop() {
-		resetMotors();
+		
+		stopMotors();
 	}
 	
 	public static void disabledInit() {		
-		resetMotors();
+		
+		stopMotors();
 	}
 	
 	public static void teleopInit() {
