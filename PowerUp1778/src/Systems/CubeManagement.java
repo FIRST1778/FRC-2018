@@ -245,15 +245,24 @@ public class CubeManagement {
 	/************************* UI input functions **********************************/
 	
 	private static void checkCollectorControls() {	
-		double collectorMotorStrength = COLLECTOR_IN_AUTO_STRENGTH;
 		
-		// collector controls
+		// collector intake control
 		double collectorInStrength = gamepad.getRawAxis(HardwareIDs.COLLECTOR_IN_AXIS);
-		double collectorOutStrength = gamepad.getRawAxis(HardwareIDs.COLLECTOR_OUT_AXIS);
+		// clamp intake strength to operating range
+		collectorInStrength = (collectorInStrength < DEAD_ZONE_THRESHOLD) ? 0.0 : collectorInStrength;
+		collectorInStrength = (collectorInStrength > COLLECTOR_MAX_STRENGTH) ? COLLECTOR_MAX_STRENGTH : collectorInStrength;
 		
-		if ((collectorInStrength > DEAD_ZONE_THRESHOLD)  && (collectorInStrength <= COLLECTOR_MAX_STRENGTH))
+		// collector expel control
+		double collectorOutStrength = gamepad.getRawAxis(HardwareIDs.COLLECTOR_OUT_AXIS);
+		// clamp expel strength to operating range
+		collectorOutStrength = (collectorOutStrength < DEAD_ZONE_THRESHOLD) ? 0.0 : collectorOutStrength;
+		collectorOutStrength = (collectorOutStrength > COLLECTOR_MAX_STRENGTH) ? COLLECTOR_MAX_STRENGTH : collectorOutStrength;
+		
+		// determine if collector operating in intake, expel or default
+		double collectorMotorStrength;
+		if (collectorInStrength > 0)
 			collectorMotorStrength = collectorInStrength * COLLECTOR_IN_FACTOR;
-		else if ((collectorOutStrength > DEAD_ZONE_THRESHOLD) && (collectorOutStrength <= COLLECTOR_MAX_STRENGTH))
+		else if (collectorOutStrength > 0)
 			collectorMotorStrength = collectorOutStrength * COLLECTOR_OUT_FACTOR;
 		else
 			collectorMotorStrength = COLLECTOR_IN_AUTO_STRENGTH;  // default auto motor rate in (for cube retention)
