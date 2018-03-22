@@ -25,7 +25,6 @@ public class TurnController {
 		
 		pidCtrl.setInputRange(-180.0, 180.0);
 		pidCtrl.setOutputRange(-maxSpeed, maxSpeed);
-		//pidCtrl.setAbsoluteTolerance(0.5);
 		pidCtrl.setContinuous(true);
 		
 		initialized = true;
@@ -52,10 +51,17 @@ public class TurnController {
 	//private static final double kF = 0;     // F not needed for PID position control
 
 	// comp.bot
-	// first competition version (tested at Auburn 3/17/2018)
+	// oscillates a little - first competition version (tested at Auburn 3/17/2018)
+	//private static final double kP = 0.025;
+	//private static final double kI = 0.002; 
+	//private static final double kD = 0.05;
+	//private static final double kF = 0;     // F not needed for PID position control
+
+	// comp.bot
+	// test version
 	private static final double kP = 0.025;
-	private static final double kI = 0.002; 
-	private static final double kD = 0.05;
+	private static final double kI = 0; 
+	private static final double kD = 0.07;
 	private static final double kF = 0;     // F not needed for PID position control
 
 	private static final double maxSpeed = 0.5;

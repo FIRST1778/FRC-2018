@@ -26,13 +26,11 @@ public class AutoNetworkBuilder {
 	public final static int MOVE_TO_SCALE_LEFT_FROM_RIGHT = 11;
 
 	// debug networks
-	/*
 	public final static int LIFT_FOREVER = 12;
 	public final static int TURN_FOREVER = 13;
 	public final static int PACE_FOREVER = 14;
 	public final static int TURN_ONCE = 15;
 	public final static int LIFT_TURN_FOREVER = 16;
-	*/
 
 	// closed-loop position cruise velocity and acceleration (used for all closed-loop position control)
 	// units are RPM
@@ -82,13 +80,11 @@ public class AutoNetworkBuilder {
 		autoNets.add(DEPOSIT_CUBE_SCALE_LEFT_FROM_RIGHT, createDepositCubeScaleLeftFromRight());	
 		autoNets.add(MOVE_TO_SCALE_LEFT_FROM_RIGHT, createMoveToScaleLeftFromRight());	
 
-		/*
 		autoNets.add(LIFT_FOREVER, createLiftingForeverNetwork());	
 		autoNets.add(TURN_FOREVER, createTurningForeverNetwork());	
 		autoNets.add(PACE_FOREVER, createPacingForeverNetwork());	
 		autoNets.add(TURN_ONCE, createTurningOnceNetwork());	
 		autoNets.add(LIFT_TURN_FOREVER, createLiftingTurningForeverNetwork());	
-		*/
 
 		return autoNets;
 	}
@@ -296,7 +292,7 @@ public class AutoNetworkBuilder {
 		//AutoState driveState = createMagicDriveState("<Drive State 1>", 144.0, 3.0, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW);
 		//AutoState liftUpTurnRightState = createLiftAndTurnState("<Lift Up & Turn Right State>", -0.6, 3.0 , 90.0, 10.0, 0.4);
 		AutoState driveState = createMagicDriveState("<Drive State 1>", 120.0, 3.0, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW);
-		AutoState liftUpTurnRightState = createLiftAndTurnState("<Lift Up & Turn Right State>", -0.6, 3.0 , 45.0, 10.0, 0.4);
+		AutoState liftUpTurnRightState = createLiftAndTurnState("<Lift Up & Turn Right State>", -0.6, 3.0 , 45.0, 10.0, 0.35);
 		AutoState depositCubeState = createCubeDepositState("<Deposit Cube State>", 3.0);
 		AutoState idleState = createIdleState("<Idle State>");
 		
@@ -321,11 +317,11 @@ public class AutoNetworkBuilder {
 	// 4) go back to idle and stay there 
 	private static AutoNetwork createDepositCubeScaleLeft() {
 		
-		AutoNetwork autoNet = new AutoNetwork("<Deposit Cube Scale Two Cubes (left side) Network>");
+		AutoNetwork autoNet = new AutoNetwork("<Deposit Cube Scale (left side) Network>");
 		
 		// create states
 		AutoState driveState = createMagicDriveState("<Drive State 1>", 246.0, 3.0, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW);
-		AutoState liftUpTurnRightState = createLiftAndTurnState("<Lift Up Turn Right State>", -0.6, 4.0 , 45.0, 10.0, 0.4);
+		AutoState liftUpTurnRightState = createLiftAndTurnState("<Lift Up Turn Right State>", -0.6, 4.0 , 45.0, 10.0, 0.35);
 		AutoState depositCubeState = createCubeDepositState("<Deposit Cube State>", 3.0);
 		AutoState idleState = createIdleState("<Idle State>");
 			
@@ -348,19 +344,17 @@ public class AutoNetworkBuilder {
 	// 2) Turn RIGHT a number of degrees
 	// 3) drive forward for a number of sec
 	// 4) Raise lift AND Turn LEFT a number of degrees (combo)
-	// 5) drive forward
-	// 6) deposit cube
-	// 7) go back to idle and stay there 
+	// 5) deposit cube
+	// 6) go back to idle and stay there 
 	private static AutoNetwork createDepositCubeScaleRightFromLeft() {
 		
 		AutoNetwork autoNet = new AutoNetwork("<Deposit Cube Scale (right from left side) Network>");
 				
 		// create states
-		AutoState driveState = createMagicDriveState("<Drive State 1>", 215.0, 3.0, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST);
-		AutoState turnRightState = createMagicTurnState("<Turn Right State>", 90.0, 2.0, 0.6);
-		AutoState driveState2 = createMagicDriveState("<Drive State 2>", 230.0, 3.0, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST);
-		AutoState liftUpAndTurnLeftState = createLiftAndTurnState("<Lift Up & Turn Left State>", -0.25, 2.0, -120.0, 10.0, 0.5);
-		AutoState driveState3 = createMagicDriveState("<Drive State 3>", 48.0, 3.0, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW);
+		AutoState driveState = createMagicDriveState("<Drive State 1>", 215.0, 3.0, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW);
+		AutoState turnRightState = createMagicTurnState("<Turn Right State>", 90.0, 5.0, 0.35);
+		AutoState driveState2 = createMagicDriveState("<Drive State 2>", 230.0, 3.0, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW);
+		AutoState liftUpAndTurnLeftState = createLiftAndTurnState("<Lift Up & Turn Left State>", -0.6, 4.0, -120.0, 10.0, 0.35);
 		AutoState depositCubeState = createCubeDepositState("<Deposit Cube State>", 3.0);
 		AutoState idleState = createIdleState("<Idle State>");
 
@@ -368,8 +362,7 @@ public class AutoNetworkBuilder {
 		driveState.associateNextState(turnRightState);
 		turnRightState.associateNextState(driveState2);
 		driveState2.associateNextState(liftUpAndTurnLeftState);
-		liftUpAndTurnLeftState.associateNextState(driveState3);
-		driveState3.associateNextState(depositCubeState);
+		liftUpAndTurnLeftState.associateNextState(depositCubeState);
 		depositCubeState.associateNextState(idleState);
 						
 		// add states to the network list
@@ -377,7 +370,6 @@ public class AutoNetworkBuilder {
 		autoNet.addState(turnRightState);
 		autoNet.addState(driveState2);
 		autoNet.addState(liftUpAndTurnLeftState);
-		autoNet.addState(driveState3);
 		autoNet.addState(depositCubeState);
 		autoNet.addState(idleState);
 				
@@ -388,30 +380,26 @@ public class AutoNetworkBuilder {
 	// 1) drive forward for a number of sec
 	// 2) Turn RIGHT a number of degrees
 	// 3) drive forward
-	// 4) raise lift
-	// 7) go back to idle and stay there 
+	// 4) go back to idle and stay there 
 	private static AutoNetwork createMoveToScaleRightFromLeft() {
 		
 		AutoNetwork autoNet = new AutoNetwork("<Move to Scale Right (left side) Network>");
 				
 		// create states
-		AutoState driveState = createMagicDriveState("<Drive State 1>", 215.0, 3.0, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST);
-		AutoState turnRightState = createMagicTurnState("<Turn Right State>", 90.0, 5.0, 0.6);
-		AutoState driveState2 = createMagicDriveState("<Drive State 2>", 160.0, 3.0, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST);
-		AutoState liftUpState = createLiftState("<Lift Up State>", -0.25, 2.0);
+		AutoState driveState = createMagicDriveState("<Drive State 1>", 215.0, 3.0, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW);
+		AutoState turnRightState = createMagicTurnState("<Turn Right State>", 90.0, 5.0, 0.35);
+		AutoState driveState2 = createMagicDriveState("<Drive State 2>", 160.0, 3.0, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW);
 		AutoState idleState = createIdleState("<Idle State>");
 		
 		// connect the state sequence
 		driveState.associateNextState(turnRightState);
 		turnRightState.associateNextState(driveState2);
-		driveState2.associateNextState(liftUpState);
-		liftUpState.associateNextState(idleState);
+		driveState2.associateNextState(idleState);
 						
 		// add states to the network list
 		autoNet.addState(driveState);
 		autoNet.addState(turnRightState);
 		autoNet.addState(driveState2);
-		autoNet.addState(liftUpState);
 		autoNet.addState(idleState);
 				
 		return autoNet;
@@ -426,13 +414,13 @@ public class AutoNetworkBuilder {
 	// 6) go back to idle and stay there 
 	private static AutoNetwork createDepositCubeSwitchCenterLeft() {
 		
-		AutoNetwork autoNet = new AutoNetwork("<Deposit Cube Switch - Two Cubes (center left) Network>");
+		AutoNetwork autoNet = new AutoNetwork("<Deposit Cube Switch (center left) Network>");
 				
 		// create states
 		AutoState driveState = createMagicDriveState("<Drive State 1>", 30.0, 3.0, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW);
-		AutoState turnLeftState = createMagicTurnState("<Turn Left State>", -50.0, 10.0, 0.4);
+		AutoState turnLeftState = createMagicTurnState("<Turn Left State>", -50.0, 10.0, 0.35);
 		AutoState driveState2 = createMagicDriveState("<Drive State 2>", 92.0, 3.0, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW);
-		AutoState liftUpAndTurnRightState = createLiftAndTurnState("<Lift Up and Turn Right State>", -0.6, 3.0, 50.0, 10.0, 0.4);
+		AutoState liftUpAndTurnRightState = createLiftAndTurnState("<Lift Up and Turn Right State>", -0.6, 3.0, 50.0, 10.0, 0.35);
 		AutoState depositCubeState = createCubeDepositState("<Cube Deposit State>", 3.0);
 		AutoState idleState = createIdleState("<Idle State>");
 
@@ -463,13 +451,13 @@ public class AutoNetworkBuilder {
 	// 6) go back to idle and stay there 
 	private static AutoNetwork createDepositCubeSwitchCenterRight() {
 		
-		AutoNetwork autoNet = new AutoNetwork("<Deposit Cube Switch - Two Cubes (center right) Network>");
+		AutoNetwork autoNet = new AutoNetwork("<Deposit Cube Switch (center right) Network>");
 				
 		// create states
 		AutoState driveState = createMagicDriveState("<Drive State 1>", 30.0, 3.0, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW);
-		AutoState turnRightState = createMagicTurnState("<Turn Right State>", 40.0, 10.0, 0.4);
+		AutoState turnRightState = createMagicTurnState("<Turn Right State>", 40.0, 10.0, 0.35);
 		AutoState driveState2 = createMagicDriveState("<Drive State 2>", 80.0, 3.0, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW);
-		AutoState liftUpAndTurnLeftState = createLiftAndTurnState("<Lift Up and Turn Left State>", -0.6, 3.0, -40.0, 10.0, 0.4);
+		AutoState liftUpAndTurnLeftState = createLiftAndTurnState("<Lift Up and Turn Left State>", -0.6, 3.0, -40.0, 10.0, 0.35);
 		AutoState depositCubeState = createCubeDepositState("<Cube Deposit State>", 3.0);
 		AutoState idleState = createIdleState("<Idle State>");
 
@@ -502,10 +490,8 @@ public class AutoNetworkBuilder {
 		AutoNetwork autoNet = new AutoNetwork("<Deposit Cube Switch (Right Side) Network>");
 		
 		// create states
-		//AutoState driveState = createMagicDriveState("<Drive State 1>", 144.0, 3.0, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW);
-		//AutoState liftUpAndTurnLeftState = createLiftAndTurnState("<Lift Up & Turn Left State>", -0.6, 3.0, -90.0, 10.0, 0.4);
 		AutoState driveState = createMagicDriveState("<Drive State 1>", 120.0, 3.0, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW);
-		AutoState liftUpAndTurnLeftState = createLiftAndTurnState("<Lift Up & Turn Left State>", -0.6, 3.0, -45.0, 10.0, 0.4);
+		AutoState liftUpAndTurnLeftState = createLiftAndTurnState("<Lift Up & Turn Left State>", -0.6, 3.0, -45.0, 10.0, 0.35);
 		AutoState depositCubeState = createCubeDepositState("<Deposit Cube State>", 3.0);
 		AutoState idleState = createIdleState("<Idle State>");
 
@@ -530,12 +516,12 @@ public class AutoNetworkBuilder {
 	// 4) go back to idle and stay there 
 	private static AutoNetwork createDepositCubeScaleRight() {
 		
-		AutoNetwork autoNet = new AutoNetwork("<Deposit Cube Scale Two Cubes (Right Side) Network>");
+		AutoNetwork autoNet = new AutoNetwork("<Deposit Cube Scale (Right Side) Network>");
 					
 		// create states
 		AutoState driveState = createMagicDriveState("<Drive State 1>", 246.0, 3.0, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW);
-		AutoState liftUpTurnLeftState = createLiftAndTurnState("<Lift Up Turn Lefts State>", -0.6, 4.0, -45.0, 10.0, 0.4);
-		AutoState depositCubeState = createCubeDepositState("<Deposit Cube State>", 1.0);
+		AutoState liftUpTurnLeftState = createLiftAndTurnState("<Lift Up Turn Lefts State>", -0.6, 4.0, -45.0, 10.0, 0.35);
+		AutoState depositCubeState = createCubeDepositState("<Deposit Cube State>", 3.0);
 		AutoState idleState = createIdleState("<Idle State>");
 			
 		// connect the state sequence
@@ -557,19 +543,17 @@ public class AutoNetworkBuilder {
 	// 2) Turn LEFT a number of degrees
 	// 3) drive forward for a number of sec
 	// 4) Raise lift AND Turn RIGHT a number of degrees (combo)
-	// 5) drive forward
-	// 6) deposit cube
-	// 7) go back to idle and stay there 
+	// 5) deposit cube
+	// 6) go back to idle and stay there 
 	private static AutoNetwork createDepositCubeScaleLeftFromRight() {
 		
 		AutoNetwork autoNet = new AutoNetwork("<Deposit Cube Scale (left from right side) Network>");
 		
 		// create states
-		AutoState driveState = createMagicDriveState("<Drive State 1>", 215.0, 3.0, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST);
-		AutoState turnLeftState = createMagicTurnState("<Turn Left State>", -90.0, 2.0, 0.6);
-		AutoState driveState2 = createMagicDriveState("<Drive State 2>", 230.0, 3.0, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST);
-		AutoState liftUpAndTurnRightState = createLiftAndTurnState("<Lift Up & Turn Right State>",-0.25, 2.0, 120.0, 5.0, 0.5);
-		AutoState driveState3 = createMagicDriveState("<Drive State 3>", 48.0, 3.0, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW);
+		AutoState driveState = createMagicDriveState("<Drive State 1>", 215.0, 3.0, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW);
+		AutoState turnLeftState = createMagicTurnState("<Turn Left State>", -90.0, 5.0, 0.35);
+		AutoState driveState2 = createMagicDriveState("<Drive State 2>", 230.0, 3.0, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW);
+		AutoState liftUpAndTurnRightState = createLiftAndTurnState("<Lift Up & Turn Right State>",-0.6, 4.0, 120.0, 5.0, 0.35);
 		AutoState depositCubeState = createCubeDepositState("<Deposit Cube State>", 3.0);
 		AutoState idleState = createIdleState("<Idle State>");
 			
@@ -577,8 +561,7 @@ public class AutoNetworkBuilder {
 		driveState.associateNextState(turnLeftState);
 		turnLeftState.associateNextState(driveState2);
 		driveState2.associateNextState(liftUpAndTurnRightState);
-		liftUpAndTurnRightState.associateNextState(driveState3);
-		driveState3.associateNextState(depositCubeState);
+		liftUpAndTurnRightState.associateNextState(depositCubeState);
 		depositCubeState.associateNextState(idleState);
 						
 		// add states to the network list
@@ -586,7 +569,6 @@ public class AutoNetworkBuilder {
 		autoNet.addState(turnLeftState);
 		autoNet.addState(driveState2);
 		autoNet.addState(liftUpAndTurnRightState);
-		autoNet.addState(driveState3);
 		autoNet.addState(depositCubeState);
 		autoNet.addState(idleState);
 				
@@ -597,30 +579,26 @@ public class AutoNetworkBuilder {
 	// 1) drive forward for a number of sec
 	// 2) Turn LEFT a number of degrees
 	// 3) drive forward
-	// 4) lift up
-	// 5) go back to idle and stay there 
+	// 4) go back to idle and stay there 
 	private static AutoNetwork createMoveToScaleLeftFromRight() {
 		
 		AutoNetwork autoNet = new AutoNetwork("<Move to Scale Left (Right Side) Network>");
 							
 		// create states
-		AutoState driveState = createMagicDriveState("<Drive State 1>", 215.0, 3.0, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST);
-		AutoState turnLeftState = createMagicTurnState("<Turn Left State>", -90.0, 2.0, 0.6);
-		AutoState driveState2 = createMagicDriveState("<Drive State 2>", 160.0, 3.0, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST);
-		AutoState liftUpState = createLiftState("<Lift Up State>", -0.25, 2.0);
+		AutoState driveState = createMagicDriveState("<Drive State 1>", 215.0, 3.0, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_SLOW);
+		AutoState turnLeftState = createMagicTurnState("<Turn Left State>", -90.0, 5.0, 0.35);
+		AutoState driveState2 = createMagicDriveState("<Drive State 2>", 160.0, 3.0, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_SLOW);
 		AutoState idleState = createIdleState("<Idle State>");
 			
 		// connect the state sequence
 		driveState.associateNextState(turnLeftState);
 		turnLeftState.associateNextState(driveState2);
-		driveState2.associateNextState(liftUpState);
-		liftUpState.associateNextState(idleState);
+		driveState2.associateNextState(idleState);
 						
 		// add states to the network list
 		autoNet.addState(driveState);
 		autoNet.addState(turnLeftState);
 		autoNet.addState(driveState2);
-		autoNet.addState(liftUpState);
 		autoNet.addState(idleState);
 		
 		return autoNet;
@@ -640,15 +618,15 @@ public class AutoNetworkBuilder {
 		AutoNetwork autoNet = new AutoNetwork("<Turning Forever Network>");
 				
 		// create states
-		AutoState turnState0 = createMagicTurnState("<Turn 0 State>", -90.0, 1.0, 0.6);
-		AutoState turnState1 = createMagicTurnState("<Turn 1 State>", 90.0, 1.0, 0.6);
-		AutoState turnState2 = createMagicTurnState("<Turn 2 State>", -90.0, 1.0, 0.6);
-		AutoState turnState3 = createMagicTurnState("<Turn 3 State>", 90.0, 1.0, 0.6);
-		AutoState turnState4 = createMagicTurnState("<Turn 4 State>", -90.0, 1.0, 0.6);
-		AutoState turnState5 = createMagicTurnState("<Turn 5 State>", 90.0, 1.0, 0.6);
-		AutoState turnState6 = createMagicTurnState("<Turn 6 State>", -90.0, 1.0, 0.6);
-		AutoState turnState7 = createMagicTurnState("<Turn 7 State>", 90.0, 1.0, 0.6);
-		AutoState turnState8 = createMagicTurnState("<Turn 8 State>", -90.0, 1.0, 0.6);
+		AutoState turnState0 = createMagicTurnState("<Turn 0 State>", -90.0, 5.0, 0.35);
+		AutoState turnState1 = createMagicTurnState("<Turn 1 State>", 90.0, 5.0, 0.35);
+		AutoState turnState2 = createMagicTurnState("<Turn 2 State>", -90.0, 5.0, 0.35);
+		AutoState turnState3 = createMagicTurnState("<Turn 3 State>", 90.0, 5.0, 0.35);
+		AutoState turnState4 = createMagicTurnState("<Turn 4 State>", -90.0, 5.0, 0.35);
+		AutoState turnState5 = createMagicTurnState("<Turn 5 State>", 90.0, 5.0, 0.35);
+		AutoState turnState6 = createMagicTurnState("<Turn 6 State>", -90.0, 5.0, 0.35);
+		AutoState turnState7 = createMagicTurnState("<Turn 7 State>", 90.0, 5.0, 0.35);
+		AutoState turnState8 = createMagicTurnState("<Turn 8 State>", -90.0, 5.0, 0.35);
 		
 		// connect the state sequence
 		turnState0.associateNextState(turnState1);
@@ -683,7 +661,7 @@ public class AutoNetworkBuilder {
 		AutoNetwork autoNet = new AutoNetwork("<Turning ONCE Network>");
 		
 		// create the states
-		AutoState turnState1 = createMagicTurnState("<Turn 1 State>", 90.0, 5.0, 0.3);
+		AutoState turnState1 = createMagicTurnState("<Turn 1 State>", 90.0, 5.0, 0.35);
 		AutoState idleState = createIdleState("Idle State");
 		
 		// connect the state sequence
@@ -710,12 +688,12 @@ public class AutoNetworkBuilder {
 		AutoNetwork autoNet = new AutoNetwork("<Pacing Forever Network>");
 				
 		// create states
-		AutoState driveState1 = createMagicDriveState("<Drive State 1>", 60.0, 3.0, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST);
-		AutoState turnRightState0 = createMagicTurnState("<Turn Right State 0>", 90.0, 1.0, 0.6);
-		AutoState turnRightState1 = createMagicTurnState("<Turn Right State 1>", 90.0, 1.0, 0.6);
-		AutoState driveState2 = createMagicDriveState("<Drive State 2>", 60.0, 3.0, CLOSED_LOOP_VEL_FAST, CLOSED_LOOP_ACCEL_FAST);
-		AutoState turnLeftState0 = createMagicTurnState("<Turn Left State 0>", -90.0, 1.0, 0.6);
-		AutoState turnLeftState1 = createMagicTurnState("<Turn Left State 1>", -90.0, 1.0, 0.6);
+		AutoState driveState1 = createMagicDriveState("<Drive State 1>", 60.0, 3.0, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW);
+		AutoState turnRightState0 = createMagicTurnState("<Turn Right State 0>", 90.0, 5.0, 0.35);
+		AutoState turnRightState1 = createMagicTurnState("<Turn Right State 1>", 90.0, 5.0, 0.35);
+		AutoState driveState2 = createMagicDriveState("<Drive State 2>", 60.0, 3.0, CLOSED_LOOP_VEL_SLOW, CLOSED_LOOP_ACCEL_SLOW);
+		AutoState turnLeftState0 = createMagicTurnState("<Turn Left State 0>", -90.0, 5.0, 0.35);
+		AutoState turnLeftState1 = createMagicTurnState("<Turn Left State 1>", -90.0, 5.0, 0.35);
 		
 		// connect the state sequence
 		driveState1.associateNextState(turnRightState0);
@@ -749,13 +727,13 @@ public class AutoNetworkBuilder {
 		AutoNetwork autoNet = new AutoNetwork("<Lifting Forever Network>");
 		
 		// create states
-		AutoState liftState1 = createLiftState("<Lift 1 State>", -0.25, 1.0);
+		AutoState liftState1 = createLiftState("<Lift 1 State>", -0.6, 3.0);
 		AutoState timerState1 = createTimerState("<Timer 1 State>", 10.0);
-		AutoState liftState2 = createLiftState("<Lift 2 State>", -0.25, 1.0);
+		AutoState liftState2 = createLiftState("<Lift 2 State>", 0.1, 3.0);
 		AutoState timerState2 = createTimerState("<Timer 2 State>", 10.0);
-		AutoState liftState3 = createLiftState("<Lift 3 State>", 0.25, 1.0);
+		AutoState liftState3 = createLiftState("<Lift 3 State>", -0.6, 3.0);
 		AutoState timerState3 = createTimerState("<Timer 3 State>", 10.0);
-		AutoState liftState4 = createLiftState("<Lift 4 State>", 0.25, 1.0);
+		AutoState liftState4 = createLiftState("<Lift 4 State>", 0.1, 3.0);
 		AutoState timerState4 = createTimerState("<Timer 4 State>", 10.0);
 		
 		// connect the state sequence
@@ -784,20 +762,20 @@ public class AutoNetworkBuilder {
 	// **** Lifting & Turning Forever Network - Lift up to different levels, while turning forever ***** 
 	//
 	// 1) be idle for a number of sec
-	// 2) lift to SWITCH level for a number of sec
-	// 3) lift to SCALE level for a number of sec
-	// 4) return to SWITCH level for a number of sec
-	// 5) return to BASE level for a number of sec
+	// 2) lift to a level for a number of sec
+	// 3) lift to a level for a number of sec
+	// 4) lift to a level for a number of sec
+	// 5) lift to a level for a number of sec
 	// 6) Go back to state 2
 	private static AutoNetwork createLiftingTurningForeverNetwork() {
 		
 		AutoNetwork autoNet = new AutoNetwork("<Lifting & Turning Forever Network>");
 		
 		// create states
-		AutoState liftandTurnState1 = createLiftAndTurnState("<Lift and Turn 1 State>", -0.25, 1.0, 90.0, 5.0, 0.3);
-		AutoState liftandTurnState2 = createLiftAndTurnState("<Lift and Turn 2 State>", -0.25, 1.0, 90.0, 5.0, 0.3);
-		AutoState liftandTurnState3 = createLiftAndTurnState("<Lift and Turn 3 State>", 0.25, 1.0, -90.0, 5.0, 0.3);
-		AutoState liftandTurnState4 = createLiftAndTurnState("<Lift and Turn 4 State>", 0.25, 1.0, -90.0, 5.0, 0.3);
+		AutoState liftandTurnState1 = createLiftAndTurnState("<Lift and Turn 1 State>", -0.6, 2.0, 90.0, 5.0, 0.35);
+		AutoState liftandTurnState2 = createLiftAndTurnState("<Lift and Turn 2 State>", 0.1, 2.0, 90.0, 5.0, 0.35);
+		AutoState liftandTurnState3 = createLiftAndTurnState("<Lift and Turn 3 State>", -0.6, 2.0, -90.0, 5.0, 0.35);
+		AutoState liftandTurnState4 = createLiftAndTurnState("<Lift and Turn 4 State>", 0.1, 2.0, -90.0, 5.0, 0.35);
 		
 		// connect the state sequence
 		liftandTurnState1.associateNextState(liftandTurnState2);
