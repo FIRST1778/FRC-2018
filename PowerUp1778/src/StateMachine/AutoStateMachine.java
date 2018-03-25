@@ -128,11 +128,11 @@ public class AutoStateMachine {
 				autoNetworkEnable = false;
 			}
 		}
-		else if (action == AutoChooser.LIFT_FOREVER)
+		else if (action == AutoChooser.LIFT_ONCE)
 		{
 			// debug network
 			autoNetworkEnable = true;
-			netIndex = AutoNetworkBuilder.LIFT_FOREVER;
+			netIndex = AutoNetworkBuilder.LIFT_ONCE;
 		}
 		else if (action == AutoChooser.TURN_FOREVER)
 		{
@@ -152,11 +152,11 @@ public class AutoStateMachine {
 			autoNetworkEnable = true;
 			netIndex = AutoNetworkBuilder.TURN_ONCE;
 		}
-		else if (action == AutoChooser.LIFT_TURN_FOREVER)
+		else if (action == AutoChooser.LIFT_TURN_ONCE)
 		{
 			// debug network
 			autoNetworkEnable = true;
-			netIndex = AutoNetworkBuilder.LIFT_TURN_FOREVER;
+			netIndex = AutoNetworkBuilder.LIFT_TURN_ONCE;
 		}
 		else {
 			// auto state machine operation disabled

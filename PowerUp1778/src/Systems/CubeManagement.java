@@ -27,11 +27,12 @@ public class CubeManagement {
 			
 	// collector strength (%VBus - max is 1.0)
 	private static final double COLLECTOR_MAX_STRENGTH = 1.0;   // joystick max limit
-	private static final double COLLECTOR_IN_FACTOR = 1.0;
+	private static final double COLLECTOR_IN_FACTOR = 0.7;
 	private static final double COLLECTOR_OUT_FACTOR = -0.7;
-	
-	private static final double COLLECTOR_IN_AUTO_STRENGTH = 0.7;  // auto
-	private static final double COLLECTOR_OUT_AUTO_STRENGTH = -0.7;  // auto
+	private static final double COLLECTOR_DEAD_ZONE = 0.05;
+		
+	private static final double COLLECTOR_IN_AUTO_STRENGTH = 0.5;  // auto
+	private static final double COLLECTOR_OUT_AUTO_STRENGTH = -0.5;  // auto
 		
 	private static final boolean LEFT_COLLECTOR_INVERTED = true;
 	private static final boolean RIGHT_COLLECTOR_INVERTED = false;
@@ -44,9 +45,6 @@ public class CubeManagement {
 	// brake motor strength (%VBus - max is 1.0)
 	private static final double BRAKE_ON_STRENGTH = 0.5;
 	private static final double BRAKE_OFF_STRENGTH = -0.5;
-	
-	// control dead zone threshold
-	private static final double DEAD_ZONE_THRESHOLD = 0.05;
 	
 	// collector intake motors
 	private static Spark leftCollectorMotor, rightCollectorMotor; 
@@ -87,8 +85,8 @@ public class CubeManagement {
 		rightCollectorMotor.setInverted(RIGHT_COLLECTOR_INVERTED);
         
 		// create and initialize brake motor (open-loop)
-		brakeMotor = new Spark(HardwareIDs.BRAKE_MOTOR_PWM_ID);
-		brakeMotor.setInverted(BRAKE_MOTOR_INVERTED);
+		//brakeMotor = new Spark(HardwareIDs.BRAKE_MOTOR_PWM_ID);
+		//brakeMotor.setInverted(BRAKE_MOTOR_INVERTED);
 		
 		// create and initialize upper lift motor
 		upperLiftMotor = configureMotor(HardwareIDs.UPPER_LIFT_TALON_ID, UPPER_REVERSE_MOTOR);
@@ -97,13 +95,13 @@ public class CubeManagement {
 		lowerLiftMotor = configureMotor(HardwareIDs.LOWER_LIFT_TALON_ID, LOWER_REVERSE_MOTOR, HardwareIDs.UPPER_LIFT_TALON_ID);
 				
 		// make sure all motors are off
-		resetMotors();
+		stopMotors();
 		
 		// reset position of encoders
 		resetPos();
 		
 		// turn on brake
-		liftBrakeOn();
+		//liftBrakeOn();
 		
 		gamepad = new Joystick(HardwareIDs.GAMEPAD_ID);
 		
@@ -131,7 +129,7 @@ public class CubeManagement {
 		upperLiftMotor.set(ControlMode.PercentOutput, 0);
 		
 		// set lift brake
-		liftBrakeOn();
+		//liftBrakeOn();
 	}
 	
 	// resets the position encoders on lift motors
@@ -249,13 +247,13 @@ public class CubeManagement {
 		// collector intake control
 		double collectorInStrength = gamepad.getRawAxis(HardwareIDs.COLLECTOR_IN_AXIS);
 		// clamp intake strength to operating range
-		collectorInStrength = (collectorInStrength < DEAD_ZONE_THRESHOLD) ? 0.0 : collectorInStrength;
+		collectorInStrength = (collectorInStrength < COLLECTOR_DEAD_ZONE) ? 0.0 : collectorInStrength;
 		collectorInStrength = (collectorInStrength > COLLECTOR_MAX_STRENGTH) ? COLLECTOR_MAX_STRENGTH : collectorInStrength;
 		
 		// collector expel control
 		double collectorOutStrength = gamepad.getRawAxis(HardwareIDs.COLLECTOR_OUT_AXIS);
 		// clamp expel strength to operating range
-		collectorOutStrength = (collectorOutStrength < DEAD_ZONE_THRESHOLD) ? 0.0 : collectorOutStrength;
+		collectorOutStrength = (collectorOutStrength < COLLECTOR_DEAD_ZONE) ? 0.0 : collectorOutStrength;
 		collectorOutStrength = (collectorOutStrength > COLLECTOR_MAX_STRENGTH) ? COLLECTOR_MAX_STRENGTH : collectorOutStrength;
 		
 		// determine if collector operating in intake, expel or default
@@ -323,7 +321,7 @@ public class CubeManagement {
 
 	public static void autoStop() {
 		
-		stopMotors();
+		resetMotors();
 	}
 	
 	public static void disabledInit() {		
@@ -339,8 +337,8 @@ public class CubeManagement {
 	public static void teleopPeriodic() {
 		
 		checkCollectorControls();
-		checkBrakeControls();
 		checkLiftControls();
+		//checkBrakeControls();
 	}
 		
 }

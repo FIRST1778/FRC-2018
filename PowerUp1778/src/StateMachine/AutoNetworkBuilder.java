@@ -26,11 +26,11 @@ public class AutoNetworkBuilder {
 	public final static int MOVE_TO_SCALE_LEFT_FROM_RIGHT = 11;
 
 	// debug networks
-	public final static int LIFT_FOREVER = 12;
+	public final static int LIFT_ONCE = 12;
 	public final static int TURN_FOREVER = 13;
 	public final static int PACE_FOREVER = 14;
 	public final static int TURN_ONCE = 15;
-	public final static int LIFT_TURN_FOREVER = 16;
+	public final static int LIFT_TURN_ONCE = 16;
 
 	// closed-loop position cruise velocity and acceleration (used for all closed-loop position control)
 	// units are RPM
@@ -80,11 +80,11 @@ public class AutoNetworkBuilder {
 		autoNets.add(DEPOSIT_CUBE_SCALE_LEFT_FROM_RIGHT, createDepositCubeScaleLeftFromRight());	
 		autoNets.add(MOVE_TO_SCALE_LEFT_FROM_RIGHT, createMoveToScaleLeftFromRight());	
 
-		autoNets.add(LIFT_FOREVER, createLiftingForeverNetwork());	
+		autoNets.add(LIFT_ONCE, createLiftingOnceNetwork());	
 		autoNets.add(TURN_FOREVER, createTurningForeverNetwork());	
 		autoNets.add(PACE_FOREVER, createPacingForeverNetwork());	
 		autoNets.add(TURN_ONCE, createTurningOnceNetwork());	
-		autoNets.add(LIFT_TURN_FOREVER, createLiftingTurningForeverNetwork());	
+		autoNets.add(LIFT_TURN_ONCE, createLiftingTurningOnceNetwork());	
 
 		return autoNets;
 	}
@@ -714,80 +714,55 @@ public class AutoNetworkBuilder {
 		return autoNet;
 	}
 
-	// **** Lifting Forever Network - Lift up to different levels forever ***** 
+	// **** Lifting Once Network - Lift up to specified level ***** 
 	//
-	// 1) be idle for a number of sec
-	// 2) lift to SWITCH level for a number of sec
-	// 3) lift to SCALE level for a number of sec
-	// 4) return to SWITCH level for a number of sec
-	// 5) return to BASE level for a number of sec
-	// 6) Go back to state 2
-	private static AutoNetwork createLiftingForeverNetwork() {
+	// 1) lift to specified level for a number of sec
+	// 2) deposit cube for a number of sec
+	// 3) Go to idle
+	private static AutoNetwork createLiftingOnceNetwork() {
 		
-		AutoNetwork autoNet = new AutoNetwork("<Lifting Forever Network>");
+		AutoNetwork autoNet = new AutoNetwork("<Lifting Once Network>");
 		
 		// create states
-		AutoState liftState1 = createLiftState("<Lift 1 State>", -0.6, 3.0);
-		AutoState timerState1 = createTimerState("<Timer 1 State>", 10.0);
-		AutoState liftState2 = createLiftState("<Lift 2 State>", 0.1, 3.0);
-		AutoState timerState2 = createTimerState("<Timer 2 State>", 10.0);
-		AutoState liftState3 = createLiftState("<Lift 3 State>", -0.6, 3.0);
-		AutoState timerState3 = createTimerState("<Timer 3 State>", 10.0);
-		AutoState liftState4 = createLiftState("<Lift 4 State>", 0.1, 3.0);
-		AutoState timerState4 = createTimerState("<Timer 4 State>", 10.0);
+		AutoState liftState1 = createLiftState("<Lift 1 State>", -0.6, 2.0);
+		AutoState depositCubeState = createCubeDepositState("<Deposit Cube State>", 3.0);
+		AutoState idleState = createIdleState("<Idle State>");
 		
 		// connect the state sequence
-		liftState1.associateNextState(timerState1);
-		timerState1.associateNextState(liftState2);		
-		liftState2.associateNextState(timerState2);
-		timerState2.associateNextState(liftState3);		
-		liftState3.associateNextState(timerState3);
-		timerState3.associateNextState(liftState4);		
-		liftState4.associateNextState(timerState4);
-		timerState4.associateNextState(liftState1);		
+		liftState1.associateNextState(depositCubeState);
+		depositCubeState.associateNextState(idleState);
 						
 		// add states to the network list
 		autoNet.addState(liftState1);
-		autoNet.addState(timerState1);
-		autoNet.addState(liftState2);
-		autoNet.addState(timerState2);
-		autoNet.addState(liftState3);
-		autoNet.addState(timerState3);
-		autoNet.addState(liftState4);
-		autoNet.addState(timerState4);
+		autoNet.addState(depositCubeState);
+		autoNet.addState(idleState);
 				
 		return autoNet;
 	}
 	
-	// **** Lifting & Turning Forever Network - Lift up to different levels, while turning forever ***** 
+	// **** Lifting & Turning Once Network - Lift up to specified level, while turning ***** 
 	//
 	// 1) be idle for a number of sec
 	// 2) lift to a level for a number of sec
-	// 3) lift to a level for a number of sec
-	// 4) lift to a level for a number of sec
-	// 5) lift to a level for a number of sec
-	// 6) Go back to state 2
-	private static AutoNetwork createLiftingTurningForeverNetwork() {
+	// 3) expel cube for a number of sec
+	// 4) Go to idle
+	private static AutoNetwork createLiftingTurningOnceNetwork() {
 		
-		AutoNetwork autoNet = new AutoNetwork("<Lifting & Turning Forever Network>");
+		AutoNetwork autoNet = new AutoNetwork("<Lifting & Turning Once Network>");
 		
 		// create states
-		AutoState liftandTurnState1 = createLiftAndTurnState("<Lift and Turn 1 State>", -0.6, 2.0, 90.0, 5.0, 0.35);
-		AutoState liftandTurnState2 = createLiftAndTurnState("<Lift and Turn 2 State>", 0.1, 2.0, 90.0, 5.0, 0.35);
-		AutoState liftandTurnState3 = createLiftAndTurnState("<Lift and Turn 3 State>", -0.6, 2.0, -90.0, 5.0, 0.35);
-		AutoState liftandTurnState4 = createLiftAndTurnState("<Lift and Turn 4 State>", 0.1, 2.0, -90.0, 5.0, 0.35);
+		AutoState liftandTurnState1 = createLiftAndTurnState("<Lift and Turn State>", -0.6, 2.0, 45.0, 5.0, 0.35);
+		AutoState depositCubeState = createCubeDepositState("<Deposit Cube State>", 3.0);
+		AutoState idleState = createIdleState("<Idle State>");
 		
 		// connect the state sequence
-		liftandTurnState1.associateNextState(liftandTurnState2);
-		liftandTurnState2.associateNextState(liftandTurnState3);
-		liftandTurnState3.associateNextState(liftandTurnState4);
-		liftandTurnState4.associateNextState(liftandTurnState1);
+		liftandTurnState1.associateNextState(depositCubeState);
+		depositCubeState.associateNextState(idleState);
 						
 		// add states to the network list
 		autoNet.addState(liftandTurnState1);
-		autoNet.addState(liftandTurnState2);
-		autoNet.addState(liftandTurnState3);
-		autoNet.addState(liftandTurnState4);
+		autoNet.addState(depositCubeState);
+		autoNet.addState(idleState);
 				
 		return autoNet;
 	}
