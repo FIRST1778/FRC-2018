@@ -25,14 +25,20 @@ public class Robot extends IterativeRobot {
 	private final int GAMEPAD_ID = 1;
 	private final int PISTON1_PNEUMATIC_BUTTON_1 = 1;
 	private final int PISTON1_PNEUMATIC_BUTTON_2 = 2;
+	private final int PISTON1_PNEUMATIC_BUTTON_3 = 3;
 		
 	private final int PCM_ID = 2;	
 	
 	private final int PISTON1_FORWARD_CHANNEL = 2;
 	private final int PISTON1_REVERSE_CHANNEL = 7;
 	
+	private final int PISTON1_FORWARD_CHANNEL = 2;
+	private final int PISTON1_REVERSE_CHANNEL = 7;
+	
 	private Compressor compress;
 	private DoubleSolenoid dSol1;
+	private DoubleSolenoid dSol2;
+	private DoubleSolenoid dSol3;
 	
 	/**
 	 * This function is run when the robot is first started up and should be
