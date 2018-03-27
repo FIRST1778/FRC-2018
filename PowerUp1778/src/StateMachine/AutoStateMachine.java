@@ -180,13 +180,13 @@ public class AutoStateMachine {
 			if (fieldAllianceColors[SCALE] == LEFT) 
 			{
 				// first priority - deposit one cube on scale (same side)
-				//netIndex = AutoNetworkBuilder.DEPOSIT_CUBE_SCALE_LEFT;  // not yet used
-				netIndex = AutoNetworkBuilder.DRIVE_FORWARD; 
+				netIndex = AutoNetworkBuilder.DEPOSIT_CUBE_SCALE_LEFT;
+				//netIndex = AutoNetworkBuilder.DRIVE_FORWARD; 
 			}
 			else // (fieldAllianceColors[SCALE] == RIGHT) 
 			{
 				// first priority - move on scale (remote side)
-				//netIndex = remoteScaleAction(LEFT,remote_scale_action);   // not yet used
+				//netIndex = remoteScaleAction(LEFT,remote_scale_action); 
 				netIndex = AutoNetworkBuilder.DRIVE_FORWARD; 
 			}
 		}
@@ -201,8 +201,8 @@ public class AutoStateMachine {
 			else if (fieldAllianceColors[SCALE] == LEFT) 
 			{
 				// second priority - deposit one cube on scale (same side)
-				//netIndex = AutoNetworkBuilder.DEPOSIT_CUBE_SCALE_LEFT;   // not yet used
-				netIndex = AutoNetworkBuilder.DRIVE_FORWARD; 
+				netIndex = AutoNetworkBuilder.DEPOSIT_CUBE_SCALE_LEFT;   // not yet used
+				//netIndex = AutoNetworkBuilder.DRIVE_FORWARD; 
 			}
 			else // (fieldAllianceColors[SCALE] == RIGHT) 
 			{
@@ -244,8 +244,8 @@ public class AutoStateMachine {
 			if (fieldAllianceColors[SCALE] == RIGHT) 
 			{
 				// first priority - deposit one cube on scale (same side)
-				//netIndex = AutoNetworkBuilder.DEPOSIT_CUBE_SCALE_RIGHT;     // not yet used
-				netIndex = AutoNetworkBuilder.DRIVE_FORWARD; 
+				netIndex = AutoNetworkBuilder.DEPOSIT_CUBE_SCALE_RIGHT; 
+				//netIndex = AutoNetworkBuilder.DRIVE_FORWARD; 
 			}
 			else // (fieldAllianceColors[SCALE] == LEFT) 
 			{
@@ -265,8 +265,8 @@ public class AutoStateMachine {
 			else if (fieldAllianceColors[SCALE] == RIGHT) 
 			{
 				// second priority - deposit one cube on scale (same side)
-				// netIndex = AutoNetworkBuilder.DEPOSIT_CUBE_SCALE_RIGHT;   // not yet used
-				netIndex = AutoNetworkBuilder.DRIVE_FORWARD; 
+				netIndex = AutoNetworkBuilder.DEPOSIT_CUBE_SCALE_RIGHT;
+				//netIndex = AutoNetworkBuilder.DRIVE_FORWARD; 
 			}
 			else // (fieldAllianceColors[SCALE] == LEFT) 
 			{

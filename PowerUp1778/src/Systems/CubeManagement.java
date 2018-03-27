@@ -31,8 +31,8 @@ public class CubeManagement {
 	private static final double COLLECTOR_OUT_FACTOR = -0.7;
 	private static final double COLLECTOR_DEAD_ZONE = 0.05;
 		
-	private static final double COLLECTOR_IN_AUTO_STRENGTH = 0.5;  // auto
-	private static final double COLLECTOR_OUT_AUTO_STRENGTH = -0.5;  // auto
+	private static final double COLLECTOR_IN_AUTO_STRENGTH = 0.25;  // auto
+	private static final double COLLECTOR_OUT_AUTO_STRENGTH = -0.75;  // auto
 		
 	private static final boolean LEFT_COLLECTOR_INVERTED = true;
 	private static final boolean RIGHT_COLLECTOR_INVERTED = false;
@@ -85,8 +85,8 @@ public class CubeManagement {
 		rightCollectorMotor.setInverted(RIGHT_COLLECTOR_INVERTED);
         
 		// create and initialize brake motor (open-loop)
-		//brakeMotor = new Spark(HardwareIDs.BRAKE_MOTOR_PWM_ID);
-		//brakeMotor.setInverted(BRAKE_MOTOR_INVERTED);
+		brakeMotor = new Spark(HardwareIDs.BRAKE_MOTOR_PWM_ID);
+		brakeMotor.setInverted(BRAKE_MOTOR_INVERTED);
 		
 		// create and initialize upper lift motor
 		upperLiftMotor = configureMotor(HardwareIDs.UPPER_LIFT_TALON_ID, UPPER_REVERSE_MOTOR);
@@ -101,7 +101,7 @@ public class CubeManagement {
 		resetPos();
 		
 		// turn on brake
-		//liftBrakeOn();
+		liftBrakeOn();
 		
 		gamepad = new Joystick(HardwareIDs.GAMEPAD_ID);
 		
