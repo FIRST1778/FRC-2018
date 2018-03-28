@@ -2,6 +2,7 @@ package StateMachine;
 
 import java.util.ArrayList;
 import NetworkComm.InputOutputComm;
+import Systems.DriveAssembly;
 import Systems.NavXSensor;
 import edu.wpi.first.wpilibj.DriverStation;
 
@@ -49,7 +50,13 @@ public class AutoStateMachine {
 		String myString = new String("autoNetworkEnable = " + autoNetworkEnable + ", networkIndex = " + networkIndex);
 		System.out.println(myString);
 		InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"Auto/AutoSM_network", myString);
+
+		// must initialize the gyro class and reset the angle to our initial rotation
+		NavXSensor.reset();
 		
+		// reset drive system encoders to zero position
+		DriveAssembly.resetPos();
+				
 		if (autoNetworkEnable)
 		{
 			// if we have a state network
@@ -60,10 +67,7 @@ public class AutoStateMachine {
 				//System.out.println("State machine starting with " + currentState.name);						
 				currentNetwork.enter();
 			}
-		}
-		
-		// must initialize the gyro class and reset the angle to our initial position
-		NavXSensor.reset();
+		}		
 		
 	}
 	
@@ -186,8 +190,8 @@ public class AutoStateMachine {
 			else // (fieldAllianceColors[SCALE] == RIGHT) 
 			{
 				// first priority - move on scale (remote side)
-				//netIndex = remoteScaleAction(LEFT,remote_scale_action); 
-				netIndex = AutoNetworkBuilder.DRIVE_FORWARD; 
+				netIndex = remoteScaleAction(LEFT,remote_scale_action); 
+				//netIndex = AutoNetworkBuilder.DRIVE_FORWARD; 
 			}
 		}
 		else // (right_left_priority == AutoChooser.SWITCH)
@@ -201,14 +205,14 @@ public class AutoStateMachine {
 			else if (fieldAllianceColors[SCALE] == LEFT) 
 			{
 				// second priority - deposit one cube on scale (same side)
-				netIndex = AutoNetworkBuilder.DEPOSIT_CUBE_SCALE_LEFT;   // not yet used
+				netIndex = AutoNetworkBuilder.DEPOSIT_CUBE_SCALE_LEFT;
 				//netIndex = AutoNetworkBuilder.DRIVE_FORWARD; 
 			}
 			else // (fieldAllianceColors[SCALE] == RIGHT) 
 			{
 				// first priority - move on scale (remote side)
-				// netIndex = remoteScaleAction(LEFT,remote_scale_action);  // not yet used
-				netIndex = AutoNetworkBuilder.DRIVE_FORWARD; 
+				netIndex = remoteScaleAction(LEFT,remote_scale_action);
+				//netIndex = AutoNetworkBuilder.DRIVE_FORWARD; 
 			}
 		}
 						
@@ -250,8 +254,8 @@ public class AutoStateMachine {
 			else // (fieldAllianceColors[SCALE] == LEFT) 
 			{
 				// first priority - move on scale (remote side)
-				//netIndex = remoteScaleAction(RIGHT,remote_scale_action);    // not yet used
-				netIndex = AutoNetworkBuilder.DRIVE_FORWARD; 
+				netIndex = remoteScaleAction(RIGHT,remote_scale_action);
+				//netIndex = AutoNetworkBuilder.DRIVE_FORWARD; 
 			}
 		}
 		else // (right_left_priority == AutoChooser.SWITCH)
@@ -271,15 +275,14 @@ public class AutoStateMachine {
 			else // (fieldAllianceColors[SCALE] == LEFT) 
 			{
 				// first priority - move on scale (remote side)
-				//netIndex = remoteScaleAction(RIGHT,remote_scale_action);    // not yet used
-				netIndex = AutoNetworkBuilder.DRIVE_FORWARD;   
+				netIndex = remoteScaleAction(RIGHT,remote_scale_action);
+				//netIndex = AutoNetworkBuilder.DRIVE_FORWARD;   
 			}
 		}
 						
 		return netIndex;
 	}
 	
-	/*
 	private int remoteScaleAction(int fromPos, int remote_scale_action)
 	{
 		int netIndex;
@@ -313,7 +316,6 @@ public class AutoStateMachine {
 		
 		return netIndex;
 	}
-	*/
 	
 	// retrieves color configuration of field elements relative to alliance side
 	private void getFieldColorConfig()
