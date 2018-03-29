@@ -27,11 +27,6 @@ public class HardwareIDs {
 	public static final int COLLECTOR_IN_AXIS = 2;
 	public static final int COLLECTOR_OUT_AXIS = 3;
 	
-	//public static final int COLLECTOR_OUT_BUTTON = 5;
-	//public static final int COLLECTOR_OUT_BUTTON_LOW = 1;
-	//public static final int COLLECTOR_OUT_BUTTON_MED = 2;
-	//public static final int COLLECTOR_OUT_BUTTON_HIGH = 4;
-		
 	public static final int FLIPPER_DEPLOY_BUTTON = 6;
 
 	public static final int BRAKE_TOGGLE_BUTTON = 10;
@@ -46,12 +41,9 @@ public class HardwareIDs {
 	
 	// Encoder Constants
 	
-	// original encoder variables
-	//private static final int ENCODER_PULSES_PER_REV = 250;  // E4P-250  - on the proto bot front motors
-	//private static final double INCHES_PER_REV = (6 * 3.14159);   // 6-in diameter wheel
-	
-	//public static final int ENCODER_PULSES_PER_REV = 256;  // 63R  - on the competition bot motors
-	public static final int ENCODER_PULSES_PER_REV = 256*4;  // 63R  - on the competition bot motors
+	// encoder variables	
+	//public static final int ENCODER_PULSES_PER_REV = 256*4;  // 63R  - on the competition bot motors
+	public static final double ENCODER_PULSES_PER_REV = 256*4;  // 63R  - on the competition bot motors
 
 	//public static final double INCHES_PER_REV = (6 * 3.14159);   // 6-in diameter wheel (theoretical)
 	public static final double INCHES_PER_REV = (5.9 * 3.14159);   // 5.9-in diameter wheel (worn)
