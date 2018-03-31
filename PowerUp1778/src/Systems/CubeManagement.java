@@ -39,7 +39,7 @@ public class CubeManagement {
 
 	// teleop lift strength (%VBus - max is 1.0)
 	private static final double LIFT_MOTOR_UP_FACTOR = 0.75;
-	private static final double LIFT_MOTOR_DOWN_FACTOR = 0.20;
+	private static final double LIFT_MOTOR_DOWN_FACTOR = 0.25;
 	private static final double LIFT_MOTOR_DEAD_ZONE = 0.1;
 		
 	// brake motor strength (%VBus - max is 1.0)
