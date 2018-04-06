@@ -6,6 +6,7 @@ import Systems.CubeManagement;
 public class CollectCubeAction extends Action {
 	
 	private String name;
+	private double strength = CubeManagement.COLLECTOR_IN_AUTO_STRENGTH;
 	
 	public CollectCubeAction()
 	{
@@ -15,9 +16,10 @@ public class CollectCubeAction extends Action {
 		InputOutputComm.initialize();
 	}
 	
-	public CollectCubeAction(String name)
+	public CollectCubeAction(String name, double strength)
 	{
 		this.name = name;
+		this.strength = strength;
 		
 		CubeManagement.initialize();		
 		InputOutputComm.initialize();
@@ -27,7 +29,7 @@ public class CollectCubeAction extends Action {
 	public void initialize() {
 		
 		// do some clamp initialization, start the collector motors to collect the cube
-		CubeManagement.collectCube();
+		CubeManagement.collectCube(strength);
 		
 		super.initialize();
 	}

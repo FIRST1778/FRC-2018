@@ -31,8 +31,9 @@ public class CubeManagement {
 	private static final double COLLECTOR_OUT_FACTOR = -0.7;
 	private static final double COLLECTOR_DEAD_ZONE = 0.05;
 		
-	private static final double COLLECTOR_IN_AUTO_STRENGTH = 0.25;  // auto
-	private static final double COLLECTOR_OUT_AUTO_STRENGTH = -0.75;  // auto
+	public static final double COLLECTOR_IN_AUTO_STRENGTH = 0.25;  // auto in for retention only
+	public static final double COLLECTOR_IN_AUTOCOLLECT_STRENGTH = 0.75;  // auto in for collection
+	public static final double COLLECTOR_OUT_AUTOEXPEL_STRENGTH = -0.75;  // auto out for expelling
 		
 	private static final boolean LEFT_COLLECTOR_INVERTED = true;
 	private static final boolean RIGHT_COLLECTOR_INVERTED = false;
@@ -122,7 +123,7 @@ public class CubeManagement {
 	public static void resetMotors()
 	{	
 		// reset collector motors
-		leftCollectorMotor.set(COLLECTOR_IN_AUTO_STRENGTH);      // low-level default collection
+		leftCollectorMotor.set(COLLECTOR_IN_AUTO_STRENGTH);      // low-level default collection (retention only)
 		rightCollectorMotor.set(COLLECTOR_IN_AUTO_STRENGTH);	
 		
 		// stop upper lift motor (lower lift follows)
@@ -219,19 +220,19 @@ public class CubeManagement {
 
 	public static void depositCube()
 	{
-		InputOutputComm.putDouble(InputOutputComm.LogTable.kMainLog,"CubeMgmt/CollectorStrength", COLLECTOR_OUT_AUTO_STRENGTH);
-		leftCollectorMotor.set(COLLECTOR_OUT_AUTO_STRENGTH);
-		rightCollectorMotor.set(COLLECTOR_OUT_AUTO_STRENGTH);
+		InputOutputComm.putDouble(InputOutputComm.LogTable.kMainLog,"CubeMgmt/CollectorStrength", COLLECTOR_OUT_AUTOEXPEL_STRENGTH);
+		leftCollectorMotor.set(COLLECTOR_OUT_AUTOEXPEL_STRENGTH);
+		rightCollectorMotor.set(COLLECTOR_OUT_AUTOEXPEL_STRENGTH);
 			
 	}
 
-	public static void collectCube()
+	public static void collectCube(double strength)
 	{
-		InputOutputComm.putDouble(InputOutputComm.LogTable.kMainLog,"CubeMgmt/CollectorStrength", COLLECTOR_IN_AUTO_STRENGTH);
-		leftCollectorMotor.set(COLLECTOR_IN_AUTO_STRENGTH);
-		rightCollectorMotor.set(COLLECTOR_IN_AUTO_STRENGTH);
+		InputOutputComm.putDouble(InputOutputComm.LogTable.kMainLog,"CubeMgmt/CollectorStrength", strength);
+		leftCollectorMotor.set(strength);
+		rightCollectorMotor.set(strength);
 	}
-	
+		
 	/************************* lift control functions **********************************/
 		
 	public static void runLift(double liftStrength)
