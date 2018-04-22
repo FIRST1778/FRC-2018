@@ -33,7 +33,7 @@ public class CubeManagement {
 		
 	public static final double COLLECTOR_IN_AUTO_STRENGTH = 0.25;  // auto in for retention only
 	public static final double COLLECTOR_IN_AUTOCOLLECT_STRENGTH = 0.75;  // auto in for collection
-	public static final double COLLECTOR_OUT_AUTOEXPEL_STRENGTH = -0.75;  // auto out for expelling
+	public static final double COLLECTOR_OUT_AUTOEXPEL_STRENGTH = -0.65;  // auto out for expelling
 		
 	private static final boolean LEFT_COLLECTOR_INVERTED = true;
 	private static final boolean RIGHT_COLLECTOR_INVERTED = false;
