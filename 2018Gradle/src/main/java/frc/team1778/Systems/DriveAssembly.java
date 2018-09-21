@@ -18,6 +18,10 @@ public class DriveAssembly {
   private static final double AUTO_DRIVE_ANGLE_CORRECT_COEFF = 0.02;
   private static final double GYRO_CORRECT_COEFF = 0.03;
 
+  private static final int CONTINUOUS_CURRENT_LIMIT = 25;
+  private static final int PEAK_CURRENT_LIMIT = 35;
+  private static final boolean PEAK_CURRENT_LIMIT_DURATION = true; 
+
   // smart controllers (motion profiling)
   private static TalonSRX mFrontLeft, mFrontRight;
   private static TalonSRX mBackLeft, mBackRight;
@@ -108,9 +112,9 @@ public class DriveAssembly {
     _talon.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, PIDLOOP_IDX, TIMEOUT_MS);
     _talon.setSensorPhase(alignSensor);
 
-    _talon.configContinuousCurrentLimit(25, TIMEOUT_MS);
-    _talon.enableCurrentLimit(true);
-    _talon.configPeakCurrentLimit(35, TIMEOUT_MS);
+    _talon.configContinuousCurrentLimit(CONTINUOUS_CURRENT_LIMIT, TIMEOUT_MS);
+    _talon.enableCurrentLimit(PEAK_CURRENT_LIMIT_DURATION);
+    _talon.configPeakCurrentLimit(PEAK_CURRENT_LIMIT, TIMEOUT_MS);
 
     _talon.selectProfileSlot(PROFILE_SLOT, PIDLOOP_IDX);
     _talon.config_kP(PROFILE_SLOT, pCoeff, TIMEOUT_MS);
@@ -133,9 +137,9 @@ public class DriveAssembly {
     _talon.setInverted(revMotor);
 
     if (talonIDToFollow > 0) _talon.set(ControlMode.Follower, (double) talonIDToFollow);
-    _talon.configContinuousCurrentLimit(25, TIMEOUT_MS);
-    _talon.enableCurrentLimit(true);
-    _talon.configPeakCurrentLimit(35, TIMEOUT_MS);
+    _talon.configContinuousCurrentLimit(CONTINUOUS_CURRENT_LIMIT, TIMEOUT_MS);
+    _talon.enableCurrentLimit(PEAK_CURRENT_LIMIT_DURATION);
+    _talon.configPeakCurrentLimit(PEAK_CURRENT_LIMIT, TIMEOUT_MS);
 
     // _talon.setNeutralMode(NeutralMode.Brake);
 
