@@ -108,6 +108,10 @@ public class DriveAssembly {
     _talon.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, PIDLOOP_IDX, TIMEOUT_MS);
     _talon.setSensorPhase(alignSensor);
 
+    _talon.configContinuousCurrentLimit(25, TIMEOUT_MS);
+    _talon.enableCurrentLimit(true);
+    _talon.configPeakCurrentLimit(35, TIMEOUT_MS);
+
     _talon.selectProfileSlot(PROFILE_SLOT, PIDLOOP_IDX);
     _talon.config_kP(PROFILE_SLOT, pCoeff, TIMEOUT_MS);
     _talon.config_kI(PROFILE_SLOT, iCoeff, TIMEOUT_MS);
@@ -129,6 +133,9 @@ public class DriveAssembly {
     _talon.setInverted(revMotor);
 
     if (talonIDToFollow > 0) _talon.set(ControlMode.Follower, (double) talonIDToFollow);
+    _talon.configContinuousCurrentLimit(25, TIMEOUT_MS);
+    _talon.enableCurrentLimit(true);
+    _talon.configPeakCurrentLimit(35, TIMEOUT_MS);
 
     // _talon.setNeutralMode(NeutralMode.Brake);
 
@@ -268,6 +275,8 @@ public class DriveAssembly {
     // set front motor values directly
     mFrontLeft.set(ControlMode.PercentOutput, adjLeftVal);
     mFrontRight.set(ControlMode.PercentOutput, adjRightVal);
+
+    System.out.println("Current: " + mFrontLeft.getOutputCurrent() + ", " + mFrontRight.getOutputCurrent());
 
     // back motors now follow front motors
     // mBackLeft.set(ControlMode.PercentOutput, leftValue);
