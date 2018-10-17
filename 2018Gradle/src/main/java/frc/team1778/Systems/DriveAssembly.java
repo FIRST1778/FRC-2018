@@ -112,8 +112,8 @@ public class DriveAssembly {
     _talon.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, PIDLOOP_IDX, TIMEOUT_MS);
     _talon.setSensorPhase(alignSensor);
 
-    //_talon.configContinuousCurrentLimit(CONTINUOUS_CURRENT_LIMIT, TIMEOUT_MS);
-    //_talon.configPeakCurrentLimit(PEAK_CURRENT_LIMIT, TIMEOUT_MS);
+    // _talon.configContinuousCurrentLimit(CONTINUOUS_CURRENT_LIMIT, TIMEOUT_MS);
+    // _talon.configPeakCurrentLimit(PEAK_CURRENT_LIMIT, TIMEOUT_MS);
     _talon.enableCurrentLimit(false);
 
     _talon.selectProfileSlot(PROFILE_SLOT, PIDLOOP_IDX);
@@ -262,10 +262,10 @@ public class DriveAssembly {
   }
 
   public static void enableCurrentLimit(boolean enable) {
-    //mBackLeft.enableCurrentLimit(enable);
-    //mBackRight.enableCurrentLimit(enable);
-    //mFrontLeft.enableCurrentLimit(enable);
-    //mFrontRight.enableCurrentLimit(enable);
+    // mBackLeft.enableCurrentLimit(enable);
+    // mBackRight.enableCurrentLimit(enable);
+    // mFrontLeft.enableCurrentLimit(enable);
+    // mFrontRight.enableCurrentLimit(enable);
   }
 
   // CORE DRIVE METHOD
