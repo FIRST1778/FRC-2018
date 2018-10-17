@@ -18,9 +18,9 @@ public class DriveAssembly {
   private static final double AUTO_DRIVE_ANGLE_CORRECT_COEFF = 0.02;
   private static final double GYRO_CORRECT_COEFF = 0.03;
 
-  private static final int CONTINUOUS_CURRENT_LIMIT = 25;
+  private static final int CONTINUOUS_CURRENT_LIMIT = 22;
   private static final int PEAK_CURRENT_LIMIT = 35;
-  private static final boolean PEAK_CURRENT_LIMIT_DURATION = true; 
+  private static boolean ENABLE_CURRENT_LIMIT = true;
 
   // smart controllers (motion profiling)
   private static TalonSRX mFrontLeft, mFrontRight;
@@ -38,8 +38,8 @@ public class DriveAssembly {
   public static final boolean ALIGNED_LEFT_SENSOR = true; // encoder polarity - front left
 
   // PIDF values - proto.bot - initial values - tested Jan 25 with 93 lb. robot
-  private static final double kP = 10.0;
-  private static final double kI = 0.0005;
+  private static final double kP = 2.5;
+  private static final double kI = 0.0;
   private static final double kD = 0.0;
   private static final double kF = 0.0; // Feedforward not used for closed loop position control
 
@@ -112,9 +112,9 @@ public class DriveAssembly {
     _talon.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, PIDLOOP_IDX, TIMEOUT_MS);
     _talon.setSensorPhase(alignSensor);
 
-    _talon.configContinuousCurrentLimit(CONTINUOUS_CURRENT_LIMIT, TIMEOUT_MS);
-    _talon.enableCurrentLimit(PEAK_CURRENT_LIMIT_DURATION);
-    _talon.configPeakCurrentLimit(PEAK_CURRENT_LIMIT, TIMEOUT_MS);
+    //_talon.configContinuousCurrentLimit(CONTINUOUS_CURRENT_LIMIT, TIMEOUT_MS);
+    //_talon.configPeakCurrentLimit(PEAK_CURRENT_LIMIT, TIMEOUT_MS);
+    _talon.enableCurrentLimit(false);
 
     _talon.selectProfileSlot(PROFILE_SLOT, PIDLOOP_IDX);
     _talon.config_kP(PROFILE_SLOT, pCoeff, TIMEOUT_MS);
@@ -138,7 +138,6 @@ public class DriveAssembly {
 
     if (talonIDToFollow > 0) _talon.set(ControlMode.Follower, (double) talonIDToFollow);
     _talon.configContinuousCurrentLimit(CONTINUOUS_CURRENT_LIMIT, TIMEOUT_MS);
-    _talon.enableCurrentLimit(PEAK_CURRENT_LIMIT_DURATION);
     _talon.configPeakCurrentLimit(PEAK_CURRENT_LIMIT, TIMEOUT_MS);
 
     // _talon.setNeutralMode(NeutralMode.Brake);
@@ -262,6 +261,13 @@ public class DriveAssembly {
     resetMotors();
   }
 
+  public static void enableCurrentLimit(boolean enable) {
+    //mBackLeft.enableCurrentLimit(enable);
+    //mBackRight.enableCurrentLimit(enable);
+    //mFrontLeft.enableCurrentLimit(enable);
+    //mFrontRight.enableCurrentLimit(enable);
+  }
+
   // CORE DRIVE METHOD
   // Assumes parameters are PercentVbus (0.0 to 1.0)
   public static void drive(double leftValue, double rightValue) {
@@ -279,8 +285,6 @@ public class DriveAssembly {
     // set front motor values directly
     mFrontLeft.set(ControlMode.PercentOutput, adjLeftVal);
     mFrontRight.set(ControlMode.PercentOutput, adjRightVal);
-
-    System.out.println("Current: " + mFrontLeft.getOutputCurrent() + ", " + mFrontRight.getOutputCurrent());
 
     // back motors now follow front motors
     // mBackLeft.set(ControlMode.PercentOutput, leftValue);

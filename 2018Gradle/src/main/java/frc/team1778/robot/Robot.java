@@ -68,6 +68,8 @@ public class Robot extends IterativeRobot {
     DriveAssembly.autoInit(true, 0.0, false);
     CubeManagement.autoInit();
 
+    DriveAssembly.enableCurrentLimit(false);
+
     // start the auto state machine
     autoSM.start();
   }
@@ -87,6 +89,7 @@ public class Robot extends IterativeRobot {
     InputOutputComm.putString(InputOutputComm.LogTable.kMainLog, "MainLog", "teleop mode...");
 
     CubeManagement.teleopInit();
+    DriveAssembly.enableCurrentLimit(true);
     // ClimberAssembly.teleopInit();
   }
 
