@@ -34,7 +34,6 @@ public class Robot extends IterativeRobot {
     InputOutputComm.initialize();
     RPIComm.initialize();
     CubeManagement.initialize();
-    // ClimberAssembly.initialize();
     NavXSensor.initialize();
     DriveAssembly.initialize();
 
@@ -90,7 +89,6 @@ public class Robot extends IterativeRobot {
 
     CubeManagement.teleopInit();
     DriveAssembly.enableCurrentLimit(true);
-    // ClimberAssembly.teleopInit();
   }
 
   /** This function is called periodically during operator control */
@@ -104,11 +102,6 @@ public class Robot extends IterativeRobot {
         Controller.Driver_isQuickTurn());
 
     CubeManagement.teleopPeriodic();
-
-    // only allow climber control in endgame (last 30 sec)
-    if (ds.getMatchTime() < 30.0) {
-      // ClimberAssembly.teleopPeriodic();
-    }
   }
 
   /** This function is called periodically during operator control */
