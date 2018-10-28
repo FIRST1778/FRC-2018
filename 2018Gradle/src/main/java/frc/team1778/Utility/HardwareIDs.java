@@ -31,7 +31,7 @@ public class HardwareIDs {
 
   public static final int BRAKE_TOGGLE_BUTTON = 10;
 
-  public static final int LIFT_MOTOR_AXIS = 5;
+  public static final int LIFT_MOTOR_AXIS = 1;
 
   public static final int CLIMBER_MOTOR_AXIS = 1;
 

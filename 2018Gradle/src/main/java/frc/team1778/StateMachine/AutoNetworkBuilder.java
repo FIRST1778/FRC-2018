@@ -618,7 +618,7 @@ public class AutoNetworkBuilder {
     AutoState driveState4 =
         createMagicDriveState(
             "<Drive State 4>",
-            -36.0,
+            -40.0,
             3.0,
             CLOSED_LOOP_VEL_SLOW,
             CLOSED_LOOP_ACCEL_SLOW,
@@ -660,7 +660,7 @@ public class AutoNetworkBuilder {
     AutoState driveState7 =
         createMagicDriveState(
             "<Drive State 7>",
-            38.0,
+            42.0,
             3.0,
             CLOSED_LOOP_VEL_SLOW,
             CLOSED_LOOP_ACCEL_SLOW,
@@ -762,7 +762,7 @@ public class AutoNetworkBuilder {
     AutoState driveState4 =
         createMagicDriveState(
             "<Drive State 4>",
-            -36.0,
+            -40.0,
             3.0,
             CLOSED_LOOP_VEL_SLOW,
             CLOSED_LOOP_ACCEL_SLOW,
